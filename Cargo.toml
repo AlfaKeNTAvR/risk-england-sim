@@ -1,0 +1,15 @@
+[package]
+name = "risk-england-sim"
+version = "0.1.0"
+edition = "2021"
+description = "Monte Carlo simulator for Risk: The Battle for Medieval England (English Heritage edition), built to balance house rules"
+license = "MIT"
+
+# Standard library only on purpose: the first version was written in a sandbox
+# without crates.io access. Add `rand` / `rayon` / `serde` freely later.
+[dependencies]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
