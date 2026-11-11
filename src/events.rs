@@ -6,11 +6,10 @@
 /// Stack thresholds, calibrated with `examples/stacks_by_century.rs`.
 pub mod th {
     pub const PLAGUE_6TH: u32 = 3;
-    pub const BURHS_9TH: u32 = 4;
     pub const WINTER_10TH: u32 = 6;
     pub const CASTLES_11TH: u32 = 5;
-    pub const SUPPLY_12TH: u32 = 8;
-    pub const FEVER_13TH: u32 = 10;
+    /// Supply problems hit the leader's territories with this many troops or more.
+    pub const SUPPLY_12TH: u32 = 5;
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]

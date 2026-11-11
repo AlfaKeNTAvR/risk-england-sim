@@ -30,7 +30,8 @@ fn add(a: &mut [f64; 6], b: &[f64; 6]) {
 }
 
 fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
-    let cfg = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderSees, events: mode, ..Config::default() };
+    let defect: u32 = std::env::var("DEFECT").ok().and_then(|v| v.parse().ok()).unwrap_or(Config::default().defect_troops);
+    let cfg = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderSees, events: mode, defect_troops: defect, ..Config::default() };
     let per = games.div_ceil(threads);
     let parts: Vec<Acc> = std::thread::scope(|sc| {
         let hs: Vec<_> = (0..threads)
@@ -119,6 +120,7 @@ fn main() {
     let mut args = std::env::args().skip(1);
     let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(20_000);
     let threads: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(2);
+    let only: Option<String> = args.next().map(|x| x.to_lowercase());
     println!("{games} games per row, 4 players (balanced x2, aggressive, hoarder), house pace + defender-sees dice\n");
 
     let base = run(EventMode::Off, games, threads);
@@ -147,6 +149,9 @@ fn main() {
     println!("\n== Each event on its own (vs the same century with no event)");
     println!("{:<22} cent  toppled (base)   leader wins (base)  leader share  lost at once | game: lead chg  comebacks  margin", "event");
     for e in ALL {
+        if only.as_ref().is_some_and(|o| !e.name().to_lowercase().contains(o.as_str())) {
+            continue;
+        }
         let a = run(EventMode::Force(e), games, threads);
         let f = &a.fired;
         let b = &base.space[e.space()];

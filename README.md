@@ -83,17 +83,18 @@ The official timeline ends mid-round, so earlier seats get more turns: seat 1 wi
 
 Win shares carry ±0.6 percentage points (95%).
 
-## Century events: first engagement report
+## Century events: engagement report
 
-`cargo run --release --example event_report -- 20000` (4 players: balanced x2, aggressive, hoarder; bots keep a rear guard of 2).
+`cargo run --release --example event_report -- 20000 [threads] [name filter]` (4 players: balanced x2, aggressive, hoarder; bots keep a rear guard of 2). `DEFECT=n` overrides troops placed on defecting territories (default 3).
 
-- A century lasts only about 0.6 rounds (2-3 turns): 10 centuries over ~6.2 rounds. "Whole century" effects get little time to act.
-- The game snowballs: from the 8th century on, the current leader wins 68-84% of games, and the final margin averages ~22 territories.
-- The full deck barely changes that: lead changes 1.58 → 1.63 per game, comebacks 23.1% → 24.6%.
-- Best "spice" (more comebacks): Shield walls +2.4 pp, Danegeld +2.3 pp, Underdog kings +2.2 pp, Good harvests +1.1 pp.
-- Events that help the leader instead: Magna Carta (leader toppled 7% vs 14%), Land grab, Viking raids, Great Heathen Army, Harrying of the North, Great Famine.
-- Troop-only losses (Black Death removes ~18 troops) don't change who leads: the winner is decided by territories, so an event only matters if it changes captures.
-- Several events show ~0 effect partly because bots ignore them (Roman roads, Offa's Dyke, Petty kingdoms, Brunanburh).
+Findings that shaped the deck:
+- A century lasts only ~0.6 rounds (2-3 turns), and the 14th usually only half a round before the game ends. Effects that build up over turns barely act; immediate effects and final-count rules do.
+- The game snowballs: from the 8th century on, the current leader wins 68-84% of games.
+- Troop-only losses don't change who leads; the winner is decided by territories. Events that move territories (defection) or change the final count matter most.
+- v1 deck (events hitting everyone): comebacks 23.1% → 24.6%. Reworked deck (events leaning against the leader, defection, Great Famine as a final-count rule): comebacks 23.1% → 36.3%, lead changes 1.58 → 1.93, final margin 21.7 → 15.9 territories, seats still ~25% each.
+- Strongest: Great Famine (leader wins 69% vs 84%), Peasants' Revolt (76% vs 84%), One kingdom and Domesday survey (+3.8 pts comebacks), Petty kingdoms (+3.5).
+- Flavor (tactics only, per bots): Roman roads, Plague of Justinian, Age of saints, Offa's Dyke, Hard winter, Norman castles, Great floods, Supply problems, Black Death. Bots don't exploit movement rules, so real effect may be larger.
+- Defection with 3 troops beat 2 slightly (+1.2 vs +0.9 pts comebacks).
 
 ## Player-facing pages
 

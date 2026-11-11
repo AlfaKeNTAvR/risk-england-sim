@@ -39,6 +39,8 @@ pub struct Config {
     pub max_rounds: u32,
     /// House rule: century events.
     pub events: EventMode,
+    /// Troops placed on each territory that defects to the weakest player.
+    pub defect_troops: u32,
 }
 
 impl Default for Config {
@@ -52,6 +54,7 @@ impl Default for Config {
             missions: true,
             max_rounds: 300,
             events: EventMode::Off,
+            defect_troops: 3,
         }
     }
 }
@@ -295,6 +298,25 @@ impl<'a> Game<'a> {
         }
     }
 
+    /// The leader's `k` thinnest territories switch to the player with the
+    /// fewest territories, with `defect_troops` troops each. No cards drawn.
+    fn defect(&mut self, leader: usize, k: usize) {
+        let Some(w) = self.weakest().filter(|&w| w != leader) else { return };
+        let mut mine: Vec<usize> = (0..N_TERR).filter(|&t| self.owner[t] == leader).collect();
+        if mine.len() <= k {
+            return;
+        }
+        // Thinnest first; among equals prefer territories bordering the weakest player.
+        mine.sort_by_key(|&t| {
+            let near = self.sh.graph.adj[t].iter().any(|&(n, _)| self.owner[n] == w);
+            (self.troops[t], !near)
+        });
+        for &t in mine.iter().take(k) {
+            self.owner[t] = w;
+            self.troops[t] = self.cfg.defect_troops;
+        }
+    }
+
     /// The cavalry has landed on a new century: roll its event and apply any
     /// immediate effect.
     #[allow(clippy::needless_range_loop)] // indexes several per-territory arrays
@@ -311,22 +333,58 @@ impl<'a> Game<'a> {
         let leader = self.leader();
         let leader_share = self.count(leader) as f64 / N_TERR as f64;
         let largest_stack = *self.troops.iter().max().unwrap();
+        let weakest = self.weakest();
         let mut lost = 0;
         if let Some(e) = self.event {
             for t in 0..N_TERR {
                 let x = self.troops[t];
                 lost += match e {
                     Ev::PlagueOfJustinian if x >= th::PLAGUE_6TH => self.shrink(t, x - 1),
-                    Ev::VikingRaids if self.sh.ports[t] => self.shrink(t, x.saturating_sub(2)),
+                    Ev::VikingRaids if self.sh.ports[t] && self.owner[t] == leader => self.shrink(t, x.saturating_sub(2)),
                     Ev::HardWinter if x >= th::WINTER_10TH => self.shrink(t, x - 2),
-                    Ev::HarryingOfTheNorth if TERRITORIES[t].region == Region::North => self.shrink(t, x - x / 2),
-                    Ev::CampFever if x >= th::FEVER_13TH => self.shrink(t, x - x / 3),
-                    Ev::BlackDeath => self.shrink(t, x - x / 3),
+                    Ev::HarryingOfTheNorth if TERRITORIES[t].region == Region::North && self.owner[t] == leader => self.shrink(t, x - x / 2),
+                    Ev::BlackDeath if Some(self.owner[t]) != weakest => self.shrink(t, x - x / 2),
                     _ => 0,
                 };
             }
         }
         let territories = (0..self.players.len()).map(|p| self.count(p)).collect();
+        match self.event {
+            Some(Ev::PeasantsRevolt) => self.defect(leader, 3),
+            Some(Ev::TheAnarchy) => self.defect(leader, 2),
+            Some(Ev::CampFever) => {
+                // The leader's largest army loses half.
+                if let Some(t) = (0..N_TERR).filter(|&t| self.owner[t] == leader).max_by_key(|&t| self.troops[t]) {
+                    let x = self.troops[t];
+                    lost += self.shrink(t, x - x / 2);
+                }
+            }
+            Some(Ev::LandGrab) => {
+                for p in 0..self.players.len() {
+                    if p != leader && self.players[p].alive {
+                        self.draw_card(p);
+                    }
+                }
+            }
+            Some(Ev::BlackDeath) => {
+                // Hands are halved too (the weakest player is spared).
+                for p in 0..self.players.len() {
+                    if Some(p) != weakest {
+                        let keep = self.players[p].hand.len().div_ceil(2);
+                        let gone: Vec<usize> = self.players[p].hand.drain(keep..).collect();
+                        self.discard.extend(gone);
+                    }
+                }
+            }
+            Some(Ev::PettyKingdoms) => {
+                for p in 0..self.players.len() {
+                    if p != leader && self.players[p].alive {
+                        self.players[p].pending += 2;
+                    }
+                }
+            }
+            _ => {}
+        }
         self.centuries.push(CenturyLog {
             space,
             event: self.event,
@@ -382,6 +440,11 @@ impl<'a> Game<'a> {
 
     /// Best (src, dst, score) attack for player p, ignoring the ratio threshold.
     fn best_attack(&self, p: usize) -> Option<(usize, usize, f64, f64)> {
+        let alliance_vs = if self.ev(Ev::Brunanburh) {
+            Some(self.leader()).filter(|&l| l != p)
+        } else {
+            None
+        };
         let mut best: Option<(usize, usize, f64, f64)> = None;
         for src in 0..N_TERR {
             if self.owner[src] != p || self.troops[src] < 2 {
@@ -390,6 +453,9 @@ impl<'a> Game<'a> {
             for &(dst, kind) in &self.sh.graph.adj[src] {
                 if self.owner[dst] == p || (kind == EdgeKind::Sea && self.ev(Ev::VikingRaids)) {
                     continue;
+                }
+                if alliance_vs.is_some_and(|l| self.owner[dst] != l) {
+                    continue; // Brunanburh: everyone else may only attack the leader
                 }
                 let ratio = (self.troops[src] - 1) as f64 / self.troops[dst] as f64;
                 let score = ratio * self.target_value(p, dst);
@@ -423,9 +489,7 @@ impl<'a> Game<'a> {
     fn trade_cards(&mut self, p: usize) -> u32 {
         let TradePolicy::AtStars(threshold) = self.players[p].strat.trade;
         let mut gained = 0;
-        if self.ev(Ev::MagnaCarta) {
-            return 0;
-        }
+
         while self.hand_stars(p) >= threshold.max(2) {
             let hand = &self.players[p].hand;
             let ones = hand.iter().filter(|&&c| TERRITORIES[c].stars == 1).count() as u32;
@@ -641,16 +705,17 @@ impl<'a> Game<'a> {
             if self.ev(Ev::GreatFloods) && river {
                 m.att_max = 1;
             }
-            if self.ev(Ev::GreatHeathenArmy) {
+            let leader_now = self.leader();
+            if self.ev(Ev::GreatHeathenArmy) && defender == leader_now {
                 m.att_plus = 1;
             }
-            if self.ev(Ev::AlfredsBurhs) && start_def >= th::BURHS_9TH {
+            if self.ev(Ev::AlfredsBurhs) && defender != leader_now {
                 m.def_plus = 1;
             }
             if self.ev(Ev::NormanCastles) && start_def >= th::CASTLES_11TH {
                 m.def_max = 3;
             }
-            let no_withdraw = self.ev(Ev::Brunanburh);
+            let no_withdraw = false;
             while attackers > 0 && defenders > 0 {
                 if !no_withdraw && (attackers as f64) < strat.withdraw_ratio * defenders as f64 {
                     break;
@@ -774,17 +839,11 @@ impl<'a> Game<'a> {
     fn take_turn(&mut self, p: usize) {
         let is_leader = self.leader() == p;
         // Start-of-turn century effects.
-        if self.ev(Ev::SupplyProblems) {
+        if self.ev(Ev::SupplyProblems) && is_leader {
             for t in 0..N_TERR {
                 if self.owner[t] == p && self.troops[t] >= th::SUPPLY_12TH {
-                    self.troops[t] -= 2;
+                    self.troops[t] -= self.troops[t] / 3;
                 }
-            }
-        }
-        if self.ev(Ev::PeasantsRevolt) && is_leader {
-            if let Some(t) = (0..N_TERR).filter(|&t| self.owner[t] == p).max_by_key(|&t| self.troops[t]) {
-                let x = self.troops[t];
-                self.shrink(t, x.saturating_sub(3));
             }
         }
         let mut danegeld_troops = false;
@@ -805,18 +864,17 @@ impl<'a> Game<'a> {
         // 1. Place troops
         let base: u32 = if self.ev(Ev::SaxonMigration) {
             5
-        } else if self.ev(Ev::GreatFamine) {
-            1
         } else {
             3
         };
         let mut new = base;
-        if !(self.ev(Ev::TheAnarchy) && is_leader) {
+        let famine = false;
+        if !famine {
             new += territory_bonus(self.count(p));
         }
-        let region_mult = if self.ev(Ev::PettyKingdoms) || self.ev(Ev::OneKingdom) { 2 } else { 1 };
+        let region_mult = 1;
         for r in 0..N_REGIONS {
-            if self.owns_region(p, r) {
+            if self.owns_region(p, r) && !famine {
                 new += Region::ALL[r].bonus() * region_mult;
             }
             if self.ev(Ev::GoodHarvests) {
@@ -829,8 +887,13 @@ impl<'a> Game<'a> {
         if self.ev(Ev::UnderdogKings) && self.weakest() == Some(p) {
             new += 3;
         }
+        if self.ev(Ev::OneKingdom) && !is_leader {
+            new += 3;
+        }
         new += std::mem::take(&mut self.players[p].pending);
-        new += self.trade_cards(p);
+        if !(self.ev(Ev::MagnaCarta) && is_leader) {
+            new += self.trade_cards(p);
+        }
         if danegeld_troops {
             new = new.saturating_sub(2);
         }
@@ -853,10 +916,7 @@ impl<'a> Game<'a> {
             CardDraw::PerCapture => captures,
             CardDraw::OnePerTurn => captures.min(1),
         };
-        if self.ev(Ev::LandGrab) && captures > 0 {
-            draws += 1;
-        }
-        if self.ev(Ev::DomesdaySurvey) {
+        if self.ev(Ev::DomesdaySurvey) && is_leader {
             draws = draws.min(1);
         }
         for _ in 0..draws {
@@ -933,8 +993,14 @@ impl<'a> Game<'a> {
             }
         }
         let territories: Vec<usize> = (0..n).map(|p| self.count(p)).collect();
-        let max = *territories.iter().max().unwrap();
-        let winners = (0..n).filter(|&p| territories[p] == max).collect();
+        // Great Famine: thinly held land is abandoned at the final count.
+        let scored: Vec<usize> = if self.ev(Ev::GreatFamine) && ended_by == EndReason::Timeline {
+            (0..n).map(|p| (0..N_TERR).filter(|&t| self.owner[t] == p && self.troops[t] >= 2).count()).collect()
+        } else {
+            territories.clone()
+        };
+        let max = *scored.iter().max().unwrap();
+        let winners = (0..n).filter(|&p| scored[p] == max).collect();
         GameResult {
             winners,
             territories,
