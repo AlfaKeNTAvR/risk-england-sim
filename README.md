@@ -82,6 +82,10 @@ The official timeline ends mid-round, so earlier seats get more turns: seat 1 wi
 
 Win shares carry ±0.6 percentage points (95%).
 
+## Player-facing pages
+
+`docs/house-rules.html` (house rules with a rollable century event deck, 33 events) and `docs/board-graph.html` (interactive board graph) are the pages the group uses at the table. Keep them in sync with the engine when rules change.
+
 ## Roadmap
 1. **Alliance pacts**: stake 1 card each for 1-2 turns, 2 each for 3-4 turns, max 2 per player; honoured pact returns stakes plus bonus cards = turns − 1 (cap 3); one pact at a time; length counted in turns, min 1 turn each, renewal allowed; betrayer gets at most 1 card that turn, victim takes the stake pile, betrayer is an oathbreaker (no pacts) until the next century.
 2. **Century events**: one event per century from a per-century deck, balanced so every region is hit about equally; types: troop gain/loss, dice modifiers, attack caps, no retreat, river/fort/movement restrictions, card caps and trades.

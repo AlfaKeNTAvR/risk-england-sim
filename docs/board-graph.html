@@ -1,0 +1,281 @@
+<title>Medieval England Board Graph</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: title band, filter chips, map diagram (scrolls sideways on phones), detail panel, board data. */
+:root{
+  --bg:#f3f4f6; --surface:#ffffff; --fg:#1d2230; --muted:#5d6577; --line:#d6d9e0;
+  --land:#7a8090; --river:#2f8fd0; --sea:#8a6a3a; --accent:#7a2f3a;
+  --north:#6b6aa8; --mid:#d0683f; --ea:#d9a531; --se:#b9708f; --wc:#7f8a52;
+  --node-stroke:#ffffff;
+  --display:"IM Fell English SC",Georgia,serif; --body:Inter,system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14171f; --surface:#1c2029; --fg:#e7e9ee; --muted:#9aa1b2; --line:#2e3340;
+  --land:#8c93a5; --river:#5bb3ee; --sea:#c9a46a; --accent:#e08a96;
+  --north:#8b8ad0; --mid:#e57f57; --ea:#e6b84a; --se:#d38caa; --wc:#9aa66a; --node-stroke:#14171f; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14171f; --surface:#1c2029; --fg:#e7e9ee; --muted:#9aa1b2; --line:#2e3340;
+  --land:#8c93a5; --river:#5bb3ee; --sea:#c9a46a; --accent:#e08a96;
+  --north:#8b8ad0; --mid:#e57f57; --ea:#e6b84a; --se:#d38caa; --wc:#9aa66a; --node-stroke:#14171f; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1100px;margin:0 auto;padding-block:20px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:18px}
+h1{font-family:var(--display);font-weight:400;font-size:clamp(28px,5vw,40px);margin:0;line-height:1.1;text-wrap:balance}
+.sub{color:var(--muted);margin:4px 0 0;max-width:65ch}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:6px 12px;font:500 13px var(--body);cursor:pointer}
+.chip[aria-pressed="false"]{opacity:.45}
+.chip:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sw{width:22px;height:0;border-top:3px solid}
+.sw.land{border-color:var(--land)} .sw.river{border-color:var(--river);border-top-width:5px} .sw.sea{border-color:var(--sea);border-top-style:dashed}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:18px;align-items:start}
+@media (max-width:820px){.grid{grid-template-columns:minmax(0,1fr)}}
+.mapbox{background:var(--surface);border:1px solid var(--line);border-radius:10px;overflow-x:auto}
+svg{display:block;width:100%;min-width:560px;height:auto}
+.edge{fill:none;transition:opacity .15s}
+.edge.land{stroke:var(--land);stroke-width:3}
+.edge.river{stroke:var(--river);stroke-width:7}
+.edge.sea{stroke:var(--sea);stroke-width:3.5;stroke-dasharray:12 9}
+.edge.verify{stroke-opacity:.55}
+.node circle{stroke:var(--node-stroke);stroke-width:3;cursor:pointer}
+.node text{fill:var(--fg);font:500 21px var(--body);text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:var(--surface);stroke-width:5px}
+.node .mt{fill:var(--fg);pointer-events:none}
+.node circle.rv{fill:none;stroke:var(--river);stroke-width:6;pointer-events:none}
+.leg{display:inline-flex;align-items:center;gap:8px;font:500 13px var(--body);color:var(--muted);padding:6px 4px}
+.ring{width:14px;height:14px;border-radius:50%;border:3px solid var(--river)}
+.tri{width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:12px solid var(--fg)}
+.rule{font-size:13px;color:var(--fg);background:var(--bg);border-radius:8px;padding:8px 10px;margin:0}
+.dim{opacity:.13}
+.node.sel circle{stroke:var(--fg);stroke-width:5}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:12px;min-width:0}
+label.lbl{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+select{width:100%;font:15px var(--body);padding:8px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg)}
+.tname{font-family:var(--display);font-size:26px;line-height:1.1;margin:0}
+.meta{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font-size:12px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.group h3{margin:0 0 4px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.group ul{margin:0;padding:0;list-style:none;display:grid;gap:2px}
+.group li button{background:none;border:0;padding:2px 0;color:var(--fg);font:15px var(--body);cursor:pointer;text-align:left}
+.group li button:hover{color:var(--accent)}
+.flag{color:var(--accent);font-size:12px;margin-left:6px}
+.hint{color:var(--muted);font-size:13px;margin:0}
+.data{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.card h2{font-family:var(--display);font-weight:400;font-size:22px;margin:0 0 8px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;font-size:14px}
+td,th{padding:4px 6px;border-bottom:1px solid var(--line);text-align:left}
+th{color:var(--muted);font-weight:500;font-size:12px}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.ages{display:flex;flex-direction:column-reverse;gap:2px;font-family:var(--mono);font-size:13px}
+.ages div{padding:2px 6px;border-left:3px solid var(--line)}
+.ages .die{border-left-color:var(--accent);color:var(--accent)}
+.copy{justify-self:start;font:500 13px var(--body);padding:8px 14px;border-radius:8px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer}
+.stats{font-family:var(--mono);font-size:13px;color:var(--muted)}
+.missions{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.missions button{width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;font:14px var(--body);color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}
+.missions button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 3px 0 0 var(--accent)}
+.troops{font-family:var(--mono);font-weight:500;color:var(--accent);white-space:nowrap}
+.powers{list-style:none;margin:8px 0 0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px}
+.powers li{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:grid;gap:4px;min-width:0}
+.powers .pn{font-weight:600}
+.powers .pe{font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;letter-spacing:.05em;text-transform:uppercase;padding:1px 7px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+.tag.good{border-color:var(--wc);color:var(--wc)}
+.tag.bad{border-color:var(--accent);color:var(--accent)}
+@media (prefers-reduced-motion:reduce){.edge{transition:none}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Risk: The Battle for Medieval England</h1>
+    <p class="sub">Board as a graph: 42 territories, 5 regions. Tap a territory to see its neighbours. Blue links cross a river, and triangles mark mountains. Both slow manoeuvres, not attacks.</p>
+  </header>
+
+  <div class="chips" role="group" aria-label="Connection types">
+    <button class="chip" id="f-land" aria-pressed="true" data-t="land"><span class="sw land"></span>Land</button>
+    <button class="chip" id="f-sea" aria-pressed="true" data-t="sea"><span class="sw sea"></span>Sea route</button>
+    <button class="chip" id="f-river" aria-pressed="true" data-t="river"><span class="sw river"></span>River crossing</button>
+    <span class="leg"><span class="tri"></span>Mountain</span>
+  </div>
+  <div class="stats" id="stats"></div>
+
+  <div class="grid">
+    <div class="mapbox"><svg id="map" viewBox="120 250 1440 1740" role="img" aria-label="Territory graph"></svg></div>
+    <aside class="panel">
+      <div>
+        <label class="lbl" for="pick">Territory</label>
+        <select id="pick"></select>
+      </div>
+      <div id="detail"><p class="hint">Pick a territory on the map or in the list.</p></div>
+    </aside>
+  </div>
+
+  <section class="data">
+    <div class="card">
+      <h2>Regions</h2>
+      <table><thead><tr><th>Region</th><th>Territories</th><th>Card stars</th><th>Bonus</th></tr></thead><tbody id="regions"></tbody></table>
+    </div>
+    <div class="card">
+      <h2>Ages track</h2>
+      <div class="ages" id="ages"></div>
+      <p class="hint" style="margin-top:8px">Official rule: the cavalry moves 1 space after every player's turn. At a dice gate (red), that player must roll the printed even or odd number, or it stays put.</p>
+    </div>
+    <div class="card">
+      <h2>Troops for cards</h2>
+      <p class="hint">Deck: 18 one-star and 24 two-star cards, 66 stars in total. At setup, each dealt card puts 1 infantry per star on its territory.</p>
+      <table><thead><tr><th>Stars</th><th>Troops</th><th>Stars</th><th>Troops</th></tr></thead><tbody id="cards"></tbody></table>
+      <h2 style="margin-top:14px">Troops for territories</h2>
+      <p class="hint">Every turn: 3 infantry, plus 12-14 territories: +1, then +1 for every 3 more, up to 40-42: +10. One card drawn per territory conquered. Pieces: infantry 1, cavalry 5, artillery 10.</p>
+    </div>
+  </section>
+  <section class="card">
+    <h2>Mission cards</h2>
+    <p class="hint">Each player is dealt 2. Tap one to highlight its territories on the map. Bonus troops arrive at the start of your next turn.</p>
+    <ul class="missions" id="missions"></ul>
+  </section>
+  <section class="card">
+    <h2>Power cards</h2>
+    <p class="hint">Each player gets 2, face down. You may flip one during Place Your Troops. Loss cards apply at once; keepable cards can be saved for any moment, including combat.</p>
+    <p class="rule">House rules: loss cards only hit the player who flips them. A territory never drops below 1 troop. For a fixed loss (lose 2 or 3), pick a territory that can take the full loss if you have one; otherwise take it from your largest territory, down to 1.</p>
+    <ul class="powers" id="powers"></ul>
+  </section>
+  <button class="copy" id="copy">Copy graph as JSON</button>
+</div>
+
+<script>
+const REG={N:{name:"North",bonus:5,c:"--north"},M:{name:"Midlands",bonus:7,c:"--mid"},E:{name:"East Anglia",bonus:3,c:"--ea"},S:{name:"South East",bonus:5,c:"--se"},W:{name:"West Country",bonus:3,c:"--wc"}};
+const T={
+"Dunstanburgh":["N",800,320],"Carlisle":["N",630,470,1],"Barnard":["N",830,455],"Brougham":["N",712,555,1],"Piel":["N",590,615],
+"Cliffords":["N",930,610,1],"Whalley":["N",690,700],"Leeds":["N",845,760],"Conisbrough":["N",1085,775],
+"Beeston":["M",690,905,1],"Bolsover":["M",850,895],"Nottingham":["M",965,935],"Bolingbroke":["M",1120,885],"Wall":["M",765,1000,1],
+"Stokesay":["M",615,1040],"Ashby de la Zouch":["M",990,1035],"Kenilworth":["M",865,1120],"Leigh Court":["M",735,1150],"Goodrich":["M",605,1205],"Bosworth":["M",1005,1170],
+"Castle Acre":["E",1315,1035],"Longthorpe":["E",1160,1140],"Framlingham":["E",1345,1165],"Bushmede":["E",1075,1250],"Berkhamstead":["E",1140,1335],"Colchester":["E",1290,1285],
+"Uffington":["S",880,1335],"High Wycombe":["S",985,1305],"Donnington":["S",945,1425],"Jewel Tower":["S",1135,1415],"Farnham":["S",1065,1500],
+"Portchester":["S",920,1560],"Dover":["S",1310,1520],"Battle":["S",1195,1610],"Carisbrooke":["S",880,1810],
+"St Briavels":["W",750,1290,1],"Old Sarum":["W",800,1455,1],"Farleigh":["W",630,1490],"Sherborne":["W",690,1615],"Okehampton":["W",430,1600],"Tintagel":["W",235,1690],"Scilly":["W",195,1915]};
+// [a,b,type,verify,control-point for curves]
+const E=[
+["Dunstanburgh","Carlisle","land"],["Dunstanburgh","Barnard","land"],["Carlisle","Barnard","land"],["Carlisle","Brougham","land"],["Carlisle","Piel","land"],
+["Barnard","Brougham","land"],["Barnard","Cliffords","land"],["Brougham","Piel","land"],["Brougham","Whalley","land"],["Brougham","Cliffords","land"],
+["Piel","Whalley","land"],["Cliffords","Whalley","land"],["Cliffords","Leeds","land"],["Cliffords","Conisbrough","land"],["Whalley","Leeds","land"],["Whalley","Beeston","land"],
+["Leeds","Conisbrough","river"],["Leeds","Beeston","river"],["Leeds","Bolsover","river"],
+["Conisbrough","Bolsover","land"],["Conisbrough","Nottingham","land"],["Conisbrough","Bolingbroke","land"],
+["Beeston","Bolsover","land"],["Beeston","Wall","land"],["Beeston","Stokesay","land"],
+["Bolsover","Nottingham","land"],["Bolsover","Wall","land"],["Bolsover","Ashby de la Zouch","land"],
+["Nottingham","Bolingbroke","land"],["Nottingham","Ashby de la Zouch","land"],
+["Bolingbroke","Ashby de la Zouch","land"],["Bolingbroke","Longthorpe","land"],["Bolingbroke","Castle Acre","land"],
+["Wall","Stokesay","land"],["Wall","Kenilworth","land"],["Wall","Leigh Court","land"],
+["Stokesay","Leigh Court","land"],["Stokesay","Goodrich","land"],
+["Ashby de la Zouch","Kenilworth","land"],["Ashby de la Zouch","Bosworth","land"],["Ashby de la Zouch","Longthorpe","land"],
+["Kenilworth","Bosworth","land"],["Kenilworth","Leigh Court","land"],["Kenilworth","St Briavels","land"],["Kenilworth","Uffington","land"],
+["Leigh Court","Goodrich","land"],["Leigh Court","St Briavels","land"],["Goodrich","St Briavels","land"],
+["Bosworth","Longthorpe","land"],["Bosworth","Bushmede","land"],["Bosworth","High Wycombe","land"],["Bosworth","Uffington","land"],
+["Castle Acre","Longthorpe","land"],["Castle Acre","Framlingham","land"],
+["Longthorpe","Framlingham","land"],["Longthorpe","Bushmede","land"],["Longthorpe","Berkhamstead","land"],["Longthorpe","Colchester","land"],
+["Framlingham","Colchester","land"],["Bushmede","Berkhamstead","land"],["Bushmede","High Wycombe","land"],
+["Berkhamstead","Colchester","land"],["Berkhamstead","High Wycombe","land"],["Berkhamstead","Jewel Tower","land"],["Colchester","Jewel Tower","land"],["Colchester","Dover","river"],
+["Uffington","High Wycombe","land"],["Uffington","Donnington","land"],["Uffington","St Briavels","land"],["Uffington","Old Sarum","land"],
+["High Wycombe","Donnington","land"],["High Wycombe","Jewel Tower","land"],
+["Donnington","Jewel Tower","land"],["Donnington","Old Sarum","land"],["Donnington","Portchester","river"],["Donnington","Farnham","river"],
+["Jewel Tower","Farnham","river"],["Jewel Tower","Dover","river"],
+["Farnham","Portchester","land"],["Farnham","Dover","land"],["Farnham","Battle","land"],
+["Portchester","Battle","land"],["Portchester","Old Sarum","land"],["Portchester","Sherborne","land"],["Dover","Battle","land"],
+["St Briavels","Old Sarum","land"],["St Briavels","Farleigh","land"],
+["Old Sarum","Farleigh","land"],["Old Sarum","Sherborne","land"],["Farleigh","Sherborne","land"],["Farleigh","Okehampton","land"],
+["Sherborne","Okehampton","land"],["Okehampton","Tintagel","land"],
+["Whalley","St Briavels","sea",0,[250,760,420,1460]],["Barnard","Bolingbroke","sea",0,[1300,420,1450,850]],["Bolingbroke","Dover","sea",0,[1560,760,1600,1560]],
+["Dover","Portchester","sea",0,[1500,1700,1150,1860]],["Portchester","Carisbrooke","sea"],["Tintagel","Scilly","sea"]];
+const AGES=["5th","6th","7th","8th","9th","10th","11th","12th","13th","14th","15th"];
+const DICE_AFTER=new Set(["7th","8th","10th","13th"]); // gate printed above these
+const CARDS=[[2,2],[3,4],[4,7],[5,10],[6,13],[7,17],[8,21],[9,25],[10,30]];
+
+const MISSIONS=[
+["Capture the port territories of Dover, Barnard and St Briavels",5,["Dover","Barnard","St Briavels"]],
+["Capture the smallest territory, Piel",2,["Piel"]],
+["Capture 2 regions (any)",6,[]],
+["Capture the south coast: Dover, Battle, Portchester, Sherborne, Okehampton, Tintagel",5,["Dover","Battle","Portchester","Sherborne","Okehampton","Tintagel"]],
+["Capture Dunstanburgh and Carlisle",2,["Dunstanburgh","Carlisle"]],
+["Capture the port territories of Whalley, Portchester and Tintagel",5,["Whalley","Portchester","Tintagel"]],
+["Capture the tri-border territories: Bosworth, Bushmede, High Wycombe",3,["Bosworth","Bushmede","High Wycombe"]],
+["Capture and hold Jewel Tower for 3 turns in total (any player's turns count)",2,["Jewel Tower"]],
+["Capture the island strongholds of Scilly and Carisbrooke",5,["Scilly","Carisbrooke"]],
+["Capture both ports of a sea route (any)",3,["Whalley","St Briavels","Barnard","Bolingbroke","Dover","Portchester","Carisbrooke","Tintagel","Scilly"]]];
+const POWERS=[
+["Reinforcements arrive","Add 5 troops to a territory.","good","now"],
+["Weapon stash discovered","When an opponent attacks one of your territories, destroy 2 of their troops before the dice roll.","good","keep"],
+["Trainees recruited","Add 3 troops to any territory that is under attack.","good","keep"],
+["Artillery on target","Choose an opponent's territory and destroy all but 1 of their troops.","good","keep"],
+["Enemy troops defect","Add 4 troops to a territory that comes under attack, and remove up to 4 troops from the attacking territory.","good","keep"],
+["Heavy snowfall in the North","Lose 3 troops from each of your territories in the North.","bad","now"],
+["A plague sweeps through your army","Lose all but 1 troop from one of your territories.","bad","now"],
+["Starvation in the ranks","Lose all but 1 troop from one of your territories.","bad","now"],
+["Tired troops","Lose 3 troops from a territory.","bad","now"],
+["Troops defect to the enemy side","Lose 2 troops from a territory.","bad","now"]];
+const ONE=new Set(["Farnham","Ashby de la Zouch","Bushmede","Barnard","Kenilworth","Scilly","Brougham","Goodrich","Donnington","Carisbrooke","Sherborne","High Wycombe","Leeds","Nottingham","Leigh Court","Piel","Jewel Tower","Berkhamstead"]);
+const stars=n=>ONE.has(n)?1:2;
+let curM=-1,hl=null;
+const svg=document.getElementById("map"),NS="http://www.w3.org/2000/svg";
+const on={land:true,river:true,sea:true}; let sel=null;
+const col=r=>`var(${REG[r].c})`;
+const el=(n,a)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);return e};
+const gE=el("g",{}),gN=el("g",{});svg.append(gE,gN);
+const edgeEls=E.map(([a,b,t,v,c])=>{const [,x1,y1]=T[a],[,x2,y2]=T[b];
+  const d=c?`M${x1},${y1} C${c[0]},${c[1]} ${c[2]},${c[3]} ${x2},${y2}`:`M${x1},${y1} L${x2},${y2}`;
+  const p=el("path",{d,class:`edge ${t}${v?" verify":""}`});gE.append(p);return {a,b,t,v,p}});
+const nodeEls={};
+for(const [name,[r,x,y,mt,rv]] of Object.entries(T)){
+  const g=el("g",{class:"node",tabindex:"0",role:"button","aria-label":name});
+  if(rv)g.append(el("circle",{cx:x,cy:y,r:25,class:"rv"}));
+  g.append(el("circle",{cx:x,cy:y,r:16,fill:col(r)}));
+  if(mt)g.append(el("path",{class:"mt",d:`M${x-7},${y+5} L${x},${y-7} L${x+7},${y+5}Z`}));
+  const t=el("text",{x,y:y+40});t.textContent=name;g.append(t);
+  g.addEventListener("click",()=>select(sel===name?null:name));
+  g.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();select(name)}});
+  gN.append(g);nodeEls[name]=g;
+}
+const pick=document.getElementById("pick");
+pick.append(new Option("None",""));
+for(const r of Object.keys(REG)){const og=document.createElement("optgroup");og.label=REG[r].name;
+  Object.keys(T).filter(n=>T[n][0]===r).sort().forEach(n=>og.append(new Option(n,n)));pick.append(og)}
+pick.onchange=()=>select(pick.value||null);
+
+function select(name){sel=name;curM=-1;hl=null;pick.value=name||"";render()}
+function render(){
+  const nb=new Set();
+  edgeEls.forEach(e=>{const vis=on[e.t];e.p.style.display=vis?"":"none";
+    const hit=sel?(e.a===sel||e.b===sel):hl?(hl.has(e.a)&&hl.has(e.b)):true;if(sel&&hit&&vis){nb.add(e.a);nb.add(e.b)}
+    e.p.classList.toggle("dim",!hit)});
+  for(const n in nodeEls){nodeEls[n].classList.toggle("dim",sel?(!nb.has(n)&&n!==sel):hl?!hl.has(n):false);nodeEls[n].classList.toggle("sel",n===sel||!!(hl&&hl.has(n)))}
+  document.querySelectorAll("#missions button").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.m===curM));
+  const d=document.getElementById("detail");
+  if(!sel){d.innerHTML='<p class="hint">Pick a territory on the map or in the list.</p>';return}
+  const [r,,,mt]=T[sel];const groups={land:[],river:[],sea:[]};
+  edgeEls.forEach(e=>{if(e.a===sel||e.b===sel)groups[e.t].push({n:e.a===sel?e.b:e.a,v:e.v})});
+  const lab={land:"By land",river:"Across a river",sea:"By sea"};
+  let h=`<h2 class="tname">${sel}</h2><div class="meta"><span class="pill"><span class="dot" style="background:${col(r)}"></span>${REG[r].name}</span><span class="pill">Card ${"★".repeat(stars(sel))}</span>${mt?'<span class="pill">Mountain</span>':""}<span class="pill">${groups.land.length+groups.river.length+groups.sea.length} neighbours</span></div>`;
+  if(mt)h+=`<p class="rule">Mountain: troops manoeuvring through must stop here 1 extra turn. Attacks are not affected.</p>`;
+  if(groups.river.length)h+=`<p class="rule">River crossing: max 5 troops cross per turn when manoeuvring, and they stop 1 extra turn. Attacks are not affected.</p>`;
+  for(const t of ["land","river","sea"]){if(!groups[t].length)continue;
+    h+=`<div class="group"><h3>${lab[t]}</h3><ul>${groups[t].sort((x,y)=>x.n.localeCompare(y.n)).map(g=>`<li><button data-n="${g.n}">${g.n}</button>${g.v?'<span class="flag">check on board</span>':""}</li>`).join("")}</ul></div>`}
+  d.innerHTML=h;d.querySelectorAll("button[data-n]").forEach(b=>b.onclick=()=>select(b.dataset.n));
+}
+document.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{const t=c.dataset.t;on[t]=!on[t];c.setAttribute("aria-pressed",on[t]);render()});
+
+document.getElementById("missions").innerHTML=MISSIONS.map((m,i)=>`<li><button data-m="${i}" aria-pressed="false"><span>${m[0]}</span><span class="troops">+${m[1]}</span></button></li>`).join("");
+document.querySelectorAll("#missions button").forEach(b=>b.onclick=()=>{const i=+b.dataset.m;sel=null;pick.value="";curM=curM===i?-1:i;hl=curM>=0&&MISSIONS[i][2].length?new Set(MISSIONS[i][2]):null;render();document.getElementById("map").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"})});
+document.getElementById("powers").innerHTML=POWERS.map(([n,e,g,w])=>`<li><span class="pn">${n}</span><span class="pe">${e}</span><span class="tags"><span class="tag ${g}">${g==="good"?"Gain":"Loss"}</span><span class="tag">${w==="now"?"Play immediately":"Keep, play any time"}</span></span></li>`).join("");
+const cnt=t=>E.filter(e=>e[2]===t).length;
+document.getElementById("stats").textContent=`${Object.keys(T).length} territories · ${E.length} connections: ${cnt("land")} land, ${cnt("river")} river, ${cnt("sea")} sea`;
+document.getElementById("regions").innerHTML=Object.entries(REG).map(([k,v])=>`<tr><td><span class="dot" style="background:${col(k)}"></span>${v.name}</td><td>${Object.values(T).filter(t=>t[0]===k).length}</td><td>${Object.keys(T).filter(n=>T[n][0]===k).reduce((s,n)=>s+stars(n),0)}</td><td>+${v.bonus}</td></tr>`).join("");
+document.getElementById("ages").innerHTML=AGES.map(a=>`<div class="${DICE_AFTER.has(a)?"die":""}">${a} century${DICE_AFTER.has(a)?"  · dice gate above":""}</div>`).join("");
+document.getElementById("cards").innerHTML=[0,1,2,3,4].map(i=>{const a=CARDS[i],b=CARDS[i+5];return `<tr><td>${a[0]}</td><td>${a[1]}</td><td>${b?b[0]:""}</td><td>${b?b[1]:""}</td></tr>`}).join("");
+
+document.getElementById("copy").onclick=async e=>{
+  const json=JSON.stringify({regions:Object.fromEntries(Object.entries(REG).map(([k,v])=>[v.name,{bonus:v.bonus}])),
+    territories:Object.fromEntries(Object.entries(T).map(([n,[r,,,mt,rv]])=>[n,{region:REG[r].name,mountain:!!mt,stars:stars(n)}])),
+    edges:E.map(([a,b,t,v])=>({a,b,type:t,verify:!!v})),ages:AGES,cardTroops:Object.fromEntries(CARDS),missions:MISSIONS.map(([text,troops,territories])=>({text,troops,territories})),powers:POWERS.map(([name,effect,kind,timing])=>({name,effect,kind,timing}))},null,1);
+  try{await navigator.clipboard.writeText(json);e.target.textContent="Copied"}catch{e.target.textContent="Copy blocked: select from console";console.log(json)}
+  setTimeout(()=>e.target.textContent="Copy graph as JSON",1800)};
+render();
+</script>
