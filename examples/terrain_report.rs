@@ -44,11 +44,11 @@ fn main() {
     }
     println!();
     for (name, t) in variants() {
-        let mut m = Mods::default();
-        m.def_plus = t.mountain_def_plus + t.river_def_plus;
-        if t.river_att_max > 0 {
-            m.att_max = t.river_att_max;
-        }
+        let m = Mods {
+            def_plus: t.mountain_def_plus + t.river_def_plus,
+            att_max: if t.river_att_max > 0 { t.river_att_max } else { 3 },
+            ..Mods::default()
+        };
         print!("{name:<38}");
         for (a, d) in fights {
             let mut rng = Rng::new(9);
