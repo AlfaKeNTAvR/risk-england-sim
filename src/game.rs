@@ -539,7 +539,7 @@ impl<'a> Game<'a> {
         let twos: Vec<usize> = hand.iter().copied().filter(|&c| TERRITORIES[c].stars == 2).collect();
         for n1 in (0..=ones.len().min(stars as usize)).rev() {
             let rest = stars as usize - n1;
-            if rest % 2 == 0 && rest / 2 <= twos.len() {
+            if rest.is_multiple_of(2) && rest / 2 <= twos.len() {
                 let mut v: Vec<usize> = ones[..n1].to_vec();
                 v.extend_from_slice(&twos[..rest / 2]);
                 return Some(v);
