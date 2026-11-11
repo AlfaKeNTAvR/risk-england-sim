@@ -128,7 +128,7 @@ fn main() {
     let mut args = std::env::args().skip(1);
     let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(20_000);
     let threads: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(2);
-    let base = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderSees, events: EventMode::Deck, ..Config::default() };
+    let base = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne, events: EventMode::Deck, ..Config::default() };
     let rules = PactRules::default();
     let on = Config { pacts: Some(rules), ..base };
     println!("{games} games per row; house pace, defender-sees dice, full century deck; 4 players, seats rotated\n");
@@ -145,12 +145,13 @@ fn main() {
 
     let mix = [Strategy::LOYAL, Strategy::OPPORTUNIST, Strategy::BACKSTABBER, Strategy::NO_PACTS];
     println!("\n== Mixed table: who wins? (fair share 25%)");
+    let new = rules;
     let variants: Vec<(&str, PactRules)> = vec![
-        ("balanced rules (default)", rules),
-        ("victim takes both stakes", PactRules { on_betrayal: StakeOnBetrayal::VictimTakesAll, ..rules }),
-        ("stakes in cards: 1 short / 2 long", PactRules { stake_stars: None, ..rules }),
-                ("stars 2/3", PactRules { stake_stars: Some((2, 3)), ..rules }),
-        ("stars 1/2", PactRules { stake_stars: Some((1, 2)), ..rules }),
+        ("default: stars = turns (max 3), victim takes both", rules),
+        ("victim gets own stake back only", PactRules { on_betrayal: StakeOnBetrayal::VictimTakesOwn, ..rules }),
+        ("betrayer max 1 card", PactRules { betray_card_cap: Some(1), ..rules }),
+        ("no bonus cards", PactRules { bonus_per_turn: 0, ..rules }),
+        ("old: 2/4 stars, 1-4 turns, victim own back", PactRules { stars_per_turn: false, max_len: 4, bonus_cap: 3, on_betrayal: StakeOnBetrayal::VictimTakesOwn, ..rules }),
     ];
     for (label, r) in variants {
         let a = run(Config { pacts: Some(r), ..base }, &mix, games, threads);
@@ -158,11 +159,9 @@ fn main() {
         table(&mix, &a);
     }
 
-    println!("\n== Pact length: short (2 turns) vs long (4 turns)");
-    let lens = [Strategy::LOYAL, Strategy::LOYAL_LONG, Strategy::LOYAL, Strategy::LOYAL_LONG];
-    for (label, r) in [("bonus = length - 1 (cap 3)", rules), ("bonus = 2 x (length - 1) (cap 6)", PactRules { bonus_per_turn: 2, bonus_cap: 6, ..rules })] {
-        let a = run(Config { pacts: Some(r), ..base }, &lens, games, threads);
-        game_line(label, &a);
-        table(&lens, &a);
-    }
+    println!("\n== Pact length: 1 vs 2 vs 3 turns");
+    let lens = [Strategy::LOYAL_SHORT, Strategy::LOYAL, Strategy::LOYAL_LONG, Strategy::NO_PACTS];
+    let a = run(Config { pacts: Some(new), ..base }, &lens, games, threads);
+    game_line("", &a);
+    table(&lens, &a);
 }

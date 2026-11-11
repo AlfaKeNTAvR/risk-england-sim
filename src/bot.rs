@@ -118,6 +118,12 @@ impl Strategy {
         pact_len: 4,
         ..Strategy::BALANCED
     };
+    pub const LOYAL_SHORT: Strategy = Strategy {
+        name: "loyal-1turn",
+        diplomacy: Diplomacy::Loyal,
+        pact_len: 1,
+        ..Strategy::BALANCED
+    };
     pub const OPPORTUNIST: Strategy = Strategy {
         name: "opportunist",
         diplomacy: Diplomacy::Opportunist { factor: 1.5 },

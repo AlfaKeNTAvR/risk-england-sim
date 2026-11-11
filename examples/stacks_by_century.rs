@@ -11,7 +11,7 @@ fn main() {
     let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(20000);
     let pool = [Strategy::BALANCED, Strategy::BALANCED, Strategy::AGGRESSIVE, Strategy::HOARDER, Strategy::BALANCED];
     let strats: Vec<Strategy> = pool[..players].to_vec();
-    let cfg = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderSees, ..Config::default() };
+    let cfg = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne, ..Config::default() };
     let sh = Shared::new();
     // per century: count, sum of (largest, 3rd largest, 10th largest, median, leader terr, leader troops, hand stars), share of games reaching it
     let mut acc = vec![[0f64; 8]; 11];

@@ -99,7 +99,7 @@ fn strategy_table(strats: &[Strategy], s: &Summary) {
 
 fn base(a: &Args) -> Config {
     if a.house {
-        Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderSees, ..Config::default() }
+        Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne, ..Config::default() }
     } else {
         Config::default()
     }

@@ -86,11 +86,11 @@ button.roll:hover{background:var(--bg)}
       <thead><tr><th>Topic</th><th>Rulebook</th><th>Our rule</th></tr></thead>
       <tbody>
         <tr><td>Timeline</td><td>Cavalry moves after every player's turn, 4 dice gates</td><td>Moves after every full round, plus 1 extra space on a 6</td></tr>
-        <tr><td>Defence dice</td><td>Both sides roll together</td><td>Attacker rolls first, defender then picks 1 or 2 dice</td></tr>
+        <tr><td>Defence dice</td><td>Both sides roll together</td><td>Attacker rolls first, defender rolls one die at a time</td></tr>
         <tr><td>Rivers</td><td>"Territories with rivers"</td><td>On borders: 8 river crossings</td></tr>
         <tr><td>Power losses</td><td>Unclear</td><td>Only the flipper is hit, never below 1 troop</td></tr>
         <tr><td>Jewel Tower mission</td><td>"Hold for 3 turns"</td><td>3 turns in total, anyone's turns count</td></tr>
-        <tr><td>Alliances</td><td>Not covered</td><td>Star-staked pacts, 1-4 turns</td></tr>
+        <tr><td>Alliances</td><td>Not covered</td><td>Star-staked pacts, 1-3 turns</td></tr>
         <tr><td>Events</td><td>None</td><td>One era-wide event per century, escalating</td></tr>
       </tbody>
     </table></div>
@@ -107,10 +107,11 @@ button.roll:hover{background:var(--bg)}
   </section>
 
   <section class="card" id="dice">
-    <h2>Defender sees the roll</h2>
+    <h2>Defending one die at a time</h2>
     <ol>
+      <li>Before a battle, move the attacking troops across, leaving at least 1 behind. Only those troops fight; winners occupy the territory.</li>
       <li>The attacker rolls their dice first.</li>
-      <li>The defender looks at the result, then chooses to roll 1 or 2 dice (2 only with 2+ troops).</li>
+      <li>The defender rolls one die and looks at it. With 2 or more troops, they may then roll a second die, or stop at one.</li>
       <li>Compare as usual. Ties go to the defender.</li>
     </ol>
   </section>
@@ -146,11 +147,10 @@ button.roll:hover{background:var(--bg)}
     <h2>Alliance pacts</h2>
     <p>There are two pacts in the game, purple and orange. A player can be in one pact at a time.</p>
     <ol>
-      <li><b>Sign:</b> two players agree a length, 1 to 4 turns each, and take a pact colour. Each stakes territory cards face up worth exactly the same stars: <b>2 stars each</b> for 1-2 turns, <b>4 stars each</b> for 3-4 turns. One 2-star card or two 1-star cards both make 2 stars. If you can't make the exact amount, you can't sign.</li>
-      <li><b>Seal:</b> each signer sets their seal to the pact length and puts it on their stake. At the end of each of your turns, turn your seal down by one. After your turn at 1, flip it face down.</li>
-      <li><b>During:</b> the two may not attack each other.</li>
-      <li><b>Kept:</b> when both seals are face down, each takes back their stake plus bonus cards from the deck: pact length minus 1, at most 3. Renewing straight away is fine.</li>
-      <li><b>Broken:</b> the moment one attacks the other, the victim takes back their stake and the betrayer's stake is discarded. The betrayer draws territory cards as normal that turn, but takes an oathbreaker seal: no pacts until the cavalry moves.</li>
+      <li><b>Sign:</b> two players agree a length of 1, 2 or 3 turns each and take a treaty card. Each places territory cards face up under their side of it, worth exactly as many stars as the pact lasts: 1 star for 1 turn, 2 stars for 2 turns, 3 stars for 3 turns. If you can't make the exact amount, you can't sign.</li>
+      <li><b>During:</b> the two may not attack each other. At the end of each of your turns, cross off one of your boxes on the treaty card.</li>
+      <li><b>Kept:</b> when both have crossed off all their turns, each takes back their stake plus bonus cards from the deck: pact length minus 1, so at most 2. Renewing straight away is fine.</li>
+      <li><b>Broken:</b> the moment one attacks the other, the victim takes both stakes. The betrayer draws territory cards as normal that turn, but takes an oathbreaker seal: no pacts until the cavalry moves.</li>
     </ol>
     <p class="sub">A handshake truce without a stake is still allowed, as in normal Risk. It just isn't binding.</p>
   </section>

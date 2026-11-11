@@ -49,7 +49,7 @@ Standard library only (written in a sandbox without crates.io). Adding `rand`, `
 
 ### House rules (switches in `Config`)
 - `Timeline::HousePace`: cavalry moves 1 space after every full round; each player rolls a d6 after their turn and a 6 moves it 1 extra space. No gates.
-- `DiceRule::DefenderSees`: attacker rolls first; defender sees it, then chooses 1 or 2 dice (bots use the exact best choice).
+- `DiceRule::DefenderOneByOne` (house rule since Nov 11): attacker rolls first; the defender rolls one die, looks, then may roll a second. `DefenderSees` (pick 1 or 2 up front) is the earlier variant.
 - `CardDraw::OnePerTurn`: classic Risk card draw, for comparison.
 - `Timeline::Off`: the rulebook's "no timeline" variation.
 - `EventMode::Deck` / `EventMode::Force(ev)`: century events (`src/events.rs`, text in `docs/house-rules.html`). Every century the cavalry lands on rolls one of its 3 events; it lasts until the cavalry moves. Pact events are no-ops until pacts exist.
@@ -110,12 +110,29 @@ Findings that shaped the deck:
 
 One by one gives the defender a further ~7% edge per roll; in whole games it shifts little (aggressive bots 66% → 64%, winner holds 26.2 → 25.8 territories). Fixed Nov 11: bots whose rear guard left too few troops kept "attacking" and withdrawing before rolling (200 times per turn); only cautious bots were affected, all earlier event and pact numbers reproduced unchanged.
 
+## Terrain in combat (candidates, not adopted yet)
+
+`cargo run --release --example terrain_report -- 20000`, `Config.terrain` (`TerrainCombat`). Attacker win chance, committed troops fought to the end, one-by-one dice:
+
+| Rule | 3 v 1 | 6 v 3 | 10 v 5 | 10 v 10 | 20 v 10 |
+|---|---|---|---|---|---|
+| None (rulebook) | 91.7% | 81.4% | 86.7% | 40.2% | 94.0% |
+| Lose 1 troop climbing / fording | 75.5% | 71.3% | 81.1% | 31.8% | 91.7% |
+| Defender +1 on top die | 78.5% | 62.4% | 65.4% | 13.8% | 70.9% |
+| Attacker max 2 dice | 89.8% | 62.5% | 59.7% | 9.3% | 57.9% |
+
+Whole games (house rules, events, pacts): mountain conquest rate 81% → 64% with the climbing cost, river 77% → 57% with fording; game length and comebacks barely move (bots don't avoid terrain). The troop cost hurts small raids and spares big armies; +1 die and the dice cap hurt big attacks the most.
+
 ## Alliance pacts: balance report
 
 `cargo run --release --example pact_report -- 20000` (house pace, defender-sees dice, full event deck, 4 players).
 `Config.pacts = Some(PactRules::default())`; bots: `LOYAL` (never betrays), `OPPORTUNIST` (betrays when attacking the partner scores 1.5x the best other attack), `BACKSTABBER` (betrays at 1.0x), `NO_PACTS`. Bots propose to the neighbour pressing hardest on their borders, never to their own best target, and refuse a leader holding 40%+ of the board.
 
 Mixed table (one of each), win share, ±0.6. Player-facing pages show no win rates on purpose: the owner wants players to judge for themselves.
+
+**Current default (Nov 11, owner's choice):** 1-3 turns each, stake face up exactly as many stars as turns, bonus = turns − 1 (max 2), victim takes both stakes, betrayer draws normally, oathbreaker until the cavalry moves. Mixed table: loyal 33.4%, opportunist 24.8%, backstabber 18.4%, no pacts 23.5%. Leans toward loyalty; switch `on_betrayal` to `VictimTakesOwn` for 27.0 / 24.6 / 20.2 / 28.1. Lengths with these rules: 2 turns 27.6%, 1 turn 24.4%, 3 turns 23.9%. Lower entry (1 star) raises pacts kept per game from 0.71 to 0.99 for loyal players.
+
+Earlier variants:
 
 | Rules | Loyal | Opportunist | Backstabber | No pacts |
 |---|---|---|---|---|

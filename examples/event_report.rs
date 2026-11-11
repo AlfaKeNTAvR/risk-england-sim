@@ -34,7 +34,7 @@ fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
     let env = |k: &str| std::env::var(k).ok().and_then(|v| v.parse::<usize>().ok());
     let cfg = Config {
         timeline: Timeline::HousePace,
-        dice: DiceRule::DefenderSees,
+        dice: DiceRule::DefenderOneByOne,
         events: mode,
         defect_troops: defect,
         revolt_count: env("REVOLT").unwrap_or(Config::default().revolt_count),

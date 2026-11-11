@@ -41,8 +41,8 @@ body{margin:0}
       <div style="font-size: 16px; line-height: 1.4">The cavalry starts on the 5th century. After each player's turn, that player rolls a die: on a 6 the cavalry moves 1 space. After every full round it moves 1 space. Ignore the printed dice gates. Reaching the 15th ends the game.</div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 6px">
-      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Defender sees the roll</h2>
-      <div style="font-size: 16px; line-height: 1.4">Before a battle, move the attacking troops across, leaving at least 1 behind. The attacker rolls first. The defender looks, then picks 1 or 2 dice. Ties go to the defender. Winners occupy the territory; no extra troops move in until your manoeuvre.</div>
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Defending one die at a time</h2>
+      <div style="font-size: 16px; line-height: 1.4">Before a battle, move the attacking troops across, leaving at least 1 behind. The attacker rolls first. The defender rolls one die, looks, and with 2 or more troops may roll a second. Ties go to the defender. Winners occupy the territory; no extra troops move in until your manoeuvre.</div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 6px">
       <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Rivers and mountains</h2>
@@ -65,10 +65,10 @@ class Component extends DCLogic {
     return {
       steps: [
         { n: '1', t: 'Place troops', d: '3, plus the territory chart, regions, missions, card trades. You may flip a power card.' },
-        { n: '2', t: 'Attack', d: 'Commit troops first. The defender sees your roll.' },
+        { n: '2', t: 'Attack', d: 'Commit troops first. The defender rolls one die at a time.' },
         { n: '3', t: 'Manoeuvre', d: 'One move. Rivers and mountains stop it.' },
         { n: '4', t: 'Draw cards', d: '1 territory card per territory conquered.' },
-        { n: '5', t: 'End of turn', d: 'Roll: a 6 moves the cavalry. Turn your pact seal down one.' }
+        { n: '5', t: 'End of turn', d: 'Roll: a 6 moves the cavalry. Cross off a pact turn.' }
       ]
     };
   }

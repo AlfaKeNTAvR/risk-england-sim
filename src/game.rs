@@ -48,11 +48,28 @@ pub struct Config {
     pub famine_half: bool,
     /// House rule: alliance pacts (None = no pacts).
     pub pacts: Option<PactRules>,
+    /// House rule candidates: terrain in combat.
+    pub terrain: TerrainCombat,
 }
 
-/// Alliance pact rules. Defaults are the simulator-balanced version (Nov 2026):
-/// the group's first draft had the victim take both stakes and capped the
-/// betrayer at 1 card, which made loyal bots win 38% in a mixed table.
+/// Terrain effects on attacks (the rulebook has none: terrain only slows manoeuvres).
+#[derive(Clone, Copy, Debug, Default)]
+pub struct TerrainCombat {
+    /// Added to the defender's highest die when defending a mountain territory.
+    pub mountain_def_plus: u8,
+    /// Troops the attacker loses before attacking into a mountain territory.
+    pub mountain_climb_cost: u32,
+    /// Most dice the attacker may roll across a river crossing (0 = no limit).
+    pub river_att_max: u32,
+    /// Added to the defender's highest die when attacked across a river.
+    pub river_def_plus: u8,
+    /// Troops the attacker loses before attacking across a river.
+    pub river_cross_cost: u32,
+}
+
+/// Alliance pact rules. Defaults are the group's choice (Nov 11, 2026): 1-3 turns,
+/// stake as many stars as turns, bonus = turns - 1 (max 2), the victim of a
+/// betrayal takes both stakes, the betrayer draws cards normally.
 #[derive(Clone, Copy, Debug)]
 pub struct PactRules {
     /// Cards each player stakes for pacts of 1-2 turns.
@@ -71,6 +88,10 @@ pub struct PactRules {
     /// Stakes counted in stars (each side must stake exactly this many stars:
     /// short, long) instead of in cards.
     pub stake_stars: Option<(u32, u32)>,
+    /// Stake exactly as many stars as the pact lasts in turns (overrides `stake_stars`).
+    pub stars_per_turn: bool,
+    /// Longest pact allowed, in turns each.
+    pub max_len: u32,
 }
 
 impl Default for PactRules {
@@ -79,11 +100,13 @@ impl Default for PactRules {
             stake_short: 1,
             stake_long: 2,
             bonus_per_turn: 1,
-            bonus_cap: 3,
+            bonus_cap: 2,
             betray_card_cap: None,
-            on_betrayal: StakeOnBetrayal::VictimTakesOwn,
+            on_betrayal: StakeOnBetrayal::VictimTakesAll,
             oathbreaker: true,
             stake_stars: Some((2, 4)),
+            stars_per_turn: true,
+            max_len: 3,
         }
     }
 }
@@ -134,6 +157,7 @@ impl Default for Config {
             revolt_count: 3,
             famine_half: true,
             pacts: None,
+            terrain: TerrainCombat::default(),
         }
     }
 }
@@ -216,6 +240,9 @@ pub struct GameResult {
     pub snapshots: Vec<Snapshot>,
     /// Every century the cavalry landed on, in order.
     pub centuries: Vec<CenturyLog>,
+    /// Attacks and conquests into [plain, mountain, across-river] territories.
+    pub terrain_attacks: [u32; 3],
+    pub terrain_wins: [u32; 3],
 }
 
 /// Board state at the start of a round.
@@ -287,6 +314,8 @@ pub struct Game<'a> {
     round: u32,
     centuries: Vec<CenturyLog>,
     pacts: Vec<Pact>,
+    terrain_attacks: [u32; 3],
+    terrain_wins: [u32; 3],
 }
 
 impl<'a> Game<'a> {
@@ -361,6 +390,8 @@ impl<'a> Game<'a> {
             round: 0,
             centuries: Vec::new(),
             pacts: Vec::new(),
+            terrain_attacks: [0; 3],
+            terrain_wins: [0; 3],
         }
     }
 
@@ -581,7 +612,23 @@ impl<'a> Game<'a> {
             }
         }
         let Some((q, _)) = best else { return };
-        let mut len = self.players[p].strat.pact_len.clamp(1, 4);
+        let mut len = self.players[p].strat.pact_len.clamp(1, rules.max_len.max(1));
+        if rules.stars_per_turn {
+            // Shorten the pact until both sides can stake exactly `len` stars.
+            while len >= 1 {
+                if let Some((sp, sq)) = self.star_stake(p, len).zip(self.star_stake(q, len)) {
+                    let pile_a = self.take_cards(p, &sp);
+                    let pile_b = self.take_cards(q, &sq);
+                    let extra_bonus = u32::from(self.ev(Ev::PeaceOfTheChurch));
+                    self.players[p].stats.pacts_signed += 1;
+                    self.players[q].stats.pacts_signed += 1;
+                    self.pacts.push(Pact { a: p, b: q, len, done_a: 0, done_b: 0, pile_a, pile_b, extra_bonus });
+                    return;
+                }
+                len -= 1;
+            }
+            return;
+        }
         if let Some((short, long)) = rules.stake_stars {
             let mut stars = if len <= 2 { short } else { long };
             let mut pair = self.star_stake(p, stars).zip(self.star_stake(q, stars));
@@ -1034,6 +1081,20 @@ impl<'a> Game<'a> {
             if self.ev(Ev::NormanCastles) && start_def >= th::CASTLES_11TH {
                 m.def_max = 3;
             }
+            let t = self.cfg.terrain;
+            if TERRITORIES[dst].mountain {
+                m.def_plus += t.mountain_def_plus;
+                attackers = attackers.saturating_sub(t.mountain_climb_cost);
+            }
+            if river {
+                if t.river_att_max > 0 {
+                    m.att_max = m.att_max.min(t.river_att_max);
+                }
+                m.def_plus += t.river_def_plus;
+                attackers = attackers.saturating_sub(t.river_cross_cost);
+            }
+            let kind = if TERRITORIES[dst].mountain { 1 } else if river { 2 } else { 0 };
+            self.terrain_attacks[kind] += 1;
             let no_withdraw = false;
             while attackers > 0 && defenders > 0 {
                 if !no_withdraw && (attackers as f64) < strat.withdraw_ratio * defenders as f64 {
@@ -1044,6 +1105,7 @@ impl<'a> Game<'a> {
                 defenders -= dl.min(defenders);
             }
             if defenders == 0 && attackers > 0 {
+                self.terrain_wins[kind] += 1;
                 self.battles_won += 1;
                 captures += 1;
                 self.players[p].stats.captures += 1;
@@ -1344,6 +1406,8 @@ impl<'a> Game<'a> {
             players: self.players.into_iter().map(|pl| pl.stats).collect(),
             snapshots,
             centuries: self.centuries,
+            terrain_attacks: self.terrain_attacks,
+            terrain_wins: self.terrain_wins,
         }
     }
 
