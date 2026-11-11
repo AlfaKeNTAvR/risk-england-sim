@@ -17,6 +17,17 @@ pub enum FlipPolicy {
     WhenBehind,
 }
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Diplomacy {
+    /// Never proposes or accepts pacts.
+    None,
+    /// Signs pacts and always keeps them.
+    Loyal,
+    /// Signs pacts and betrays when attacking the partner scores at least
+    /// `factor` times the best other attack (or there is no other attack).
+    Opportunist { factor: f64 },
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Strategy {
     pub name: &'static str,
@@ -34,6 +45,9 @@ pub struct Strategy {
     /// Before building the spearhead, top up thin frontier territories to
     /// this many troops (uses at most a third of new troops).
     pub frontier_min: u32,
+    pub diplomacy: Diplomacy,
+    /// Pact length this bot proposes, in turns each (1-4).
+    pub pact_len: u32,
 }
 
 impl Strategy {
@@ -46,6 +60,8 @@ impl Strategy {
         spearhead_share: 0.7,
         rear_guard: 2,
         frontier_min: 2,
+        diplomacy: Diplomacy::None,
+        pact_len: 2,
     };
     pub const AGGRESSIVE: Strategy = Strategy {
         name: "aggressive",
@@ -56,6 +72,8 @@ impl Strategy {
         spearhead_share: 1.0,
         rear_guard: 1,
         frontier_min: 0,
+        diplomacy: Diplomacy::None,
+        pact_len: 2,
     };
     pub const CAUTIOUS: Strategy = Strategy {
         name: "cautious",
@@ -66,6 +84,8 @@ impl Strategy {
         spearhead_share: 0.4,
         rear_guard: 3,
         frontier_min: 3,
+        diplomacy: Diplomacy::None,
+        pact_len: 2,
     };
     pub const HOARDER: Strategy = Strategy {
         name: "hoarder",
@@ -85,6 +105,32 @@ impl Strategy {
     pub const FLIPPER: Strategy = Strategy {
         name: "flipper",
         flip: FlipPolicy::Always,
+        ..Strategy::BALANCED
+    };
+    pub const LOYAL: Strategy = Strategy {
+        name: "loyal",
+        diplomacy: Diplomacy::Loyal,
+        ..Strategy::BALANCED
+    };
+    pub const LOYAL_LONG: Strategy = Strategy {
+        name: "loyal-long",
+        diplomacy: Diplomacy::Loyal,
+        pact_len: 4,
+        ..Strategy::BALANCED
+    };
+    pub const OPPORTUNIST: Strategy = Strategy {
+        name: "opportunist",
+        diplomacy: Diplomacy::Opportunist { factor: 1.5 },
+        ..Strategy::BALANCED
+    };
+    pub const BACKSTABBER: Strategy = Strategy {
+        name: "backstabber",
+        diplomacy: Diplomacy::Opportunist { factor: 1.0 },
+        ..Strategy::BALANCED
+    };
+    pub const NO_PACTS: Strategy = Strategy {
+        name: "no-pacts",
+        diplomacy: Diplomacy::None,
         ..Strategy::BALANCED
     };
     pub const NEVER_FLIP: Strategy = Strategy {

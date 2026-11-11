@@ -98,12 +98,33 @@ Findings that shaped the deck:
 - Great Famine tuning (owner felt "1-troop territories don't count" was too harsh): counting them as half gives leader wins 80.4% (vs 68.9% harsh, 84.3% normal). Default: half. Bots don't reinforce thin land when the famine is announced; humans would, so the real effect is smaller still.
 - With these defaults the full deck gives comebacks 23.1% → 33.7%, final margin 21.7 → 16.4 territories.
 
+## Alliance pacts: balance report
+
+`cargo run --release --example pact_report -- 20000` (house pace, defender-sees dice, full event deck, 4 players).
+`Config.pacts = Some(PactRules::default())`; bots: `LOYAL` (never betrays), `OPPORTUNIST` (betrays when attacking the partner scores 1.5x the best other attack), `BACKSTABBER` (betrays at 1.0x), `NO_PACTS`. Bots propose to the neighbour pressing hardest on their borders, never to their own best target, and refuse a leader holding 40%+ of the board.
+
+Mixed table (one of each), win share, ±0.6:
+
+| Rules | Loyal | Opportunist | Backstabber | No pacts |
+|---|---|---|---|---|
+| First draft: victim takes both stakes, betrayer max 1 card | 37.6% | 22.7% | 16.4% | 23.3% |
+| **Balanced (default)**: victim gets own stake back, betrayer's stake discarded, betrayer draws normally | **27.7%** | **26.3%** | **21.4%** | **24.6%** |
+| Balanced but both stakes discarded | 23.5% | 26.0% | 22.5% | 28.0% |
+| Balanced but no bonus cards | 25.2% | 23.7% | 20.8% | 30.3% |
+| Balanced but bonus doubled | 29.6% | 28.6% | 21.5% | 20.3% |
+
+- The first draft made loyalty dominant: being betrayed was profitable (the victim gained the betrayer's stake) and the 1-card limit made every betrayal a loss.
+- Balanced: keeping your word is slightly best, a well-timed betrayal nearly as good, betraying whenever possible loses, and pacts beat ignoring them.
+- The oathbreaker rule has no measurable effect with these bots (kept for theme).
+- Long pacts (4 turns) lose to short ones (2 turns): 22.7% vs 27.3%, even with doubled bonuses. Being locked in costs more than the bonus.
+- Pacts raise comebacks slightly: 45.8% → 47.7% (mixed table), 50.2% when everyone is loyal.
+
 ## Player-facing pages
 
 `docs/house-rules.html` (house rules with a rollable century event deck, 33 events) and `docs/board-graph.html` (interactive board graph) are the pages the group uses at the table. Keep them in sync with the engine when rules change.
 
 ## Roadmap
-1. **Alliance pacts**: stake 1 card each for 1-2 turns, 2 each for 3-4 turns, max 2 per player; honoured pact returns stakes plus bonus cards = turns − 1 (cap 3); one pact at a time; length counted in turns, min 1 turn each, renewal allowed; betrayer gets at most 1 card that turn, victim takes the stake pile, betrayer is an oathbreaker (no pacts) until the next century.
-2. **Century events**: era-wide modifiers, 3 per century for the 5th-14th (the 15th ends the game), listed in `docs/house-rules.html`. They escalate: early boons, middle combat/movement changes, late punishments for big stacks and the leader. Stack thresholds were calibrated with `cargo run --release --example stacks_by_century -- 4 5000` (board state when each century begins). Note: with house pace, each century is reached only ~55-60% of the time (a 6 skips it), so ~6 events fire per game.
-3. Bots that pursue missions, and a betrayal-aware diplomacy bot.
+1. ~~Alliance pacts~~ done (see above).
+2. **Century events** (done; tune further with smarter bots): era-wide modifiers, 3 per century for the 5th-14th (the 15th ends the game), listed in `docs/house-rules.html`. They escalate: early boons, middle combat/movement changes, late punishments for big stacks and the leader. Stack thresholds were calibrated with `cargo run --release --example stacks_by_century -- 4 5000` (board state when each century begins). Note: with house pace, each century is reached only ~55-60% of the time (a 6 skips it), so ~6 events fire per game.
+3. Bots that pursue missions and exploit movement events; diplomacy bots that retaliate against betrayers.
 4. Sweep tools: grid over a parameter (e.g. card chart, timeline length), CSV output, charts.

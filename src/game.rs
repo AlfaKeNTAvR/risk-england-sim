@@ -46,6 +46,73 @@ pub struct Config {
     /// Great Famine: 1-troop territories count half at the final count
     /// (false = they don't count at all).
     pub famine_half: bool,
+    /// House rule: alliance pacts (None = no pacts).
+    pub pacts: Option<PactRules>,
+}
+
+/// Alliance pact rules. Defaults are the simulator-balanced version (Nov 2026):
+/// the group's first draft had the victim take both stakes and capped the
+/// betrayer at 1 card, which made loyal bots win 38% in a mixed table.
+#[derive(Clone, Copy, Debug)]
+pub struct PactRules {
+    /// Cards each player stakes for pacts of 1-2 turns.
+    pub stake_short: usize,
+    /// Cards each player stakes for pacts of 3-4 turns.
+    pub stake_long: usize,
+    /// Bonus cards each when a pact is kept: (length - 1) * this, capped at `bonus_cap`.
+    pub bonus_per_turn: u32,
+    pub bonus_cap: u32,
+    /// Most territory cards a betrayer may draw on the turn they betray.
+    pub betray_card_cap: Option<u32>,
+    /// What happens to the stakes when a pact is betrayed.
+    pub on_betrayal: StakeOnBetrayal,
+    /// Betrayers can't sign pacts until the cavalry moves.
+    pub oathbreaker: bool,
+}
+
+impl Default for PactRules {
+    fn default() -> Self {
+        PactRules {
+            stake_short: 1,
+            stake_long: 2,
+            bonus_per_turn: 1,
+            bonus_cap: 3,
+            betray_card_cap: None,
+            on_betrayal: StakeOnBetrayal::VictimTakesOwn,
+            oathbreaker: true,
+        }
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum StakeOnBetrayal {
+    /// Victim takes both stakes.
+    VictimTakesAll,
+    /// Victim gets their own stake back; the betrayer's stake is discarded.
+    VictimTakesOwn,
+    /// Both stakes are discarded.
+    AllDiscarded,
+}
+
+#[derive(Clone, Debug)]
+struct Pact {
+    a: usize,
+    b: usize,
+    len: u32,
+    done_a: u32,
+    done_b: u32,
+    pile_a: Vec<usize>,
+    pile_b: Vec<usize>,
+    extra_bonus: u32,
+}
+
+impl Pact {
+    fn has(&self, p: usize) -> bool {
+        self.a == p || self.b == p
+    }
+    fn other(&self, p: usize) -> usize {
+        if self.a == p { self.b } else { self.a }
+    }
 }
 
 impl Default for Config {
@@ -62,6 +129,7 @@ impl Default for Config {
             defect_troops: 1,
             revolt_count: 3,
             famine_half: true,
+            pacts: None,
         }
     }
 }
@@ -115,6 +183,12 @@ pub enum EndReason {
 
 #[derive(Clone, Debug, Default)]
 pub struct PlayerStats {
+    pub pacts_signed: u32,
+    pub pacts_kept: u32,
+    pub betrayals: u32,
+    pub betrayed: u32,
+    /// Cards gained from pacts: bonus cards plus stakes taken from a betrayer.
+    pub pact_cards: u32,
     pub card_troops: u32,
     pub trades: u32,
     pub mission_troops: u32,
@@ -186,6 +260,9 @@ struct Player {
     pending: u32,
     alive: bool,
     stats: PlayerStats,
+    /// Oathbreaker while the cavalry is on this space or earlier.
+    oath_until: Option<usize>,
+    betrayed_this_turn: bool,
 }
 
 pub struct Game<'a> {
@@ -205,6 +282,7 @@ pub struct Game<'a> {
     event: Option<Ev>,
     round: u32,
     centuries: Vec<CenturyLog>,
+    pacts: Vec<Pact>,
 }
 
 impl<'a> Game<'a> {
@@ -223,6 +301,8 @@ impl<'a> Game<'a> {
                 pending: 0,
                 alive: true,
                 stats: PlayerStats::default(),
+                oath_until: None,
+                betrayed_this_turn: false,
             })
             .collect();
 
@@ -276,6 +356,7 @@ impl<'a> Game<'a> {
             event: None,
             round: 0,
             centuries: Vec::new(),
+            pacts: Vec::new(),
         }
     }
 
@@ -366,6 +447,12 @@ impl<'a> Game<'a> {
                     lost += self.shrink(t, x - x / 2);
                 }
             }
+            Some(Ev::BaronsWar) => {
+                for pc in std::mem::take(&mut self.pacts) {
+                    self.players[pc.a].hand.extend(pc.pile_a);
+                    self.players[pc.b].hand.extend(pc.pile_b);
+                }
+            }
             Some(Ev::LandGrab) => {
                 for p in 0..self.players.len() {
                     if p != leader && self.players[p].alive {
@@ -402,6 +489,164 @@ impl<'a> Game<'a> {
             territories,
             largest_stack,
         });
+    }
+
+    // ---------------------------------------------------------------- pacts
+
+    fn partner(&self, p: usize) -> Option<usize> {
+        self.pacts.iter().find(|pc| pc.has(p)).map(|pc| pc.other(p))
+    }
+
+    fn oathbreaker(&self, p: usize) -> bool {
+        self.players[p].oath_until.is_some_and(|s| self.cavalry <= s)
+    }
+
+    fn borders(&self, p: usize, q: usize) -> bool {
+        (0..N_TERR).any(|t| self.owner[t] == p && self.sh.graph.adj[t].iter().any(|&(n, _)| self.owner[n] == q))
+    }
+
+    /// Troops q has next to p's territories.
+    fn pressure(&self, q: usize, p: usize) -> u32 {
+        (0..N_TERR)
+            .filter(|&t| self.owner[t] == q && self.sh.graph.adj[t].iter().any(|&(n, _)| self.owner[n] == p))
+            .map(|t| self.troops[t])
+            .sum()
+    }
+
+    fn can_pact(&self, p: usize) -> bool {
+        self.players[p].alive
+            && self.players[p].strat.diplomacy != Diplomacy::None
+            && self.partner(p).is_none()
+            && !(self.oathbreaker(p) && self.cfg.pacts.is_some_and(|r| r.oathbreaker))
+    }
+
+    /// Would q happily accept a pact with p? q refuses if p is its best target,
+    /// or if p is a runaway leader (40%+ of the board).
+    fn accepts(&self, q: usize, p: usize) -> bool {
+        let best_target_is_p = self.best_attack_on(q, false).is_some_and(|b| self.owner[b.1] == p);
+        let runaway = self.count(p) * 10 >= N_TERR * 4 && self.leader() == p;
+        !best_target_is_p && !runaway
+    }
+
+    fn take_stake(&mut self, p: usize, k: usize) -> Vec<usize> {
+        let hand = &mut self.players[p].hand;
+        hand.sort_by_key(|&c| TERRITORIES[c].stars);
+        hand.drain(..k).collect()
+    }
+
+    /// Start of p's turn: propose a pact to the neighbour pressing hardest on
+    /// p's borders, if neither wants to attack the other.
+    fn diplomacy(&mut self, p: usize) {
+        let Some(rules) = self.cfg.pacts else { return };
+        if self.ev(Ev::BaronsWar) || !self.can_pact(p) {
+            return;
+        }
+        let n = self.players.len();
+        let mut best: Option<(usize, u32)> = None;
+        for q in 0..n {
+            if q == p || !self.can_pact(q) || !self.borders(p, q) {
+                continue;
+            }
+            if !self.accepts(p, q) || !self.accepts(q, p) {
+                continue;
+            }
+            let pr = self.pressure(q, p);
+            if best.is_none_or(|b| pr > b.1) {
+                best = Some((q, pr));
+            }
+        }
+        let Some((q, _)) = best else { return };
+        let mut len = self.players[p].strat.pact_len.clamp(1, 4);
+        let hand_min = self.players[p].hand.len().min(self.players[q].hand.len());
+        let mut stake = if len <= 2 { rules.stake_short } else { rules.stake_long };
+        if hand_min < stake {
+            len = len.min(2);
+            stake = rules.stake_short;
+        }
+        if hand_min < stake {
+            return; // can't stake
+        }
+        let pile_a = self.take_stake(p, stake);
+        let pile_b = self.take_stake(q, stake);
+        let extra_bonus = u32::from(self.ev(Ev::PeaceOfTheChurch));
+        self.players[p].stats.pacts_signed += 1;
+        self.players[q].stats.pacts_signed += 1;
+        // p is mid-turn: this turn counts as p's first pact turn.
+        self.pacts.push(Pact { a: p, b: q, len, done_a: 0, done_b: 0, pile_a, pile_b, extra_bonus });
+    }
+
+    /// End of p's turn: count it, and settle a kept pact.
+    fn advance_pact(&mut self, p: usize) {
+        let Some(rules) = self.cfg.pacts else { return };
+        let Some(i) = self.pacts.iter().position(|pc| pc.has(p)) else { return };
+        {
+            let pc = &mut self.pacts[i];
+            if pc.a == p {
+                pc.done_a += 1;
+            } else {
+                pc.done_b += 1;
+            }
+            if pc.done_a < pc.len || pc.done_b < pc.len {
+                return;
+            }
+        }
+        let pc = self.pacts.remove(i);
+        let bonus = ((pc.len - 1) * rules.bonus_per_turn).min(rules.bonus_cap) + pc.extra_bonus;
+        for (who, pile) in [(pc.a, pc.pile_a), (pc.b, pc.pile_b)] {
+            self.players[who].hand.extend(pile);
+            for _ in 0..bonus {
+                self.draw_card(who);
+            }
+            self.players[who].stats.pacts_kept += 1;
+            self.players[who].stats.pact_cards += bonus;
+        }
+    }
+
+    /// Opportunists break their pact when attacking the partner is clearly
+    /// the best move. The victim takes both stakes.
+    fn maybe_betray(&mut self, p: usize) {
+        let Some(rules) = self.cfg.pacts else { return };
+        let Diplomacy::Opportunist { factor } = self.players[p].strat.diplomacy else { return };
+        if self.ev(Ev::PeaceOfTheChurch) {
+            return; // pacts can't be broken this century
+        }
+        let Some(i) = self.pacts.iter().position(|pc| pc.has(p)) else { return };
+        let ratio_needed = self.players[p].strat.attack_ratio;
+        let Some(bp) = self.best_attack_on(p, true) else { return };
+        if bp.3 < ratio_needed {
+            return;
+        }
+        let worth = match self.best_attack_on(p, false) {
+            Some(nb) if nb.3 >= ratio_needed => bp.2 >= factor * nb.2,
+            _ => true,
+        };
+        if !worth {
+            return;
+        }
+        let pc = self.pacts.remove(i);
+        let victim = pc.other(p);
+        let (victim_pile, betrayer_pile) = if pc.a == victim { (pc.pile_a, pc.pile_b) } else { (pc.pile_b, pc.pile_a) };
+        match rules.on_betrayal {
+            StakeOnBetrayal::VictimTakesAll => {
+                self.players[victim].stats.pact_cards += betrayer_pile.len() as u32;
+                self.players[victim].hand.extend(victim_pile);
+                self.players[victim].hand.extend(betrayer_pile);
+            }
+            StakeOnBetrayal::VictimTakesOwn => {
+                self.players[victim].hand.extend(victim_pile);
+                self.discard.extend(betrayer_pile);
+            }
+            StakeOnBetrayal::AllDiscarded => {
+                self.discard.extend(victim_pile);
+                self.discard.extend(betrayer_pile);
+            }
+        }
+        self.players[p].stats.betrayals += 1;
+        self.players[victim].stats.betrayed += 1;
+        self.players[p].betrayed_this_turn = true;
+        if rules.oathbreaker {
+            self.players[p].oath_until = Some(self.cavalry);
+        }
     }
 
     fn count(&self, p: usize) -> usize {
@@ -447,6 +692,16 @@ impl<'a> Game<'a> {
 
     /// Best (src, dst, score) attack for player p, ignoring the ratio threshold.
     fn best_attack(&self, p: usize) -> Option<(usize, usize, f64, f64)> {
+        self.best_attack_on(p, false)
+    }
+
+    /// `partner_only`: consider only attacks on the pact partner (for betrayal);
+    /// otherwise the partner is off limits.
+    fn best_attack_on(&self, p: usize, partner_only: bool) -> Option<(usize, usize, f64, f64)> {
+        let partner = self.partner(p);
+        if partner_only && partner.is_none() {
+            return None;
+        }
         let alliance_vs = if self.ev(Ev::Brunanburh) {
             Some(self.leader()).filter(|&l| l != p)
         } else {
@@ -463,6 +718,9 @@ impl<'a> Game<'a> {
                 }
                 if alliance_vs.is_some_and(|l| self.owner[dst] != l) {
                     continue; // Brunanburh: everyone else may only attack the leader
+                }
+                if (Some(self.owner[dst]) == partner) != partner_only {
+                    continue;
                 }
                 let ratio = (self.troops[src] - 1) as f64 / self.troops[dst] as f64;
                 let score = ratio * self.target_value(p, dst);
@@ -656,6 +914,13 @@ impl<'a> Game<'a> {
     // --------------------------------------------------------------- attack
 
     fn eliminate(&mut self, victim: usize, by: usize) {
+        if let Some(i) = self.pacts.iter().position(|pc| pc.has(victim)) {
+            let pc = self.pacts.remove(i);
+            let survivor = pc.other(victim);
+            let (own, theirs) = if pc.a == victim { (pc.pile_b, pc.pile_a) } else { (pc.pile_a, pc.pile_b) };
+            self.players[survivor].hand.extend(own);
+            self.players[by].hand.extend(theirs);
+        }
         self.players[victim].alive = false;
         let cards = std::mem::take(&mut self.players[victim].hand);
         self.players[by].hand.extend(cards);
@@ -669,6 +934,7 @@ impl<'a> Game<'a> {
         let strat = self.players[p].strat;
         let mut captures = 0;
         for _ in 0..200 {
+            self.maybe_betray(p);
             let Some((src, dst, _, ratio)) = self.best_attack(p) else { break };
             if ratio < strat.attack_ratio {
                 break;
@@ -868,6 +1134,8 @@ impl<'a> Game<'a> {
             }
         }
 
+        self.diplomacy(p);
+
         // 1. Place troops
         let base: u32 = if self.ev(Ev::SaxonMigration) {
             5
@@ -926,6 +1194,12 @@ impl<'a> Game<'a> {
         if self.ev(Ev::DomesdaySurvey) && is_leader {
             draws = draws.min(1);
         }
+        if self.players[p].betrayed_this_turn {
+            if let Some(cap) = self.cfg.pacts.and_then(|r| r.betray_card_cap) {
+                draws = draws.min(cap);
+            }
+            self.players[p].betrayed_this_turn = false;
+        }
         for _ in 0..draws {
             self.draw_card(p);
         }
@@ -940,6 +1214,7 @@ impl<'a> Game<'a> {
         if self.cfg.missions {
             self.check_missions(p);
         }
+        self.advance_pact(p);
     }
 
     pub fn play(mut self) -> GameResult {
@@ -1055,6 +1330,39 @@ mod tests {
             let r = Game::new(cfg, &sh, &strats, seed).play();
             assert_eq!(r.territories.iter().sum::<usize>(), 42);
             assert!(!r.winners.is_empty());
+        }
+    }
+
+    #[test]
+    fn pacts_and_events_conserve_cards() {
+        let sh = Shared::new();
+        let cfg = Config {
+            timeline: Timeline::HousePace,
+            dice: DiceRule::DefenderSees,
+            events: EventMode::Deck,
+            pacts: Some(PactRules::default()),
+            ..Config::default()
+        };
+        let strats = [Strategy::LOYAL, Strategy::OPPORTUNIST, Strategy::BACKSTABBER, Strategy::NO_PACTS];
+        for seed in 0..300 {
+            let mut g = Game::new(cfg, &sh, &strats, seed);
+            g.begin_century();
+            for _ in 0..8 {
+                for p in 0..4 {
+                    if g.players[p].alive && g.players.iter().filter(|pl| pl.alive).count() > 1 {
+                        g.take_turn(p);
+                        g.cavalry = (g.cavalry + 1).min(LAST_SPACE - 1);
+                        g.begin_century();
+                    }
+                }
+                let cards = g.deck.len()
+                    + g.discard.len()
+                    + g.players.iter().map(|pl| pl.hand.len()).sum::<usize>()
+                    + g.pacts.iter().map(|pc| pc.pile_a.len() + pc.pile_b.len()).sum::<usize>();
+                assert_eq!(cards, 42, "territory cards must be conserved (seed {seed})");
+                assert!(g.troops.iter().all(|&t| t >= 1));
+                assert!(g.pacts.iter().all(|pc| g.players[pc.a].alive && g.players[pc.b].alive));
+            }
         }
     }
 
