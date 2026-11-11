@@ -41,6 +41,11 @@ pub struct Config {
     pub events: EventMode,
     /// Troops placed on each territory that defects to the weakest player.
     pub defect_troops: u32,
+    /// Territories that defect in Peasants' Revolt.
+    pub revolt_count: usize,
+    /// Great Famine: 1-troop territories count half at the final count
+    /// (false = they don't count at all).
+    pub famine_half: bool,
 }
 
 impl Default for Config {
@@ -54,7 +59,9 @@ impl Default for Config {
             missions: true,
             max_rounds: 300,
             events: EventMode::Off,
-            defect_troops: 3,
+            defect_troops: 1,
+            revolt_count: 3,
+            famine_half: true,
         }
     }
 }
@@ -350,7 +357,7 @@ impl<'a> Game<'a> {
         }
         let territories = (0..self.players.len()).map(|p| self.count(p)).collect();
         match self.event {
-            Some(Ev::PeasantsRevolt) => self.defect(leader, 3),
+            Some(Ev::PeasantsRevolt) => self.defect(leader, self.cfg.revolt_count),
             Some(Ev::TheAnarchy) => self.defect(leader, 2),
             Some(Ev::CampFever) => {
                 // The leader's largest army loses half.
@@ -994,10 +1001,14 @@ impl<'a> Game<'a> {
         }
         let territories: Vec<usize> = (0..n).map(|p| self.count(p)).collect();
         // Great Famine: thinly held land is abandoned at the final count.
+        // Scores are in half-territories so a 1-troop territory can count half.
         let scored: Vec<usize> = if self.ev(Ev::GreatFamine) && ended_by == EndReason::Timeline {
-            (0..n).map(|p| (0..N_TERR).filter(|&t| self.owner[t] == p && self.troops[t] >= 2).count()).collect()
+            let thin = if self.cfg.famine_half { 1 } else { 0 };
+            (0..n)
+                .map(|p| (0..N_TERR).filter(|&t| self.owner[t] == p).map(|t| if self.troops[t] >= 2 { 2 } else { thin }).sum())
+                .collect()
         } else {
-            territories.clone()
+            territories.iter().map(|&x| x * 2).collect()
         };
         let max = *scored.iter().max().unwrap();
         let winners = (0..n).filter(|&p| scored[p] == max).collect();

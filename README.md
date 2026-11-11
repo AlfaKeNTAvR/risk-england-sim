@@ -85,7 +85,7 @@ Win shares carry ±0.6 percentage points (95%).
 
 ## Century events: engagement report
 
-`cargo run --release --example event_report -- 20000 [threads] [name filter]` (4 players: balanced x2, aggressive, hoarder; bots keep a rear guard of 2). `DEFECT=n` overrides troops placed on defecting territories (default 3).
+`cargo run --release --example event_report -- 20000 [threads] [name filter]` (4 players: balanced x2, aggressive, hoarder; bots keep a rear guard of 2). Env overrides: `DEFECT=n` troops placed on defecting territories (default 1), `REVOLT=n` territories in Peasants' Revolt (default 3), `FAMINE_HALF=0|1` (default 1).
 
 Findings that shaped the deck:
 - A century lasts only ~0.6 rounds (2-3 turns), and the 14th usually only half a round before the game ends. Effects that build up over turns barely act; immediate effects and final-count rules do.
@@ -94,7 +94,9 @@ Findings that shaped the deck:
 - v1 deck (events hitting everyone): comebacks 23.1% → 24.6%. Reworked deck (events leaning against the leader, defection, Great Famine as a final-count rule): comebacks 23.1% → 36.3%, lead changes 1.58 → 1.93, final margin 21.7 → 15.9 territories, seats still ~25% each.
 - Strongest: Great Famine (leader wins 69% vs 84%), Peasants' Revolt (76% vs 84%), One kingdom and Domesday survey (+3.8 pts comebacks), Petty kingdoms (+3.5).
 - Flavor (tactics only, per bots): Roman roads, Plague of Justinian, Age of saints, Offa's Dyke, Hard winter, Norman castles, Great floods, Supply problems, Black Death. Bots don't exploit movement rules, so real effect may be larger.
-- Defection with 3 troops beat 2 slightly (+1.2 vs +0.9 pts comebacks).
+- Defection tuning (owner felt 3 territories x 3 troops = 9 free troops was too much): 3 territories x 1 troop keeps most of the effect (leader wins 77.4% vs 76.4% with 3 troops, normally 84.3%), 2 x 2 is milder (79.5%). Default: 1 troop.
+- Great Famine tuning (owner felt "1-troop territories don't count" was too harsh): counting them as half gives leader wins 80.4% (vs 68.9% harsh, 84.3% normal). Default: half. Bots don't reinforce thin land when the famine is announced; humans would, so the real effect is smaller still.
+- With these defaults the full deck gives comebacks 23.1% → 33.7%, final margin 21.7 → 16.4 territories.
 
 ## Player-facing pages
 

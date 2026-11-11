@@ -31,7 +31,16 @@ fn add(a: &mut [f64; 6], b: &[f64; 6]) {
 
 fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
     let defect: u32 = std::env::var("DEFECT").ok().and_then(|v| v.parse().ok()).unwrap_or(Config::default().defect_troops);
-    let cfg = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderSees, events: mode, defect_troops: defect, ..Config::default() };
+    let env = |k: &str| std::env::var(k).ok().and_then(|v| v.parse::<usize>().ok());
+    let cfg = Config {
+        timeline: Timeline::HousePace,
+        dice: DiceRule::DefenderSees,
+        events: mode,
+        defect_troops: defect,
+        revolt_count: env("REVOLT").unwrap_or(Config::default().revolt_count),
+        famine_half: env("FAMINE_HALF").map_or(Config::default().famine_half, |v| v == 1),
+        ..Config::default()
+    };
     let per = games.div_ceil(threads);
     let parts: Vec<Acc> = std::thread::scope(|sc| {
         let hs: Vec<_> = (0..threads)
