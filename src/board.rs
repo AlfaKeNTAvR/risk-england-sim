@@ -241,7 +241,7 @@ mod tests {
         assert_eq!(EDGES.iter().filter(|e| e.2 == River).count(), 8);
         assert_eq!(g.sea_routes.len(), 6);
         // connected
-        let mut seen = vec![false; N_TERR];
+        let mut seen = [false; N_TERR];
         let mut stack = vec![0];
         while let Some(x) = stack.pop() {
             if seen[x] { continue; }
