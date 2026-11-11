@@ -147,14 +147,10 @@ fn main() {
     println!("\n== Mixed table: who wins? (fair share 25%)");
     let variants: Vec<(&str, PactRules)> = vec![
         ("balanced rules (default)", rules),
-        ("first draft: victim takes all, cap 1", PactRules { on_betrayal: StakeOnBetrayal::VictimTakesAll, betray_card_cap: Some(1), ..rules }),
-        ("no bonus cards", PactRules { bonus_per_turn: 0, ..rules }),
-        ("bonus 2 per turn (cap 6)", PactRules { bonus_per_turn: 2, bonus_cap: 6, ..rules }),
-        ("betrayer capped at 1 card", PactRules { betray_card_cap: Some(1), ..rules }),
-        ("no oathbreaker", PactRules { oathbreaker: false, ..rules }),
         ("victim takes both stakes", PactRules { on_betrayal: StakeOnBetrayal::VictimTakesAll, ..rules }),
-        ("both stakes discarded", PactRules { on_betrayal: StakeOnBetrayal::AllDiscarded, ..rules }),
-        ("bigger stakes 2/3", PactRules { stake_short: 2, stake_long: 3, ..rules }),
+        ("stakes in cards: 1 short / 2 long", PactRules { stake_stars: None, ..rules }),
+                ("stars 2/3", PactRules { stake_stars: Some((2, 3)), ..rules }),
+        ("stars 1/2", PactRules { stake_stars: Some((1, 2)), ..rules }),
     ];
     for (label, r) in variants {
         let a = run(Config { pacts: Some(r), ..base }, &mix, games, threads);

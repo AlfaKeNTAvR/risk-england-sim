@@ -68,6 +68,9 @@ pub struct PactRules {
     pub on_betrayal: StakeOnBetrayal,
     /// Betrayers can't sign pacts until the cavalry moves.
     pub oathbreaker: bool,
+    /// Stakes counted in stars (each side must stake exactly this many stars:
+    /// short, long) instead of in cards.
+    pub stake_stars: Option<(u32, u32)>,
 }
 
 impl Default for PactRules {
@@ -80,6 +83,7 @@ impl Default for PactRules {
             betray_card_cap: None,
             on_betrayal: StakeOnBetrayal::VictimTakesOwn,
             oathbreaker: true,
+            stake_stars: Some((2, 4)),
         }
     }
 }
@@ -528,6 +532,27 @@ impl<'a> Game<'a> {
         !best_target_is_p && !runaway
     }
 
+    /// Cheapest set of p's cards worth exactly `stars` stars (prefers 1-star cards).
+    fn star_stake(&self, p: usize, stars: u32) -> Option<Vec<usize>> {
+        let hand = &self.players[p].hand;
+        let ones: Vec<usize> = hand.iter().copied().filter(|&c| TERRITORIES[c].stars == 1).collect();
+        let twos: Vec<usize> = hand.iter().copied().filter(|&c| TERRITORIES[c].stars == 2).collect();
+        for n1 in (0..=ones.len().min(stars as usize)).rev() {
+            let rest = stars as usize - n1;
+            if rest % 2 == 0 && rest / 2 <= twos.len() {
+                let mut v: Vec<usize> = ones[..n1].to_vec();
+                v.extend_from_slice(&twos[..rest / 2]);
+                return Some(v);
+            }
+        }
+        None
+    }
+
+    fn take_cards(&mut self, p: usize, cards: &[usize]) -> Vec<usize> {
+        self.players[p].hand.retain(|c| !cards.contains(c));
+        cards.to_vec()
+    }
+
     fn take_stake(&mut self, p: usize, k: usize) -> Vec<usize> {
         let hand = &mut self.players[p].hand;
         hand.sort_by_key(|&c| TERRITORIES[c].stars);
@@ -557,6 +582,23 @@ impl<'a> Game<'a> {
         }
         let Some((q, _)) = best else { return };
         let mut len = self.players[p].strat.pact_len.clamp(1, 4);
+        if let Some((short, long)) = rules.stake_stars {
+            let mut stars = if len <= 2 { short } else { long };
+            let mut pair = self.star_stake(p, stars).zip(self.star_stake(q, stars));
+            if pair.is_none() && len > 2 {
+                len = 2;
+                stars = short;
+                pair = self.star_stake(p, stars).zip(self.star_stake(q, stars));
+            }
+            let Some((sp, sq)) = pair else { return };
+            let pile_a = self.take_cards(p, &sp);
+            let pile_b = self.take_cards(q, &sq);
+            let extra_bonus = u32::from(self.ev(Ev::PeaceOfTheChurch));
+            self.players[p].stats.pacts_signed += 1;
+            self.players[q].stats.pacts_signed += 1;
+            self.pacts.push(Pact { a: p, b: q, len, done_a: 0, done_b: 0, pile_a, pile_b, extra_bonus });
+            return;
+        }
         let hand_min = self.players[p].hand.len().min(self.players[q].hand.len());
         let mut stake = if len <= 2 { rules.stake_short } else { rules.stake_long };
         if hand_min < stake {
@@ -953,6 +995,10 @@ impl<'a> Game<'a> {
                 break;
             }
             let mut attackers = self.troops[src] - guard;
+            let min_ratio = strat.attack_ratio.min(1.0).max(strat.withdraw_ratio);
+            if (attackers as f64) < min_ratio * self.troops[dst] as f64 {
+                break; // after keeping a rear guard, too few troops left to attack
+            }
             self.troops[src] -= attackers;
             let mut defenders = self.troops[dst];
 

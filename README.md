@@ -98,23 +98,40 @@ Findings that shaped the deck:
 - Great Famine tuning (owner felt "1-troop territories don't count" was too harsh): counting them as half gives leader wins 80.4% (vs 68.9% harsh, 84.3% normal). Default: half. Bots don't reinforce thin land when the famine is announced; humans would, so the real effect is smaller still.
 - With these defaults the full deck gives comebacks 23.1% → 33.7%, final margin 21.7 → 16.4 territories.
 
+## Defence dice variants
+
+`cargo run --release --example dice_rules -- 20000`. `DiceRule::DefenderOneByOne`: attacker rolls first; the defender rolls one die, looks, then decides on a second.
+
+| Rule | 3v2 roll: attacker / defender losses | 11 v 10 battle | 16 v 10 | 21 v 10 |
+|---|---|---|---|---|
+| Classic | 0.921 / 1.079 | 56.8% | 88.3% | 97.7% |
+| Defender sees, picks 1 or 2 (house rule) | 0.750 / 0.750 | 45.9% | 81.2% | 95.5% |
+| Defender sees, one by one | 0.755 / 0.703 | 40.3% | 77.2% | 94.0% |
+
+One by one gives the defender a further ~7% edge per roll; in whole games it shifts little (aggressive bots 66% → 64%, winner holds 26.2 → 25.8 territories). Fixed Nov 11: bots whose rear guard left too few troops kept "attacking" and withdrawing before rolling (200 times per turn); only cautious bots were affected, all earlier event and pact numbers reproduced unchanged.
+
 ## Alliance pacts: balance report
 
 `cargo run --release --example pact_report -- 20000` (house pace, defender-sees dice, full event deck, 4 players).
 `Config.pacts = Some(PactRules::default())`; bots: `LOYAL` (never betrays), `OPPORTUNIST` (betrays when attacking the partner scores 1.5x the best other attack), `BACKSTABBER` (betrays at 1.0x), `NO_PACTS`. Bots propose to the neighbour pressing hardest on their borders, never to their own best target, and refuse a leader holding 40%+ of the board.
 
-Mixed table (one of each), win share, ±0.6:
+Mixed table (one of each), win share, ±0.6. Player-facing pages show no win rates on purpose: the owner wants players to judge for themselves.
 
 | Rules | Loyal | Opportunist | Backstabber | No pacts |
 |---|---|---|---|---|
 | First draft: victim takes both stakes, betrayer max 1 card | 37.6% | 22.7% | 16.4% | 23.3% |
 | **Balanced (default)**: victim gets own stake back, betrayer's stake discarded, betrayer draws normally | **27.7%** | **26.3%** | **21.4%** | **24.6%** |
+| Balanced but victim takes both stakes | 32.5% | 26.3% | 20.4% | 20.9% |
+| Stakes matched in stars, 2 short / 4 long (default since Nov 11) | 27.1% | 24.7% | 20.2% | 28.0% |
+| Stakes matched in stars, 1 short / 2 long | 25.7% | 25.9% | 23.3% | 25.1% |
 | Balanced but both stakes discarded | 23.5% | 26.0% | 22.5% | 28.0% |
 | Balanced but no bonus cards | 25.2% | 23.7% | 20.8% | 30.3% |
 | Balanced but bonus doubled | 29.6% | 28.6% | 21.5% | 20.3% |
 
 - The first draft made loyalty dominant: being betrayed was profitable (the victim gained the betrayer's stake) and the 1-card limit made every betrayal a loss.
 - Balanced: keeping your word is slightly best, a well-timed betrayal nearly as good, betraying whenever possible loses, and pacts beat ignoring them.
+- Stakes are matched in stars and face up (owner asked: card counts let one side stake a 2-star card against a 1-star card). 2/4 stars plays like 1/2 cards but with ~15% fewer pacts (exact sums are harder to make). If you can't stake exactly, you can't sign.
+- Victim takes both stakes: being betrayed becomes profitable (+2 cards per game for loyal players), so everyone signs and keeps; non-signers drop to 21%. Kept as `StakeOnBetrayal::VictimTakesAll` for the group to try.
 - The oathbreaker rule has no measurable effect with these bots (kept for theme).
 - Long pacts (4 turns) lose to short ones (2 turns): 22.7% vs 27.3%, even with doubled bonuses. Being locked in costs more than the bonus.
 - Pacts raise comebacks slightly: 45.8% → 47.7% (mixed table), 50.2% when everyone is loyal.
@@ -123,7 +140,7 @@ Mixed table (one of each), win share, ±0.6:
 
 `docs/house-rules.html` (house rules with a rollable century event deck, 30 events) and `docs/board-graph.html` (interactive board graph) are the pages the group uses at the table. Keep them in sync with the engine when rules change.
 
-`docs/print/` holds the printable table pieces (sources of the "Medieval England Table Pieces" design canvas, letter size): 4 sheets of century event cards (2.4 x 3.4 in), three diplomacy options (two cut-out pact charters, a full diplomacy board, or seal tokens only), and a two-sided house rules reference. Event card text and pact rules must match `src/events.rs` and `PactRules::default()`.
+`docs/print/` holds the printable table pieces (sources of the "Medieval England Table Pieces" design canvas, letter size): 4 sheets of century event cards (2.4 x 3.4 in), two diplomacy options (square purple/orange pact seals rotated to count down, or treaty cards ticked with dry-erase), all pieces with a 4 mm gap and 5 mm clear inner edge for laminating, knife-cutting and 5 mm corner punching, and a two-sided house rules reference. Event card text and pact rules must match `src/events.rs` and `PactRules::default()`.
 
 ## Roadmap
 1. ~~Alliance pacts~~ done (see above).

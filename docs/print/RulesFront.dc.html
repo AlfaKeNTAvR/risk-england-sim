@@ -13,7 +13,7 @@
 body{margin:0}
 </style>
 </helmet>
-<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 60px 64px; background: #f3e7cf; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 18px">
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 60px 64px; background: #f3e7cf; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 22px">
   <div style="display: flex; justify-content: space-between; align-items: flex-end; border-bottom: 2px solid #5a4632; padding-bottom: 10px">
     <div style="display: flex; flex-direction: column; gap: 2px">
       <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 16px; letter-spacing: 0.08em; color: #8e2424">Risk: The Battle for Medieval England</span>
@@ -22,8 +22,8 @@ body{margin:0}
     <span style="font-size: 14px; color: #5a4632; text-align: right; line-height: 1.3">Everything not here<br>follows the rulebook.</span>
   </div>
 
-  <div style="display: flex; flex-direction: column; gap: 6px">
-    <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b5a8e">Your turn</h2>
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Your turn</h2>
     <div style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px">
       <sc-for list="{{steps}}" as="st" hint-placeholder-count="5">
         <div style="border: 1.5px solid #5a4632; background: #fbf4e4; padding: 8px 9px; display: flex; flex-direction: column; gap: 4px">
@@ -35,34 +35,27 @@ body{margin:0}
     </div>
   </div>
 
-  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px">
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px">
     <div style="display: flex; flex-direction: column; gap: 6px">
-      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b5a8e">Timeline pace</h2>
-      <div style="font-size: 15px; line-height: 1.38">The cavalry starts on the 5th century. After each player's turn, that player rolls a die: on a 6 the cavalry moves 1 space. After every full round it moves 1 space. Ignore the printed dice gates. Reaching the 15th ends the game.</div>
-      <div style="font-size: 13px; line-height: 1.3; color: #5a4632; font-style: italic">Why: the printed timeline gives about 3 turns each and seat 1 wins twice as often as seat 4. This gives about 6 turns and fair seats.</div>
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Timeline pace</h2>
+      <div style="font-size: 16px; line-height: 1.4">The cavalry starts on the 5th century. After each player's turn, that player rolls a die: on a 6 the cavalry moves 1 space. After every full round it moves 1 space. Ignore the printed dice gates. Reaching the 15th ends the game.</div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 6px">
-      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b5a8e">Defender sees the roll</h2>
-      <div style="font-size: 15px; line-height: 1.38">Before a battle, move the attacking troops across, leaving at least 1 behind. The attacker rolls first. The defender looks, then picks 1 or 2 dice. Ties go to the defender. Winners occupy; no extra troops move in until your manoeuvre.</div>
-      <div style="font-size: 13px; line-height: 1.3; color: #5a4632; font-style: italic">Big attacks barely change; close fights favour the defender.</div>
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Defender sees the roll</h2>
+      <div style="font-size: 16px; line-height: 1.4">Before a battle, move the attacking troops across, leaving at least 1 behind. The attacker rolls first. The defender looks, then picks 1 or 2 dice. Ties go to the defender. Winners occupy the territory; no extra troops move in until your manoeuvre.</div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 6px">
-      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b5a8e">Rivers and mountains</h2>
-      <div style="font-size: 15px; line-height: 1.38">Only the manoeuvre is affected, never attacks. Crossing a river: at most 5 troops, and they stop on the far side. Entering a mountain territory: they stop there.</div>
-      <div style="font-size: 14px; line-height: 1.35"><b>Rivers:</b> Leeds–Beeston, Leeds–Bolsover, Leeds–Conisbrough, Portchester–Donnington, Donnington–Farnham, Farnham–Jewel Tower, Jewel Tower–Dover, Colchester–Dover.</div>
-      <div style="font-size: 14px; line-height: 1.35"><b>Mountains:</b> Carlisle, Brougham, Cliffords, Beeston, Wall, St Briavels, Old Sarum.</div>
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Rivers and mountains</h2>
+      <div style="font-size: 16px; line-height: 1.4">Only the manoeuvre is affected, never attacks. Crossing a river: at most 5 troops, and they stop on the far side. Entering a mountain territory: they stop there.</div>
+      <div style="font-size: 15px; line-height: 1.38"><b>Rivers:</b> Leeds–Beeston, Leeds–Bolsover, Leeds–Conisbrough, Portchester–Donnington, Donnington–Farnham, Farnham–Jewel Tower, Jewel Tower–Dover, Colchester–Dover.</div>
+      <div style="font-size: 15px; line-height: 1.38"><b>Mountains:</b> Carlisle, Brougham, Cliffords, Beeston, Wall, St Briavels, Old Sarum.</div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 6px">
-      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b5a8e">Rulings</h2>
-      <div style="font-size: 15px; line-height: 1.38"><b>Power card losses</b> hit only the player who flips them; Heavy snowfall hits only your North territories. No territory drops below 1. For "lose 2" or "lose 3", use a territory that can take the full loss if you have one, else your largest.</div>
-      <div style="font-size: 15px; line-height: 1.38"><b>Jewel Tower mission:</b> 3 turns in total, anyone's turns count.</div>
-      <div style="font-size: 15px; line-height: 1.38"><b>Winning:</b> most territories when the cavalry reaches the 15th.</div>
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Rulings</h2>
+      <div style="font-size: 16px; line-height: 1.4"><b>Power card losses</b> hit only the player who flips them; Heavy snowfall hits only your North territories. No territory drops below 1. For "lose 2" or "lose 3", use a territory that can take the full loss if you have one, else your largest.</div>
+      <div style="font-size: 16px; line-height: 1.4"><b>Jewel Tower mission:</b> 3 turns in total, anyone's turns count.</div>
+      <div style="font-size: 16px; line-height: 1.4"><b>Winning:</b> most territories when the cavalry reaches the 15th.</div>
     </div>
-  </div>
-
-  <div style="margin-top: auto; border-top: 1.5px solid #8a7356; padding-top: 10px; display: flex; gap: 22px; font-size: 14px; line-height: 1.35">
-    <div style="flex: 1"><b style="color: #8e2424">From 20,000 simulated games:</b> trade cards early, at 3 to 6 stars. Hoarding to 10 wins only about half as often.</div>
-    <div style="flex: 1">Flipping power cards pays off: you choose where losses land, and the good cards are strong.</div>
   </div>
 </div>
 </x-dc>
@@ -72,10 +65,10 @@ class Component extends DCLogic {
     return {
       steps: [
         { n: '1', t: 'Place troops', d: '3, plus the territory chart, regions, missions, card trades. You may flip a power card.' },
-        { n: '2', t: 'Attack', d: 'Commit troops first. Defender sees your roll.' },
+        { n: '2', t: 'Attack', d: 'Commit troops first. The defender sees your roll.' },
         { n: '3', t: 'Manoeuvre', d: 'One move. Rivers and mountains stop it.' },
         { n: '4', t: 'Draw cards', d: '1 territory card per territory conquered.' },
-        { n: '5', t: 'Roll for time', d: 'A 6 moves the cavalry. A pact turn ticks over.' }
+        { n: '5', t: 'End of turn', d: 'Roll: a 6 moves the cavalry. Turn your pact seal down one.' }
       ]
     };
   }

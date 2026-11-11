@@ -73,7 +73,7 @@ button.roll:hover{background:var(--bg)}
 <div class="wrap">
   <header>
     <h1>Medieval England House Rules</h1>
-    <p class="sub">Our changes to Risk: The Battle for Medieval England. Everything not listed here follows the rulebook. Rules marked <em>tested</em> were checked in the simulator over 20,000 bot games.</p>
+    <p class="sub">Our changes to Risk: The Battle for Medieval England. Everything not listed here follows the rulebook. </p>
   </header>
 
   <nav aria-label="Sections">
@@ -90,31 +90,29 @@ button.roll:hover{background:var(--bg)}
         <tr><td>Rivers</td><td>"Territories with rivers"</td><td>On borders: 8 river crossings</td></tr>
         <tr><td>Power losses</td><td>Unclear</td><td>Only the flipper is hit, never below 1 troop</td></tr>
         <tr><td>Jewel Tower mission</td><td>"Hold for 3 turns"</td><td>3 turns in total, anyone's turns count</td></tr>
-        <tr><td>Alliances</td><td>Not covered</td><td>Card-staked pacts, 1-4 turns</td></tr>
+        <tr><td>Alliances</td><td>Not covered</td><td>Star-staked pacts, 1-4 turns</td></tr>
         <tr><td>Events</td><td>None</td><td>One era-wide event per century, escalating</td></tr>
       </tbody>
     </table></div>
   </section>
 
   <section class="card" id="timeline">
-    <h2>Timeline pace <span class="status tested">tested</span></h2>
+    <h2>Timeline pace</h2>
     <ol>
       <li>The cavalry starts on the 5th century.</li>
       <li>After each player's turn, that player rolls a die. On a 6 the cavalry moves 1 space.</li>
       <li>After every full round, the cavalry moves 1 space. Ignore the printed dice gates.</li>
       <li>When it reaches the 15th century, the game ends. Most territories wins.</li>
     </ol>
-    <div class="evidence"><b>Why:</b> with the rulebook timeline, each player gets about 3.5 turns, and because the game ends mid-round, seat 1 wins 34% of games and seat 4 only 17%. Our pace gives about 6 turns each, and every seat wins about 25%.</div>
   </section>
 
   <section class="card" id="dice">
-    <h2>Defender sees the roll <span class="status tested">tested</span></h2>
+    <h2>Defender sees the roll</h2>
     <ol>
       <li>The attacker rolls their dice first.</li>
       <li>The defender looks at the result, then chooses to roll 1 or 2 dice (2 only with 2+ troops).</li>
       <li>Compare as usual. Ties go to the defender.</li>
     </ol>
-    <div class="evidence"><b>Effect:</b> a 3-against-2 roll becomes an even trade (0.75 troops lost each, instead of 0.92 attacker / 1.08 defender). Well-prepared attacks barely change: 21 against 10 still wins 96%. Close fights flip: 11 against 10 drops from 57% to 45%. It rewards preparation and punishes gambles.</div>
   </section>
 
   <section class="card" id="terrain">
@@ -134,42 +132,38 @@ button.roll:hover{background:var(--bg)}
     <h2>Cards</h2>
     <h3>Territory cards (rulebook, confirmed)</h3>
     <p>Draw 1 card for every territory you conquer. This is the official rule, not a house rule.</p>
-    <div class="evidence"><b>Tip from the simulator:</b> cards are the biggest troop source in this edition (about 85 troops per player per game). Trading at 3 to 6 stars wins about 30% of games; hoarding until 10 stars wins only 16%.</div>
     <h3>Power cards</h3>
     <ul>
       <li>Loss cards hit only the player who flips them. Heavy snowfall hits only your own North territories.</li>
       <li>A territory never drops below 1 troop.</li>
       <li>For "lose 2" or "lose 3", pick a territory that can take the full loss if you have one. Otherwise take it from your largest territory.</li>
     </ul>
-    <div class="evidence"><b>Tip from the simulator:</b> flipping wins 31% against 19% for never flipping. Losses stay small because you choose where they land.</div>
     <h3>Missions</h3>
     <p>"Capture and hold Jewel Tower for 3 turns": 3 turns in total, and every player's turn counts.</p>
   </section>
 
   <section class="card" id="pacts">
-    <h2>Alliance pacts <span class="status tested">tested</span></h2>
+    <h2>Alliance pacts</h2>
+    <p>There are two pacts in the game, purple and orange. A player can be in one pact at a time.</p>
     <ol>
-      <li><b>Sign:</b> two players agree a length in turns, 1 to 4 turns each. Each puts the same number of territory cards face up on the pact board: 1 card for 1-2 turns, 2 cards for 3-4 turns.</li>
-      <li><b>During:</b> the two may not attack each other. A player can be in one pact at a time.</li>
-      <li><b>Kept:</b> when both have taken their agreed turns, each takes back their cards plus bonus cards from the deck: pact length minus 1, at most 3.</li>
-      <li><b>Renew:</b> allowed straight away, with the same player or anyone else.</li>
-      <li><b>Broken:</b> the moment one attacks the other, the victim takes back their own cards and the betrayer's cards are discarded. The betrayer draws territory cards as normal that turn, but becomes an <em>oathbreaker</em> and can't sign a pact until the cavalry moves to the next century.</li>
+      <li><b>Sign:</b> two players agree a length, 1 to 4 turns each, and take a pact colour. Each stakes territory cards face up worth exactly the same stars: <b>2 stars each</b> for 1-2 turns, <b>4 stars each</b> for 3-4 turns. One 2-star card or two 1-star cards both make 2 stars. If you can't make the exact amount, you can't sign.</li>
+      <li><b>Seal:</b> each signer sets their seal to the pact length and puts it on their stake. At the end of each of your turns, turn your seal down by one. After your turn at 1, flip it face down.</li>
+      <li><b>During:</b> the two may not attack each other.</li>
+      <li><b>Kept:</b> when both seals are face down, each takes back their stake plus bonus cards from the deck: pact length minus 1, at most 3. Renewing straight away is fine.</li>
+      <li><b>Broken:</b> the moment one attacks the other, the victim takes back their stake and the betrayer's stake is discarded. The betrayer draws territory cards as normal that turn, but takes an oathbreaker seal: no pacts until the cavalry moves.</li>
     </ol>
-    <div class="evidence"><b>Why these numbers:</b> in our first draft the victim took both stakes and the betrayer drew at most 1 card. In 20,000 simulated games that made loyal players win 38% at a table of four, and betraying always a mistake. With these rules, loyal players win 28%, well-timed betrayers 26%, players who betray at every chance 21%, and players who never sign 25%. Keeping your word pays a little, betraying is a real gamble, and pacts are worth signing.</div>
-    <div class="evidence"><b>Tip:</b> short pacts beat long ones. Being locked in for 4 turns costs more than the extra bonus cards are worth.</div>
+    <p class="sub">A handshake truce without a stake is still allowed, as in normal Risk. It just isn't binding.</p>
   </section>
 
   <section class="card" id="events">
-    <h2>Century events <span class="status tested">tested</span></h2>
+    <h2>Century events</h2>
     <p>Each century is an era: its event changes how the game works for as long as the cavalry stays there. When the cavalry enters a new century, roll a die: 1-2 is the first event, 3-4 the second, 5-6 the third. Effects marked <b>At once</b> happen when the century begins; everything else lasts the whole century. Every century happens: a 6 just moves the cavalry on early, so that century is shorter. Losses never take a territory below 1 troop.</p>
-    <p>Events escalate and lean against the leader. Early centuries bring boons and small shocks, the middle ones change how fighting works, and late ones break up the leader's position. In 20,000 simulated games the full deck raises comebacks from 23% to 34% and shrinks the winning margin from 22 to 16 territories, without changing seat fairness.</p>
+    <p>Events escalate and lean against the leader. Early centuries bring boons and small shocks, the middle ones change how fighting works, and late ones break up the leader's position.</p>
     <p><b>The leader</b> is the player with the most territories at that moment (on a tie, the tied player earliest in turn order). <b>Defect:</b> the territory switches to the player with the fewest territories; remove its troops and place 1 of the new owner's troops there. No card is drawn for it. <b>Thinnest</b> means fewest troops; on a tie, the owner picks.</p>
-    <p class="sub">The 15th century has no events: reaching it ends the game. Each card shows what 20,000 simulated games say about it.</p>
+    <p class="sub">The 15th century has no events: reaching it ends the game.</p>
     <div class="how"><button class="roll" id="rollAll">Roll all centuries</button><span class="sub" id="rollNote">Or roll one century at a time.</span></div>
     <div class="centuries" id="deck"></div>
-    <h3>Escalation check</h3>
-    <p class="sub">Typical board when each century begins, 4 players, 20,000 simulated games with bots that keep a rear guard of 2. "Reached" is how often the game gets that far before it ends.</p>
-    <div class="tbl"><table><thead><tr><th>Century</th><th>Reached</th><th>Largest stack</th><th>3rd largest</th><th>Leader's territories</th><th>Event thresholds used</th></tr></thead><tbody id="esc"></tbody></table></div>
+    
   </section>
 </div>
 
@@ -188,7 +182,7 @@ deck.innerHTML=DECK.map(([c,yrs,ph,b,th,evs],ci)=>`<article class="century" id="
     <span class="t">${e[0]} <span class="sg ${sg[e[4]]}">${e[4]}</span></span>
     <span class="x">${e[1]}</span>
     <span class="chips"><span class="chip">${e[2]==="Century"?"Whole century":e[2]==="At once"?"At once":e[2]==="Final count"?"Final count":"At once + century"}</span><span class="chip kind">${e[3]}</span>${e[5].map(t=>`<span class="chip kind">${TARGET[t]}</span>`).join("")}</span>
-    <span class="h">${e[6]}</span>${verdict(e[7])}</div>`).join("")}</div></article>`).join("");
+    <span class="h">${e[6]}</span></div>`).join("")}</div></article>`).join("");
 
 function verdict(v){
   if(!v)return"";
@@ -205,5 +199,5 @@ function roll(ci){
 }
 deck.querySelectorAll("button.roll").forEach(b=>b.onclick=()=>roll(+b.dataset.c));
 document.getElementById("rollAll").onclick=()=>{DECK.forEach((_,i)=>roll(i));document.getElementById("rollNote").textContent="One event picked per century. Roll again for a new game."};
-document.getElementById("esc").innerHTML=DECK.map(([c,, ph,b,th])=>`<tr><td><span class="dot" style="background:var(${PHASE[ph][1]})"></span> ${c}</td><td class="num">${b[0]}%</td><td class="num">${b[1].toFixed(1)}</td><td class="num">${b[2].toFixed(1)}</td><td class="num">${b[3]}</td><td>${th}</td></tr>`).join("");
+void DECK.map(([c,, ph,b,th])=>`<tr><td><span class="dot" style="background:var(${PHASE[ph][1]})"></span> ${c}</td><td class="num">${b[0]}%</td><td class="num">${b[1].toFixed(1)}</td><td class="num">${b[2].toFixed(1)}</td><td class="num">${b[3]}</td><td>${th}</td></tr>`).join("");
 </script>

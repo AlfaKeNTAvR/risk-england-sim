@@ -12,6 +12,9 @@ pub enum DiceRule {
     /// chooses to roll 1 or 2 dice (here: the choice that maximises the
     /// defender's expected troop trade).
     DefenderSees,
+    /// House variant: attacker rolls first; the defender rolls one die, looks,
+    /// then decides whether to roll a second (bots use the exact best choice).
+    DefenderOneByOne,
 }
 
 /// Losses (attacker, defender) from comparing sorted-descending dice.
@@ -36,6 +39,8 @@ fn sorted_desc(v: &mut [u8]) {
 /// of defence dice (1 or 2). Built by exact enumeration.
 pub struct DefenderTable {
     best: Vec<u8>,
+    /// One-by-one rule: roll the second die? Indexed by key(attack) * 7 + first die.
+    second: Vec<bool>,
 }
 
 fn key(a: &[u8]) -> usize {
@@ -52,11 +57,15 @@ impl DefenderTable {
     pub fn get(&self, sorted_attack: &[u8]) -> u8 {
         self.best[key(sorted_attack)]
     }
+    pub fn roll_second(&self, sorted_attack: &[u8], first: u8) -> bool {
+        self.second[key(sorted_attack) * 7 + first as usize]
+    }
 }
 
 impl DefenderTable {
     pub fn build() -> Self {
         let mut best = vec![0u8; 4 * 343];
+        let mut second = vec![false; 4 * 343 * 7];
         for n in 1..=3usize {
             let mut idx = vec![1u8; n];
             loop {
@@ -80,6 +89,18 @@ impl DefenderTable {
                     }
                     ev2 /= 36.0;
                     best[key(&a)] = if ev2 > ev1 { 2 } else { 1 };
+                    for d1 in 1..=6u8 {
+                        let (x, y) = compare(&a, &[d1]);
+                        let stop = x as f64 - y as f64;
+                        let mut go = 0.0;
+                        for d2 in 1..=6u8 {
+                            let mut d = [d1, d2];
+                            sorted_desc(&mut d);
+                            let (x, y) = compare(&a, &d);
+                            go += x as f64 - y as f64;
+                        }
+                        second[key(&a) * 7 + d1 as usize] = go / 6.0 > stop;
+                    }
                 }
                 // increment odometer
                 let mut i = 0;
@@ -99,7 +120,7 @@ impl DefenderTable {
                 }
             }
         }
-        DefenderTable { best }
+        DefenderTable { best, second }
     }
 }
 
@@ -161,13 +182,25 @@ pub fn roll_mod(
                     1
                 }
             }
+            DiceRule::DefenderOneByOne => 0, // rolled below, one at a time
         }
     };
-    a[0] += m.att_plus;
     let mut d = [0u8; 3];
-    for x in d.iter_mut().take(nd) {
-        *x = rng.d6();
-    }
+    let nd = if nd == 0 {
+        d[0] = rng.d6();
+        if defenders >= 2 && table.roll_second(a, d[0]) {
+            d[1] = rng.d6();
+            2
+        } else {
+            1
+        }
+    } else {
+        for x in d.iter_mut().take(nd) {
+            *x = rng.d6();
+        }
+        nd
+    };
+    a[0] += m.att_plus; // after the defender's decisions, which see the plain dice
     let d = &mut d[..nd];
     sorted_desc(d);
     d[0] += m.def_plus;
