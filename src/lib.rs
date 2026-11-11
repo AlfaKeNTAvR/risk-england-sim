@@ -5,6 +5,7 @@ pub mod board;
 pub mod bot;
 pub mod cards;
 pub mod combat;
+pub mod events;
 pub mod game;
 pub mod rng;
 pub mod sim;

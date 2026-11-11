@@ -105,6 +105,25 @@ impl DefenderTable {
 
 /// One exchange of dice. `attackers` = committed attacking troops,
 /// `defenders` = troops in the defending territory.
+/// Dice changes from century events.
+#[derive(Clone, Copy, Debug)]
+pub struct Mods {
+    /// Most dice the attacker may roll (normally 3).
+    pub att_max: u32,
+    /// Added to the attacker's highest die.
+    pub att_plus: u8,
+    /// Added to the defender's highest die.
+    pub def_plus: u8,
+    /// Most dice the defender may roll (normally 2).
+    pub def_max: u32,
+}
+
+impl Default for Mods {
+    fn default() -> Self {
+        Mods { att_max: 3, att_plus: 0, def_plus: 0, def_max: 2 }
+    }
+}
+
 pub fn roll_once(
     rng: &mut Rng,
     attackers: u32,
@@ -112,29 +131,46 @@ pub fn roll_once(
     rule: DiceRule,
     table: &DefenderTable,
 ) -> (u32, u32) {
-    let na = attackers.min(3) as usize;
+    roll_mod(rng, attackers, defenders, rule, table, Mods::default())
+}
+
+pub fn roll_mod(
+    rng: &mut Rng,
+    attackers: u32,
+    defenders: u32,
+    rule: DiceRule,
+    table: &DefenderTable,
+    m: Mods,
+) -> (u32, u32) {
+    let na = attackers.min(m.att_max).clamp(1, 3) as usize;
     let mut a = [0u8; 3];
     for x in a.iter_mut().take(na) {
         *x = rng.d6();
     }
     let a = &mut a[..na];
     sorted_desc(a);
-    let nd = match rule {
-        DiceRule::Classic => defenders.min(2) as usize,
-        DiceRule::DefenderSees => {
-            if defenders >= 2 {
-                table.get(a) as usize
-            } else {
-                1
+    let nd = if m.def_max >= 3 {
+        defenders.min(3) as usize
+    } else {
+        match rule {
+            DiceRule::Classic => defenders.min(2) as usize,
+            DiceRule::DefenderSees => {
+                if defenders >= 2 {
+                    table.get(a) as usize
+                } else {
+                    1
+                }
             }
         }
     };
-    let mut d = [0u8; 2];
+    a[0] += m.att_plus;
+    let mut d = [0u8; 3];
     for x in d.iter_mut().take(nd) {
         *x = rng.d6();
     }
     let d = &mut d[..nd];
     sorted_desc(d);
+    d[0] += m.def_plus;
     compare(a, d)
 }
 

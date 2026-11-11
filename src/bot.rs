@@ -28,6 +28,12 @@ pub struct Strategy {
     pub flip: FlipPolicy,
     /// Share of new troops placed on the attack spearhead (rest defends).
     pub spearhead_share: f64,
+    /// Troops left behind when attacking out of a territory that still
+    /// borders enemies (human players keep a rear guard of about 2).
+    pub rear_guard: u32,
+    /// Before building the spearhead, top up thin frontier territories to
+    /// this many troops (uses at most a third of new troops).
+    pub frontier_min: u32,
 }
 
 impl Strategy {
@@ -38,6 +44,8 @@ impl Strategy {
         trade: TradePolicy::AtStars(6),
         flip: FlipPolicy::WhenBehind,
         spearhead_share: 0.7,
+        rear_guard: 2,
+        frontier_min: 2,
     };
     pub const AGGRESSIVE: Strategy = Strategy {
         name: "aggressive",
@@ -46,6 +54,8 @@ impl Strategy {
         trade: TradePolicy::AtStars(4),
         flip: FlipPolicy::Always,
         spearhead_share: 1.0,
+        rear_guard: 1,
+        frontier_min: 0,
     };
     pub const CAUTIOUS: Strategy = Strategy {
         name: "cautious",
@@ -54,6 +64,8 @@ impl Strategy {
         trade: TradePolicy::AtStars(6),
         flip: FlipPolicy::Never,
         spearhead_share: 0.4,
+        rear_guard: 3,
+        frontier_min: 3,
     };
     pub const HOARDER: Strategy = Strategy {
         name: "hoarder",

@@ -52,6 +52,7 @@ Standard library only (written in a sandbox without crates.io). Adding `rand`, `
 - `DiceRule::DefenderSees`: attacker rolls first; defender sees it, then chooses 1 or 2 dice (bots use the exact best choice).
 - `CardDraw::OnePerTurn`: classic Risk card draw, for comparison.
 - `Timeline::Off`: the rulebook's "no timeline" variation.
+- `EventMode::Deck` / `EventMode::Force(ev)`: century events (`src/events.rs`, text in `docs/house-rules.html`). Every century the cavalry lands on rolls one of its 3 events; it lasts until the cavalry moves. Pact events are no-ops until pacts exist.
 
 ### Bot simplifications (known gaps)
 - Missions are scored passively (bots get the bonus when they happen to meet one; they only mildly favour mission territories).
@@ -81,6 +82,18 @@ The official timeline ends mid-round, so earlier seats get more turns: seat 1 wi
 **Play styles**: aggressive 56%, balanced 30%, hoarder 13%, cautious 2%. Attack early and often is strongly favoured under card-per-capture.
 
 Win shares carry ±0.6 percentage points (95%).
+
+## Century events: first engagement report
+
+`cargo run --release --example event_report -- 20000` (4 players: balanced x2, aggressive, hoarder; bots keep a rear guard of 2).
+
+- A century lasts only about 0.6 rounds (2-3 turns): 10 centuries over ~6.2 rounds. "Whole century" effects get little time to act.
+- The game snowballs: from the 8th century on, the current leader wins 68-84% of games, and the final margin averages ~22 territories.
+- The full deck barely changes that: lead changes 1.58 → 1.63 per game, comebacks 23.1% → 24.6%.
+- Best "spice" (more comebacks): Shield walls +2.4 pp, Danegeld +2.3 pp, Underdog kings +2.2 pp, Good harvests +1.1 pp.
+- Events that help the leader instead: Magna Carta (leader toppled 7% vs 14%), Land grab, Viking raids, Great Heathen Army, Harrying of the North, Great Famine.
+- Troop-only losses (Black Death removes ~18 troops) don't change who leads: the winner is decided by territories, so an event only matters if it changes captures.
+- Several events show ~0 effect partly because bots ignore them (Roman roads, Offa's Dyke, Petty kingdoms, Brunanburh).
 
 ## Player-facing pages
 

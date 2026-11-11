@@ -8,8 +8,8 @@ use risk_england_sim::game::*;
 fn main() {
     let mut args = std::env::args().skip(1);
     let players: usize = args.next().map(|x| x.parse().unwrap()).unwrap_or(4);
-    let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(5000);
-    let pool = [Strategy::AGGRESSIVE, Strategy::BALANCED, Strategy::CAUTIOUS, Strategy::HOARDER, Strategy::BALANCED];
+    let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(20000);
+    let pool = [Strategy::BALANCED, Strategy::BALANCED, Strategy::AGGRESSIVE, Strategy::HOARDER, Strategy::BALANCED];
     let strats: Vec<Strategy> = pool[..players].to_vec();
     let cfg = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderSees, ..Config::default() };
     let sh = Shared::new();

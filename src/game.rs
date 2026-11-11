@@ -5,6 +5,7 @@ use crate::board::*;
 use crate::bot::*;
 use crate::cards::*;
 use crate::combat::*;
+use crate::events::*;
 use crate::rng::Rng;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -36,6 +37,8 @@ pub struct Config {
     pub powers: bool,
     pub missions: bool,
     pub max_rounds: u32,
+    /// House rule: century events.
+    pub events: EventMode,
 }
 
 impl Default for Config {
@@ -48,6 +51,7 @@ impl Default for Config {
             powers: true,
             missions: true,
             max_rounds: 300,
+            events: EventMode::Off,
         }
     }
 }
@@ -63,6 +67,8 @@ pub struct Shared {
     pub table: DefenderTable,
     pub jewel_tower: usize,
     pub mission_ids: Vec<Vec<usize>>, // territory ids for Hold missions
+    /// Ends of sea routes.
+    pub ports: [bool; N_TERR],
 }
 
 impl Shared {
@@ -74,7 +80,13 @@ impl Shared {
                 _ => Vec::new(),
             })
             .collect();
-        Shared { graph: Graph::build(), table: DefenderTable::build(), jewel_tower: id("Jewel Tower"), mission_ids }
+        let graph = Graph::build();
+        let mut ports = [false; N_TERR];
+        for &(a, b) in &graph.sea_routes {
+            ports[a] = true;
+            ports[b] = true;
+        }
+        Shared { graph, table: DefenderTable::build(), jewel_tower: id("Jewel Tower"), mission_ids, ports }
     }
 }
 
@@ -114,6 +126,8 @@ pub struct GameResult {
     pub players: Vec<PlayerStats>,
     /// Board state at the start of every round, for calibrating events.
     pub snapshots: Vec<Snapshot>,
+    /// Every century the cavalry landed on, in order.
+    pub centuries: Vec<CenturyLog>,
 }
 
 /// Board state at the start of a round.
@@ -130,6 +144,27 @@ pub struct Snapshot {
     pub leader_troops: u32,
     /// Average stars in hand per living player.
     pub hand_stars: f64,
+    /// Player with the most territories (lowest seat on a tie).
+    pub leader: usize,
+    pub territories: Vec<usize>,
+}
+
+/// A century the cavalry landed on, and what happened there.
+#[derive(Clone, Debug)]
+pub struct CenturyLog {
+    pub space: usize,
+    pub event: Option<Ev>,
+    pub round: u32,
+    /// Leader (most territories) when the century began.
+    pub leader: usize,
+    /// Leader's share of all territories when the century began.
+    pub leader_share: f64,
+    /// Troops removed by the event's immediate effect.
+    pub troops_lost_at_once: u32,
+    /// Territories per player when the century began (after the event).
+    pub territories: Vec<usize>,
+    /// Largest stack when the century began (before the event).
+    pub largest_stack: u32,
 }
 
 struct Player {
@@ -157,6 +192,9 @@ pub struct Game<'a> {
     jt_turns: u32,
     battles: u32,
     battles_won: u32,
+    event: Option<Ev>,
+    round: u32,
+    centuries: Vec<CenturyLog>,
 }
 
 impl<'a> Game<'a> {
@@ -225,7 +263,80 @@ impl<'a> Game<'a> {
             jt_turns: 0,
             battles: 0,
             battles_won: 0,
+            event: None,
+            round: 0,
+            centuries: Vec::new(),
         }
+    }
+
+    fn ev(&self, e: Ev) -> bool {
+        self.event == Some(e)
+    }
+
+    fn leader(&self) -> usize {
+        let n = self.players.len();
+        (0..n).max_by_key(|&p| (self.count(p), std::cmp::Reverse(p))).unwrap()
+    }
+
+    fn weakest(&self) -> Option<usize> {
+        let n = self.players.len();
+        (0..n).filter(|&p| self.players[p].alive).min_by_key(|&p| (self.count(p), p))
+    }
+
+    /// Lose troops on one territory, never below 1. Returns troops removed.
+    fn shrink(&mut self, t: usize, to: u32) -> u32 {
+        let to = to.max(1);
+        if self.troops[t] > to {
+            let lost = self.troops[t] - to;
+            self.troops[t] = to;
+            lost
+        } else {
+            0
+        }
+    }
+
+    /// The cavalry has landed on a new century: roll its event and apply any
+    /// immediate effect.
+    #[allow(clippy::needless_range_loop)] // indexes several per-territory arrays
+    fn begin_century(&mut self) {
+        let space = self.cavalry;
+        self.event = match self.cfg.events {
+            EventMode::Off => None,
+            EventMode::Deck => {
+                let slot = (self.rng.d6() as usize - 1) / 2;
+                Ev::of_space(space, slot)
+            }
+            EventMode::Force(e) => (e.space() == space).then_some(e),
+        };
+        let leader = self.leader();
+        let leader_share = self.count(leader) as f64 / N_TERR as f64;
+        let largest_stack = *self.troops.iter().max().unwrap();
+        let mut lost = 0;
+        if let Some(e) = self.event {
+            for t in 0..N_TERR {
+                let x = self.troops[t];
+                lost += match e {
+                    Ev::PlagueOfJustinian if x >= th::PLAGUE_6TH => self.shrink(t, x - 1),
+                    Ev::VikingRaids if self.sh.ports[t] => self.shrink(t, x.saturating_sub(2)),
+                    Ev::HardWinter if x >= th::WINTER_10TH => self.shrink(t, x - 2),
+                    Ev::HarryingOfTheNorth if TERRITORIES[t].region == Region::North => self.shrink(t, x - x / 2),
+                    Ev::CampFever if x >= th::FEVER_13TH => self.shrink(t, x - x / 3),
+                    Ev::BlackDeath => self.shrink(t, x - x / 3),
+                    _ => 0,
+                };
+            }
+        }
+        let territories = (0..self.players.len()).map(|p| self.count(p)).collect();
+        self.centuries.push(CenturyLog {
+            space,
+            event: self.event,
+            round: self.round,
+            leader,
+            leader_share,
+            troops_lost_at_once: lost,
+            territories,
+            largest_stack,
+        });
     }
 
     fn count(&self, p: usize) -> usize {
@@ -276,8 +387,8 @@ impl<'a> Game<'a> {
             if self.owner[src] != p || self.troops[src] < 2 {
                 continue;
             }
-            for &(dst, _) in &self.sh.graph.adj[src] {
-                if self.owner[dst] == p {
+            for &(dst, kind) in &self.sh.graph.adj[src] {
+                if self.owner[dst] == p || (kind == EdgeKind::Sea && self.ev(Ev::VikingRaids)) {
                     continue;
                 }
                 let ratio = (self.troops[src] - 1) as f64 / self.troops[dst] as f64;
@@ -312,6 +423,9 @@ impl<'a> Game<'a> {
     fn trade_cards(&mut self, p: usize) -> u32 {
         let TradePolicy::AtStars(threshold) = self.players[p].strat.trade;
         let mut gained = 0;
+        if self.ev(Ev::MagnaCarta) {
+            return 0;
+        }
         while self.hand_stars(p) >= threshold.max(2) {
             let hand = &self.players[p].hand;
             let ones = hand.iter().filter(|&&c| TERRITORIES[c].stars == 1).count() as u32;
@@ -441,6 +555,25 @@ impl<'a> Game<'a> {
             Some(s) => s,
             None => return,
         };
+        // Top up thin frontier territories first (at most a third of new troops).
+        let min = self.players[p].strat.frontier_min;
+        let mut budget = n / 3;
+        let mut n = n;
+        if min > 0 {
+            let mut thin: Vec<usize> = (0..N_TERR)
+                .filter(|&t| self.owner[t] == p && self.troops[t] < min && self.is_frontier(t))
+                .collect();
+            thin.sort_by(|&a, &b| self.threat(b).partial_cmp(&self.threat(a)).unwrap());
+            for t in thin {
+                let add = (min - self.troops[t]).min(budget);
+                self.troops[t] += add;
+                budget -= add;
+                n -= add;
+                if budget == 0 {
+                    break;
+                }
+            }
+        }
         let share = self.players[p].strat.spearhead_share;
         let on_spear = ((n as f64) * share).round() as u32;
         self.troops[spear] += on_spear;
@@ -477,9 +610,12 @@ impl<'a> Game<'a> {
             }
 
             // Commit troops: keep a guard back if src borders other enemies.
-            let avail = self.troops[src] - 1;
             let other_enemies = self.enemy_neighbours(src).any(|n| n != dst);
-            let mut attackers = if other_enemies { (avail * 2 / 3).max(avail.min(3)) } else { avail };
+            let guard = if other_enemies { strat.rear_guard.max(1).max(self.troops[src] / 4) } else { 1 };
+            if self.troops[src] <= guard {
+                break;
+            }
+            let mut attackers = self.troops[src] - guard;
             self.troops[src] -= attackers;
             let mut defenders = self.troops[dst];
 
@@ -496,11 +632,30 @@ impl<'a> Game<'a> {
             }
 
             self.battles += 1;
+            let river = self.sh.graph.edge(src, dst) == Some(EdgeKind::River);
+            let start_def = defenders;
+            let mut m = Mods::default();
+            if self.ev(Ev::ShieldWalls) {
+                m.att_max = 2;
+            }
+            if self.ev(Ev::GreatFloods) && river {
+                m.att_max = 1;
+            }
+            if self.ev(Ev::GreatHeathenArmy) {
+                m.att_plus = 1;
+            }
+            if self.ev(Ev::AlfredsBurhs) && start_def >= th::BURHS_9TH {
+                m.def_plus = 1;
+            }
+            if self.ev(Ev::NormanCastles) && start_def >= th::CASTLES_11TH {
+                m.def_max = 3;
+            }
+            let no_withdraw = self.ev(Ev::Brunanburh);
             while attackers > 0 && defenders > 0 {
-                if (attackers as f64) < strat.withdraw_ratio * defenders as f64 {
+                if !no_withdraw && (attackers as f64) < strat.withdraw_ratio * defenders as f64 {
                     break;
                 }
-                let (al, dl) = roll_once(&mut self.rng, attackers, defenders, self.cfg.dice, &self.sh.table);
+                let (al, dl) = roll_mod(&mut self.rng, attackers, defenders, self.cfg.dice, &self.sh.table, m);
                 attackers -= al.min(attackers);
                 defenders -= dl.min(defenders);
             }
@@ -552,8 +707,10 @@ impl<'a> Game<'a> {
                 }
                 continue;
             }
-            for &(v, _) in &self.sh.graph.adj[u] {
-                if self.owner[v] == p && dist[v] == u32::MAX {
+            for &(v, kind) in &self.sh.graph.adj[u] {
+                let blocked = (self.ev(Ev::HardWinter) && TERRITORIES[v].mountain)
+                    || (self.ev(Ev::GreatFloods) && kind == EdgeKind::River);
+                if self.owner[v] == p && dist[v] == u32::MAX && !blocked {
                     dist[v] = dist[u] + 1;
                     prev[v] = u;
                     queue.push_back(v);
@@ -572,7 +729,12 @@ impl<'a> Game<'a> {
         for w in path.windows(2) {
             let (u, v) = (w[0], w[1]);
             at = v;
-            if self.sh.graph.edge(u, v) == Some(EdgeKind::River) {
+            if self.ev(Ev::RomanRoads) {
+                continue; // roads: rivers and mountains don't stop the move
+            }
+            let river = self.sh.graph.edge(u, v) == Some(EdgeKind::River)
+                || (self.ev(Ev::OffasDyke) && TERRITORIES[u].region != TERRITORIES[v].region);
+            if river {
                 moving = moving.min(5);
                 break;
             }
@@ -599,8 +761,9 @@ impl<'a> Game<'a> {
         let ms = self.players[p].missions.clone();
         for m in ms {
             if self.mission_done(p, m) {
-                self.players[p].pending += MISSIONS[m].troops;
-                self.players[p].stats.mission_troops += MISSIONS[m].troops;
+                let bonus = MISSIONS[m].troops * if self.ev(Ev::AgeOfSaints) { 2 } else { 1 };
+                self.players[p].pending += bonus;
+                self.players[p].stats.mission_troops += bonus;
                 self.players[p].missions.retain(|&x| x != m);
             }
         }
@@ -609,15 +772,68 @@ impl<'a> Game<'a> {
     // --------------------------------------------------------------- turns
 
     fn take_turn(&mut self, p: usize) {
+        let is_leader = self.leader() == p;
+        // Start-of-turn century effects.
+        if self.ev(Ev::SupplyProblems) {
+            for t in 0..N_TERR {
+                if self.owner[t] == p && self.troops[t] >= th::SUPPLY_12TH {
+                    self.troops[t] -= 2;
+                }
+            }
+        }
+        if self.ev(Ev::PeasantsRevolt) && is_leader {
+            if let Some(t) = (0..N_TERR).filter(|&t| self.owner[t] == p).max_by_key(|&t| self.troops[t]) {
+                let x = self.troops[t];
+                self.shrink(t, x.saturating_sub(3));
+            }
+        }
+        let mut danegeld_troops = false;
+        if self.ev(Ev::Danegeld) && is_leader {
+            if let Some(w) = self.weakest().filter(|&w| w != p) {
+                // Cheapest card goes to the weakest player; no cards = 2 troops instead.
+                let hand = &self.players[p].hand;
+                if let Some(i) = (0..hand.len()).min_by_key(|&i| TERRITORIES[hand[i]].stars) {
+                    let c = self.players[p].hand.remove(i);
+                    self.players[w].hand.push(c);
+                } else {
+                    self.players[w].pending += 2;
+                    danegeld_troops = true;
+                }
+            }
+        }
+
         // 1. Place troops
-        let mut new = 3 + territory_bonus(self.count(p));
+        let base: u32 = if self.ev(Ev::SaxonMigration) {
+            5
+        } else if self.ev(Ev::GreatFamine) {
+            1
+        } else {
+            3
+        };
+        let mut new = base;
+        if !(self.ev(Ev::TheAnarchy) && is_leader) {
+            new += territory_bonus(self.count(p));
+        }
+        let region_mult = if self.ev(Ev::PettyKingdoms) || self.ev(Ev::OneKingdom) { 2 } else { 1 };
         for r in 0..N_REGIONS {
             if self.owns_region(p, r) {
-                new += Region::ALL[r].bonus();
+                new += Region::ALL[r].bonus() * region_mult;
             }
+            if self.ev(Ev::GoodHarvests) {
+                let mine = self.sh.graph.region_members[r].iter().filter(|&&t| self.owner[t] == p).count();
+                if mine >= 3 {
+                    new += 1;
+                }
+            }
+        }
+        if self.ev(Ev::UnderdogKings) && self.weakest() == Some(p) {
+            new += 3;
         }
         new += std::mem::take(&mut self.players[p].pending);
         new += self.trade_cards(p);
+        if danegeld_troops {
+            new = new.saturating_sub(2);
+        }
         if self.wants_flip(p) {
             new += self.flip_power(p);
         }
@@ -629,11 +845,20 @@ impl<'a> Game<'a> {
         }
         // 3. Manoeuvre
         self.manoeuvre(p);
+        if self.ev(Ev::RomanRoads) {
+            self.manoeuvre(p);
+        }
         // 4. Draw cards
-        let draws = match self.cfg.card_draw {
+        let mut draws = match self.cfg.card_draw {
             CardDraw::PerCapture => captures,
             CardDraw::OnePerTurn => captures.min(1),
         };
+        if self.ev(Ev::LandGrab) && captures > 0 {
+            draws += 1;
+        }
+        if self.ev(Ev::DomesdaySurvey) {
+            draws = draws.min(1);
+        }
         for _ in 0..draws {
             self.draw_card(p);
         }
@@ -656,8 +881,10 @@ impl<'a> Game<'a> {
         let mut rounds = 0;
         let ended_by;
         let mut snapshots = Vec::new();
+        self.begin_century();
         'game: loop {
             rounds += 1;
+            self.round = rounds;
             snapshots.push(self.snapshot(rounds));
             for p in 0..n {
                 if !self.players[p].alive {
@@ -688,6 +915,9 @@ impl<'a> Game<'a> {
                     ended_by = EndReason::Timeline;
                     break 'game;
                 }
+                if self.cavalry != self.centuries.last().map_or(usize::MAX, |c| c.space) {
+                    self.begin_century();
+                }
             }
             if self.cfg.timeline == Timeline::HousePace {
                 self.cavalry += 1;
@@ -695,6 +925,7 @@ impl<'a> Game<'a> {
                     ended_by = EndReason::Timeline;
                     break 'game;
                 }
+                self.begin_century();
             }
             if rounds >= self.cfg.max_rounds {
                 ended_by = EndReason::RoundLimit;
@@ -714,6 +945,7 @@ impl<'a> Game<'a> {
             battles_won: self.battles_won,
             players: self.players.into_iter().map(|pl| pl.stats).collect(),
             snapshots,
+            centuries: self.centuries,
         }
     }
 
@@ -728,7 +960,8 @@ impl<'a> Game<'a> {
             .unwrap_or(0);
         let alive: Vec<usize> = (0..n).filter(|&p| self.players[p].alive).collect();
         let hand_stars = alive.iter().map(|&p| self.hand_stars(p) as f64).sum::<f64>() / alive.len().max(1) as f64;
-        Snapshot { century: self.cavalry, round, stacks, leader_territories, leader_troops, hand_stars }
+        let territories: Vec<usize> = (0..n).map(|p| self.count(p)).collect();
+        Snapshot { century: self.cavalry, round, stacks, leader_territories, leader_troops, hand_stars, leader: self.leader(), territories }
     }
 }
 
