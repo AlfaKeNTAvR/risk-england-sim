@@ -88,7 +88,7 @@ button.roll:hover{background:var(--bg)}
         <tr><td>Power losses</td><td>Unclear</td><td>Only the flipper is hit, never below 1 troop</td></tr>
         <tr><td>Jewel Tower mission</td><td>"Hold for 3 turns"</td><td>3 turns in total, anyone's turns count</td></tr>
         <tr><td>Alliances</td><td>Not covered</td><td>Card-staked pacts</td></tr>
-        <tr><td>Events</td><td>None</td><td>One historical event per century</td></tr>
+        <tr><td>Events</td><td>None</td><td>One era-wide event per century, escalating</td></tr>
       </tbody>
     </table></div>
   </section>
@@ -157,75 +157,74 @@ button.roll:hover{background:var(--bg)}
 
   <section class="card" id="events">
     <h2>Century events <span class="status untested">not yet simulated</span></h2>
-    <p>Each time the cavalry enters a new century, including the 5th at the start, roll a die: 1-2 is the first event, 3-4 the second, 5-6 the third. The effect lasts until the cavalry moves again. A century skipped by a 6 has no event. "Troops" are placed by the holder; losses never take a territory below 1.</p>
+    <p>Each century is an era: its event changes how the game works for as long as the cavalry stays there. When the cavalry enters a new century, roll a die: 1-2 is the first event, 3-4 the second, 5-6 the third. Effects marked <b>At once</b> happen when the century begins; everything else lasts the whole century. A century skipped by a 6 has no event. Losses never take a territory below 1 troop.</p>
+    <p>Events escalate. Early centuries bring boons and small shocks, the middle ones change how fighting works, and late ones punish big armies and the leader. Thresholds come from the simulator: the typical largest stack when each century begins.</p>
+    <p class="sub">The 15th century has no events: reaching it ends the game.</p>
     <div class="how"><button class="roll" id="rollAll">Roll all centuries</button><span class="sub" id="rollNote">Or roll one century at a time.</span></div>
     <div class="centuries" id="deck"></div>
-    <h3>Balance check</h3>
-    <p class="sub">How often each region is named across all 33 events. Plus helps whoever holds it, minus hurts, neutral changes how fighting works there. Events for every region count once under "all".</p>
-    <div class="tbl"><table class="coverage"><thead><tr><th>Region</th><th>Events</th><th>Plus</th><th>Minus</th><th>Neutral</th></tr></thead><tbody id="cov"></tbody></table></div>
+    <h3>Escalation check</h3>
+    <p class="sub">Typical board when each century begins, 4 players (5,000 simulated games). "Reached" is how often the cavalry lands on it instead of skipping it on a 6.</p>
+    <div class="tbl"><table><thead><tr><th>Century</th><th>Reached</th><th>Largest stack</th><th>3rd largest</th><th>Leader's territories</th><th>Event thresholds used</th></tr></thead><tbody id="esc"></tbody></table></div>
   </section>
 </div>
 
 <script>
-const R={N:["North","--north"],M:["Midlands","--mid"],E:["East Anglia","--ea"],S:["South East","--se"],W:["West Country","--wc"],A:["All regions","--all"]};
-// [title, effect, regions[], sign (+,-,0), kind, history]
+const PHASE={early:["Early","--good"],mid:["Middle","--ea"],late:["Late","--bad"]};
+const TARGET={all:"Everyone",leader:"The leader",weak:"The weakest",stacks:"Big stacks",ports:"Port territories",north:"The North",borders:"Region borders",rivers:"River crossings"};
+// century, years, phase, typical board [reached %, largest, 3rd, leader terr], thresholds note, events: [title, effect, timing, kind, sign, targets[], history]
 const DECK=[
-["5th","410-499",[
- ["Saxon landings","Each player who holds a territory in East Anglia places 2 troops there.",["E"],"+","Troops","Saxon settlers arrive on the east coast."],
- ["Bitter winter in the North","Attacks from North territories roll at most 2 dice. No manoeuvres into North mountains (Carlisle, Brougham, Cliffords).",["N"],"0","Limit","With Rome gone, the northern frontier freezes and empties."],
- ["Legend of Arthur","Whoever holds Tintagel places 3 troops there.",["W"],"+","Troops","The legend of a British war leader grows in the west."]]],
-["6th","500-599",[
- ["Plague of Justinian","Every territory with 6 or more troops loses 2.",["A"],"-","Troops","A pandemic reaches Britain from the Mediterranean."],
- ["Kingdoms take shape","Anyone holding a complete region gets 2 extra troops on their next turn.",["A"],"+","Troops","Rival kingdoms settle their borders."],
- ["Augustine lands in Kent","Whoever holds Dover draws 1 territory card.",["S"],"+","Cards","Missionaries arrive from Rome in 597."]]],
-["7th","600-699",[
- ["Rise of Mercia","Each player gets 1 troop per Midlands territory held, at most 3, placed in the Midlands.",["M"],"+","Troops","Mercia becomes the strongest kingdom in the middle of England."],
- ["Synod of Whitby","Truce in the North: no attacks into North territories this century.",["N"],"0","Limit","The church gathers at Whitby in 664."],
- ["Scriptoria flourish","Every player draws 1 territory card.",["A"],"+","Cards","Monasteries copy books across the land."]]],
-["8th","700-799",[
- ["Offa's Dyke","Every border between the Midlands and the West Country counts as a river crossing this century.",["M","W"],"0","Movement","King Offa builds a great earthwork along the western border."],
- ["Raid on Lindisfarne","Dunstanburgh, Barnard and Cliffords each lose 2 troops.",["N"],"-","Troops","The first Viking raid strikes the north-east coast in 793."],
- ["Good harvest","Every player gains 2 troops on their next turn.",["A"],"+","Troops","Full barns across England."]]],
-["9th","800-899",[
- ["Great Heathen Army","Attacks into East Anglia add 1 to the attacker's highest die.",["E"],"-","Dice","A Viking army lands in East Anglia in 865."],
- ["Alfred holds Wessex","Defenders in the West Country add 1 to their highest die.",["W"],"+","Dice","Alfred retreats to the marshes and strikes back."],
- ["Danegeld","Every player discards 1 territory card, or loses 2 troops from one territory.",["A"],"-","Cards","Kingdoms pay the Danes to go away."]]],
-["10th","900-999",[
- ["England united","The player with the most territories places 3 troops.",["A"],"+","Troops","Æthelstan becomes the first king of all England in 927."],
- ["Battle of Brunanburh","Each player gets 1 troop per North territory held, at most 3, placed in the North.",["N"],"+","Troops","A great victory over the northern alliance in 937."],
- ["Burhs fortified","Each player places 1 troop on each of up to 2 of their South East territories.",["S"],"+","Troops","Fortified towns guard the south."]]],
-["11th","1000-1099",[
- ["Norman Conquest","Whoever holds Battle places 4 troops there.",["S"],"+","Troops","William wins at Hastings in 1066, on the site of Battle Abbey."],
- ["Harrying of the North","Every North territory with 4 or more troops loses half, rounded down.",["N"],"-","Troops","William lays waste to the north in 1069-70."],
- ["Domesday survey","This century, draw at most 2 territory cards per turn.",["A"],"0","Cards","Every holding in England is counted in 1086."]]],
-["12th","1100-1199",[
- ["The Anarchy","No new pacts this century. Pacts already signed continue.",["A"],"0","Diplomacy","Civil war between Stephen and Matilda."],
- ["Stone keeps","Attacks into the Midlands roll at most 2 dice.",["M"],"+","Limit","Timber castles are rebuilt in stone."],
- ["Great floods","No manoeuvres across rivers. Attacks across a river crossing roll at most 2 dice.",["N","M","E","S"],"0","Movement","Rivers burst their banks."]]],
-["13th","1200-1299",[
- ["Magna Carta","No card trading this century.",["A"],"0","Cards","The barons force the king to seal the charter in 1215."],
- ["Siege of Kenilworth","Whoever holds Kenilworth places 3 troops there. Its defenders add 1 to their highest die.",["M"],"+","Dice","The longest siege in English history, 1266."],
- ["Wool boom","Each player gets 1 troop per East Anglia territory held, at most 3, placed in East Anglia.",["E"],"+","Troops","East Anglian wool makes the region rich."]]],
-["14th","1300-1399",[
- ["Black Death","Every territory with 6 or more troops loses 3.",["A"],"-","Troops","The plague kills a third of England from 1348."],
- ["Peasants' Revolt","Colchester, Dover and Jewel Tower each lose 2 troops.",["S","E"],"-","Troops","Rebels from Essex and Kent march on London in 1381."],
- ["Welsh longbowmen","Defenders in the West Country add 1 to their highest die.",["W"],"+","Dice","The longbow becomes the decisive weapon."]]],
-["15th","1400-1485",[
- ["Wars of the Roses","Every player places 2 troops, then must attack at least once. Attackers may not withdraw this century.",["A"],"0","Limit","York and Lancaster fight for the crown."],
- ["Bosworth Field","Whoever holds Bosworth draws 2 territory cards.",["M"],"+","Cards","Richard III falls in 1485, ending the Middle Ages."],
- ["Printing press","Every player draws 1 territory card and may trade at once.",["A"],"+","Cards","Caxton prints the first book in England in 1476."]]]
+["5th","410-499","early",[100,2.0,2.0,11],"none",[
+ ["Saxon migration","Every player gets 2 extra troops at the start of each turn.","Century","Troops","+",["all"],"Settlers pour across the North Sea as Rome leaves."],
+ ["Roman roads","You may make 2 manoeuvres per turn, and rivers and mountains don't stop them.","Century","Movement","+",["all"],"The old roads still connect the land."],
+ ["Land grab","Your first conquest each turn draws 2 territory cards instead of 1.","Century","Cards","+",["all"],"With no one in charge, land goes to whoever takes it."]]],
+["6th","500-599","early",[49,3.6,2.6,12.5],"4+",[
+ ["Petty kingdoms","Holding a complete region pays double its region bonus.","Century","Troops","+",["all"],"Small kingdoms fight over every valley."],
+ ["Plague of Justinian","Every territory with 4 or more troops loses 1.","At once","Troops","−",["stacks"],"A pandemic reaches Britain from the Mediterranean."],
+ ["Age of saints","Mission bonuses are doubled.","Century","Missions","+",["all"],"Missionaries and monks spread across the land."]]],
+["7th","600-699","early",[61,4.2,2.8,13.4],"none",[
+ ["Shield walls","Attackers roll at most 2 dice.","Century","Combat","±",["all"],"Battles are fought shield to shield."],
+ ["Peace of the Church","Pacts can't be broken, and pacts signed this century pay 1 extra bonus card.","Century","Diplomacy","+",["all"],"The Synod of Whitby brings the kingdoms together in 664."],
+ ["Underdog kings","At the start of each turn, the player with the fewest territories gets 3 extra troops.","Century","Troops","+",["weak"],"Small kingdoms rise while great ones squabble."]]],
+["8th","700-799","mid",[60,5.3,3.1,15.1],"ports",[
+ ["Viking raids","Every port territory loses 2 troops at once. No attacks along sea routes this century.","Both","Movement","−",["ports"],"The first raid hits Lindisfarne in 793."],
+ ["Offa's Dyke","Every border between two regions counts as a river crossing for manoeuvres.","Century","Movement","±",["borders"],"Kings mark their borders with earthworks."],
+ ["Good harvests","At the start of each turn, get 1 extra troop for every region where you hold 3 or more territories.","Century","Troops","+",["all"],"Full barns across England."]]],
+["9th","800-899","mid",[60,7.7,3.6,17.3],"5+",[
+ ["Great Heathen Army","Attackers add 1 to their highest die.","Century","Combat","±",["all"],"A Viking army lands in 865 and marches inland."],
+ ["Danegeld","At the start of each turn, the player with the most territories gives 1 territory card of their choice to the player with the fewest.","Century","Cards","−",["leader"],"The strong pay the Danes to go away."],
+ ["Alfred's burhs","Defenders add 1 to their highest die in territories with 5 or more troops.","Century","Combat","±",["stacks"],"Fortified towns hold out against the raiders."]]],
+["10th","900-999","mid",[60,10.8,4.6,19.5],"8+",[
+ ["One kingdom","Region bonuses are doubled.","Century","Troops","+",["all"],"Æthelstan becomes king of all England in 927."],
+ ["Battle of Brunanburh","Attackers may not withdraw: every attack is fought to the end.","Century","Combat","±",["all"],"The great slaughter of 937."],
+ ["Hard winter","Every territory with 8 or more troops loses 2 at once. No manoeuvres into mountain territories this century.","Both","Troops","−",["stacks"],"Snow closes the passes."]]],
+["11th","1000-1099","mid",[61,14.4,5.9,21.4],"6+",[
+ ["Norman castles","Defending a territory with 6 or more troops, the defender may roll 3 dice.","Century","Combat","±",["stacks"],"Castles rise across the conquered land after 1066."],
+ ["Harrying of the North","Every North territory loses half its troops at once, rounded down.","At once","Troops","−",["north"],"William lays waste to the north in 1069-70."],
+ ["Domesday survey","Draw at most 1 territory card per turn, however many territories you conquer.","Century","Cards","−",["all"],"Every holding in England is counted in 1086."]]],
+["12th","1100-1199","late",[59,17.9,7.3,22.7],"10+",[
+ ["The Anarchy","The player with the most territories gets no bonus from the territory chart.","Century","Troops","−",["leader"],"Civil war between Stephen and Matilda."],
+ ["Great floods","No manoeuvres across rivers. Attacks across a river crossing roll at most 1 die.","Century","Movement","±",["rivers"],"Rivers burst their banks."],
+ ["Supply problems","At the start of your turn, each of your territories with 10 or more troops loses 2.","Century","Troops","−",["stacks"],"Great armies can't be fed."]]],
+["13th","1200-1299","late",[57,21.5,8.9,23.6],"12+",[
+ ["Magna Carta","No card trading this century.","Century","Cards","−",["all"],"The barons force the king to seal the charter in 1215."],
+ ["Barons' War","All pacts end at once: stakes go back, no bonus cards. No new pacts this century.","Both","Diplomacy","−",["all"],"Simon de Montfort leads the barons against the king."],
+ ["Camp fever","Every territory with 12 or more troops loses a third, rounded down.","At once","Troops","−",["stacks"],"Disease spreads through crowded siege camps."]]],
+["14th","1300-1399","late",[54,24.3,10.4,24.1],"all, leader",[
+ ["Black Death","Every territory loses a third of its troops at once, rounded down.","At once","Troops","−",["all"],"The plague kills a third of England from 1348."],
+ ["Great Famine","Every player gets 1 troop instead of 3 at the start of each turn.","Century","Troops","−",["all"],"Years of rain and failed harvests from 1315."],
+ ["Peasants' Revolt","At the start of each of their turns, the player with the most territories loses 3 troops from their largest stack.","Century","Troops","−",["leader"],"Rebels march on London in 1381."]]]
 ];
 
 const deck=document.getElementById("deck");
-const signTxt={"+":["plus","+"],"-":["minus","−"],"0":["zero","±"]};
-deck.innerHTML=DECK.map(([c,yrs,evs],ci)=>`<article class="century" id="c${ci}">
-  <div class="chead"><span><span class="cname">${c} century</span> <span class="cyears">${yrs}</span></span><button class="roll" data-c="${ci}">Roll</button></div>
+const sg={"+":"plus","−":"minus","±":"zero"};
+deck.innerHTML=DECK.map(([c,yrs,ph,b,th,evs],ci)=>`<article class="century" id="c${ci}">
+  <div class="chead"><span><span class="cname">${c} century</span> <span class="cyears">${yrs}</span> <span class="chip" style="margin-left:6px"><span class="dot" style="background:var(${PHASE[ph][1]})"></span>${PHASE[ph][0]}</span></span><button class="roll" data-c="${ci}">Roll</button></div>
   <div class="events">${evs.map((e,ei)=>`<div class="ev" data-e="${ei}">
     <span class="die">${["1-2","3-4","5-6"][ei]}</span>
-    <span class="t">${e[0]} <span class="sg ${signTxt[e[3]][0]}">${signTxt[e[3]][1]}</span></span>
+    <span class="t">${e[0]} <span class="sg ${sg[e[4]]}">${e[4]}</span></span>
     <span class="x">${e[1]}</span>
-    <span class="chips">${e[2].map(r=>`<span class="chip"><span class="dot" style="background:var(${R[r][1]})"></span>${R[r][0]}</span>`).join("")}<span class="chip kind">${e[4]}</span></span>
-    <span class="h">${e[5]}</span></div>`).join("")}</div></article>`).join("");
+    <span class="chips"><span class="chip">${e[2]==="Century"?"Whole century":e[2]==="At once"?"At once":"At once + century"}</span><span class="chip kind">${e[3]}</span>${e[5].map(t=>`<span class="chip kind">${TARGET[t]}</span>`).join("")}</span>
+    <span class="h">${e[6]}</span></div>`).join("")}</div></article>`).join("");
 
 function roll(ci){
   const d=1+Math.floor(Math.random()*6), pick=Math.floor((d-1)/2);
@@ -234,8 +233,5 @@ function roll(ci){
 }
 deck.querySelectorAll("button.roll").forEach(b=>b.onclick=()=>roll(+b.dataset.c));
 document.getElementById("rollAll").onclick=()=>{DECK.forEach((_,i)=>roll(i));document.getElementById("rollNote").textContent="One event picked per century. Roll again for a new game."};
-
-const cov={};for(const k in R)cov[k]={n:0,"+":0,"-":0,"0":0};
-DECK.forEach(([, ,evs])=>evs.forEach(e=>e[2].forEach(r=>{cov[r].n++;cov[r][e[3]]++})));
-document.getElementById("cov").innerHTML=Object.keys(R).map(k=>`<tr><td class="r"><span class="dot" style="background:var(${R[k][1]})"></span> ${R[k][0]}</td><td class="num">${cov[k].n}</td><td class="num">${cov[k]["+"]}</td><td class="num">${cov[k]["-"]}</td><td class="num">${cov[k]["0"]}</td></tr>`).join("");
+document.getElementById("esc").innerHTML=DECK.map(([c,, ph,b,th])=>`<tr><td><span class="dot" style="background:var(${PHASE[ph][1]})"></span> ${c}</td><td class="num">${b[0]}%</td><td class="num">${b[1].toFixed(1)}</td><td class="num">${b[2].toFixed(1)}</td><td class="num">${b[3]}</td><td>${th}</td></tr>`).join("");
 </script>

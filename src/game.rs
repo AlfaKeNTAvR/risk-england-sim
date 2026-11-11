@@ -112,6 +112,24 @@ pub struct GameResult {
     pub battles: u32,
     pub battles_won: u32,
     pub players: Vec<PlayerStats>,
+    /// Board state at the start of every round, for calibrating events.
+    pub snapshots: Vec<Snapshot>,
+}
+
+/// Board state at the start of a round.
+#[derive(Clone, Debug)]
+pub struct Snapshot {
+    /// Timeline space (0 = 5th century ... 10 = 15th).
+    pub century: usize,
+    pub round: u32,
+    /// All stacks, sorted descending.
+    pub stacks: Vec<u32>,
+    /// Territories held by the leading player.
+    pub leader_territories: usize,
+    /// Total troops of the largest army.
+    pub leader_troops: u32,
+    /// Average stars in hand per living player.
+    pub hand_stars: f64,
 }
 
 struct Player {
@@ -637,8 +655,10 @@ impl<'a> Game<'a> {
         let mut turns = 0;
         let mut rounds = 0;
         let ended_by;
+        let mut snapshots = Vec::new();
         'game: loop {
             rounds += 1;
+            snapshots.push(self.snapshot(rounds));
             for p in 0..n {
                 if !self.players[p].alive {
                     continue;
@@ -693,7 +713,22 @@ impl<'a> Game<'a> {
             battles: self.battles,
             battles_won: self.battles_won,
             players: self.players.into_iter().map(|pl| pl.stats).collect(),
+            snapshots,
         }
+    }
+
+    fn snapshot(&self, round: u32) -> Snapshot {
+        let mut stacks: Vec<u32> = self.troops.to_vec();
+        stacks.sort_unstable_by(|a, b| b.cmp(a));
+        let n = self.players.len();
+        let leader_territories = (0..n).map(|p| self.count(p)).max().unwrap_or(0);
+        let leader_troops = (0..n)
+            .map(|p| (0..N_TERR).filter(|&t| self.owner[t] == p).map(|t| self.troops[t]).sum::<u32>())
+            .max()
+            .unwrap_or(0);
+        let alive: Vec<usize> = (0..n).filter(|&p| self.players[p].alive).collect();
+        let hand_stars = alive.iter().map(|&p| self.hand_stars(p) as f64).sum::<f64>() / alive.len().max(1) as f64;
+        Snapshot { century: self.cavalry, round, stacks, leader_territories, leader_troops, hand_stars }
     }
 }
 

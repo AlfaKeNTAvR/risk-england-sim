@@ -88,6 +88,6 @@ Win shares carry ±0.6 percentage points (95%).
 
 ## Roadmap
 1. **Alliance pacts**: stake 1 card each for 1-2 turns, 2 each for 3-4 turns, max 2 per player; honoured pact returns stakes plus bonus cards = turns − 1 (cap 3); one pact at a time; length counted in turns, min 1 turn each, renewal allowed; betrayer gets at most 1 card that turn, victim takes the stake pile, betrayer is an oathbreaker (no pacts) until the next century.
-2. **Century events**: one event per century from a per-century deck, balanced so every region is hit about equally; types: troop gain/loss, dice modifiers, attack caps, no retreat, river/fort/movement restrictions, card caps and trades.
+2. **Century events**: era-wide modifiers, 3 per century for the 5th-14th (the 15th ends the game), listed in `docs/house-rules.html`. They escalate: early boons, middle combat/movement changes, late punishments for big stacks and the leader. Stack thresholds were calibrated with `cargo run --release --example stacks_by_century -- 4 5000` (board state when each century begins). Note: with house pace, each century is reached only ~55-60% of the time (a 6 skips it), so ~6 events fire per game.
 3. Bots that pursue missions, and a betrayal-aware diplomacy bot.
 4. Sweep tools: grid over a parameter (e.g. card chart, timeline length), CSV output, charts.
