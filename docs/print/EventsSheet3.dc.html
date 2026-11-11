@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Event cards, 11th to 13th century</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=IM+Fell+English:ital@0;1&amp;family=EB+Garamond:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 42px 60px; background: #ffffff; font-family: 'EB Garamond', Georgia, serif; color: #2f241a">
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 696px; height: 972px">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="9">
+      <div style="width: 232px; height: 324px; box-sizing: border-box; border: 1px solid #8a7356; background: #f6ecd6; display: flex; flex-direction: column">
+        <div style="height: 42px; flex-shrink: 0; background: {{c.band}}; color: #fff8ea; display: flex; align-items: center; justify-content: space-between; padding: 0 12px">
+          <div style="display: flex; align-items: baseline; gap: 7px">
+            <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 24px; line-height: 1">{{c.rom}}</span>
+            <span style="font-size: 12px; opacity: 0.95">{{c.years}}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 5px; background: #fff8ea; color: #2f241a; border-radius: 4px; padding: 2px 7px">
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="1" y="1" width="12" height="12" rx="2.5" fill="none" stroke="#2f241a" stroke-width="1.3"></rect><circle cx="4.5" cy="4.5" r="1.1" fill="#2f241a"></circle><circle cx="9.5" cy="9.5" r="1.1" fill="#2f241a"></circle></svg>
+            <span style="font-size: 15px; font-weight: 600">{{c.die}}</span>
+          </div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 7px; padding: 11px 13px 10px">
+          <div style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 21px; line-height: 1.05; color: #2f241a">{{c.title}}</div>
+          <div style="display: flex"><span style="font-size: 12px; letter-spacing: 0.04em; border: 1px solid #8a7356; border-radius: 99px; padding: 0 8px; color: #5a4632">{{c.timing}}</span></div>
+          <div style="font-size: 15px; line-height: 1.28">{{c.effect}}</div>
+          <div style="margin-top: auto; border-top: 1px solid #c9b48c; padding-top: 6px; font-family: 'IM Fell English', Georgia, serif; font-style: italic; font-size: 12px; line-height: 1.25; color: #5a4632">{{c.hist}}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var mid = '#7d5a12';
+    var late = '#8e2424';
+    var c = function (band, rom, years, die, title, timing, effect, hist) {
+      return { band: band, rom: rom, years: years, die: die, title: title, timing: timing, effect: effect, hist: hist };
+    };
+    return {
+      cards: [
+        c(mid, 'XI', '1000–1099', '1–2', 'Norman castles', 'Whole century', 'Defending a territory with 5 or more troops, the defender may roll 3 dice.', 'Castles rise across the conquered land after 1066.'),
+        c(mid, 'XI', '1000–1099', '3–4', 'Harrying of the North', 'At once', 'The leader’s North territories lose half their troops, rounded down.', 'William lays waste to the north in 1069–70.'),
+        c(mid, 'XI', '1000–1099', '5–6', 'Domesday survey', 'Whole century', 'The leader draws at most 1 territory card per turn, however many territories they conquer.', 'Every holding is counted in 1086, and the greatest pay most.'),
+        c(late, 'XII', '1100–1199', '1–2', 'The Anarchy', 'At once', 'The leader’s 2 thinnest territories defect to the player with the fewest territories.', 'Civil war between Stephen and Matilda; lords switch sides.'),
+        c(late, 'XII', '1100–1199', '3–4', 'Great floods', 'Whole century', 'No manoeuvres across rivers. Attacks across a river crossing roll at most 1 die.', 'Rivers burst their banks.'),
+        c(late, 'XII', '1100–1199', '5–6', 'Supply problems', 'Whole century', 'At the start of the leader’s turn, each of their territories with 5 or more troops loses a third, rounded down.', 'The greatest armies can’t be fed.'),
+        c(late, 'XIII', '1200–1299', '1–2', 'Magna Carta', 'Whole century', 'The leader can’t trade cards this century.', 'The barons force the king to seal the charter in 1215.'),
+        c(late, 'XIII', '1200–1299', '3–4', 'Barons’ War', 'At once + century', 'All pacts end: stakes go back, no bonus cards. No new pacts this century.', 'Simon de Montfort leads the barons against the king.'),
+        c(late, 'XIII', '1200–1299', '5–6', 'Camp fever', 'At once', 'The leader’s largest stack loses half its troops, rounded down.', 'Disease spreads through the biggest siege camp.')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

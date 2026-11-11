@@ -121,7 +121,9 @@ Mixed table (one of each), win share, ±0.6:
 
 ## Player-facing pages
 
-`docs/house-rules.html` (house rules with a rollable century event deck, 33 events) and `docs/board-graph.html` (interactive board graph) are the pages the group uses at the table. Keep them in sync with the engine when rules change.
+`docs/house-rules.html` (house rules with a rollable century event deck, 30 events) and `docs/board-graph.html` (interactive board graph) are the pages the group uses at the table. Keep them in sync with the engine when rules change.
+
+`docs/print/` holds the printable table pieces (sources of the "Medieval England Table Pieces" design canvas, letter size): 4 sheets of century event cards (2.4 x 3.4 in), three diplomacy options (two cut-out pact charters, a full diplomacy board, or seal tokens only), and a two-sided house rules reference. Event card text and pact rules must match `src/events.rs` and `PactRules::default()`.
 
 ## Roadmap
 1. ~~Alliance pacts~~ done (see above).

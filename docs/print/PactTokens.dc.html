@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Pact seal tokens</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=IM+Fell+English:ital@0;1&amp;family=EB+Garamond:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 60px 72px; background: #ffffff; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 36px">
+  <div style="display: flex; flex-direction: column; gap: 4px">
+    <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 30px; line-height: 1; color: #5b5a8e">Option 3: seal tokens only</span>
+    <span style="font-size: 16px; line-height: 1.4">Smallest footprint. Each signer keeps a seal in front of them with the stake cards tucked under it. Turn the seal so the number at the top shows the turns still to go.</span>
+  </div>
+
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 24px; justify-items: center">
+    <sc-for list="{{seals}}" as="s" hint-placeholder-count="4">
+      <div style="position: relative; width: 144px; height: 144px; border-radius: 50%; border: 3px double #5b5a8e; outline: 1px dashed #8a7356; outline-offset: 6px; background: #f3e7cf; box-sizing: border-box">
+        <span style="position: absolute; top: 6px; left: 0; right: 0; text-align: center; font-size: 16px; font-weight: 600">1</span>
+        <span style="position: absolute; right: 9px; top: 0; bottom: 0; display: flex; align-items: center; font-size: 16px; font-weight: 600">2</span>
+        <span style="position: absolute; bottom: 6px; left: 0; right: 0; text-align: center; font-size: 16px; font-weight: 600">3</span>
+        <span style="position: absolute; left: 9px; top: 0; bottom: 0; display: flex; align-items: center; font-size: 16px; font-weight: 600">4</span>
+        <div style="position: absolute; inset: 30px; border-radius: 50%; background: #5b5a8e; color: #fff8ea; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0">
+          <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 15px; line-height: 1">Pact</span>
+          <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 34px; line-height: 1">{{s.num}}</span>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="display: flex; gap: 40px; align-items: center; justify-content: center">
+    <sc-for list="{{oaths}}" as="o" hint-placeholder-count="2">
+      <div style="width: 144px; height: 144px; border-radius: 50%; border: 2.5px solid #8e2424; outline: 1px dashed #8a7356; outline-offset: 6px; background: #f3e7cf; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center">
+        <svg width="40" height="34" viewBox="0 0 40 34" aria-hidden="true"><circle cx="20" cy="17" r="14" fill="none" stroke="#8e2424" stroke-width="2"></circle><path d="M22 2 L16 15 L23 19 L17 32" fill="none" stroke="#8e2424" stroke-width="2.2"></path></svg>
+        <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 18px; line-height: 1; color: #8e2424">Oathbreaker</span>
+        <span style="font-size: 12px; color: #5a4632; line-height: 1.1">no pacts until<br>the cavalry moves</span>
+      </div>
+    </sc-for>
+  </div>
+
+  <div style="align-self: center; width: 504px; box-sizing: border-box; border: 1.5px solid #5a4632; outline: 1px dashed #8a7356; outline-offset: 6px; background: #f3e7cf; padding: 14px 18px; display: flex; flex-direction: column; gap: 6px">
+    <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 22px; line-height: 1; color: #5b5a8e">Pacts in brief</span>
+    <div style="font-size: 15px; line-height: 1.32"><b>Sign:</b> agree 1–4 turns each. Stake 1 card each for 1–2 turns, 2 cards each for 3–4 turns. One pact per player.</div>
+    <div style="font-size: 15px; line-height: 1.32"><b>Kept:</b> stakes back, plus (turns − 1) bonus cards each, at most 3.</div>
+    <div style="font-size: 15px; line-height: 1.32"><b>Broken:</b> the victim takes back their stake; the betrayer's is discarded and they take an oathbreaker seal.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      seals: [{ num: 'I' }, { num: 'I' }, { num: 'II' }, { num: 'II' }],
+      oaths: [{ id: 1 }, { id: 2 }]
+    };
+  }
+}
+</script>
+</body>
+</html>

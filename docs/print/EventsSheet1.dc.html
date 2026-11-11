@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Event cards, 5th to 7th century</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=IM+Fell+English:ital@0;1&amp;family=EB+Garamond:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 42px 60px; background: #ffffff; font-family: 'EB Garamond', Georgia, serif; color: #2f241a">
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); width: 696px; height: 972px">
+    <sc-for list="{{cards}}" as="c" hint-placeholder-count="9">
+      <div style="width: 232px; height: 324px; box-sizing: border-box; border: 1px solid #8a7356; background: #f6ecd6; display: flex; flex-direction: column">
+        <div style="height: 42px; flex-shrink: 0; background: {{c.band}}; color: #fff8ea; display: flex; align-items: center; justify-content: space-between; padding: 0 12px">
+          <div style="display: flex; align-items: baseline; gap: 7px">
+            <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 24px; line-height: 1">{{c.rom}}</span>
+            <span style="font-size: 12px; opacity: 0.95">{{c.years}}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 5px; background: #fff8ea; color: #2f241a; border-radius: 4px; padding: 2px 7px">
+            <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><rect x="1" y="1" width="12" height="12" rx="2.5" fill="none" stroke="#2f241a" stroke-width="1.3"></rect><circle cx="4.5" cy="4.5" r="1.1" fill="#2f241a"></circle><circle cx="9.5" cy="9.5" r="1.1" fill="#2f241a"></circle></svg>
+            <span style="font-size: 15px; font-weight: 600">{{c.die}}</span>
+          </div>
+        </div>
+        <div style="flex: 1; display: flex; flex-direction: column; gap: 7px; padding: 11px 13px 10px">
+          <div style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 21px; line-height: 1.05; color: #2f241a">{{c.title}}</div>
+          <div style="display: flex"><span style="font-size: 12px; letter-spacing: 0.04em; border: 1px solid #8a7356; border-radius: 99px; padding: 0 8px; color: #5a4632">{{c.timing}}</span></div>
+          <div style="font-size: 15px; line-height: 1.28">{{c.effect}}</div>
+          <div style="margin-top: auto; border-top: 1px solid #c9b48c; padding-top: 6px; font-family: 'IM Fell English', Georgia, serif; font-style: italic; font-size: 12px; line-height: 1.25; color: #5a4632">{{c.hist}}</div>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var early = '#4f6b3a';
+    var c = function (rom, years, die, title, timing, effect, hist) {
+      return { band: early, rom: rom, years: years, die: die, title: title, timing: timing, effect: effect, hist: hist };
+    };
+    return {
+      cards: [
+        c('V', '410–499', '1–2', 'Saxon migration', 'Whole century', 'Every player gets 2 extra troops at the start of each turn.', 'Settlers pour across the North Sea as Rome leaves.'),
+        c('V', '410–499', '3–4', 'Roman roads', 'Whole century', 'You may make 2 manoeuvres per turn. Rivers and mountains don’t stop them.', 'The old roads still connect the land.'),
+        c('V', '410–499', '5–6', 'Land grab', 'At once', 'Every player except the leader draws 1 territory card.', 'With no one in charge, land goes to whoever takes it.'),
+        c('VI', '500–599', '1–2', 'Petty kingdoms', 'At once', 'Every player except the leader gets 2 extra troops on their next turn.', 'Small kingdoms rise to check the strongest.'),
+        c('VI', '500–599', '3–4', 'Plague of Justinian', 'At once', 'Every territory with 3 or more troops loses 1.', 'A pandemic reaches Britain from the Mediterranean.'),
+        c('VI', '500–599', '5–6', 'Age of saints', 'Whole century', 'Mission bonuses are doubled.', 'Missionaries and monks spread across the land.'),
+        c('VII', '600–699', '1–2', 'Shield walls', 'Whole century', 'Attackers roll at most 2 dice.', 'Battles are fought shield to shield.'),
+        c('VII', '600–699', '3–4', 'Peace of the Church', 'Whole century', 'Pacts can’t be broken. Pacts signed this century pay 1 extra bonus card.', 'The Synod of Whitby brings the kingdoms together in 664.'),
+        c('VII', '600–699', '5–6', 'Underdog kings', 'Whole century', 'At the start of each turn, the player with the fewest territories gets 3 extra troops.', 'Small kingdoms rise while great ones squabble.')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

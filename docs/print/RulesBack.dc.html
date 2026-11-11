@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>House rules, back</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=IM+Fell+English:ital@0;1&amp;family=EB+Garamond:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 60px 64px; background: #f3e7cf; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 18px">
+  <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+    <div style="display: flex; flex-direction: column; gap: 7px">
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 28px; color: #5b5a8e">Alliance pacts</h2>
+      <div style="font-size: 15px; line-height: 1.36"><b>Sign:</b> two players agree 1–4 turns each and stake cards face up on a charter: 1 card each for 1–2 turns, 2 each for 3–4 turns. One pact per player.</div>
+      <div style="font-size: 15px; line-height: 1.36"><b>During:</b> the two may not attack each other.</div>
+      <div style="font-size: 15px; line-height: 1.36"><b>Kept:</b> when both have taken their turns, each takes back their stake plus (turns − 1) bonus cards, at most 3. Renewing straight away is fine.</div>
+      <div style="font-size: 15px; line-height: 1.36"><b>Broken:</b> the moment one attacks the other, the victim takes back their stake and the betrayer's is discarded. The betrayer draws cards as normal but is an oathbreaker: no pacts until the cavalry moves.</div>
+      <div style="font-size: 13px; line-height: 1.3; color: #5a4632; font-style: italic">Tested: loyal players win 28%, well-timed betrayers 26%, constant backstabbers 21%, players who never sign 25%. Short pacts beat long ones.</div>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 7px">
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 28px; color: #8e2424">Century events</h2>
+      <div style="font-size: 15px; line-height: 1.36">Each time the cavalry lands on a century, including the 5th at the start, roll a die and lay that century's card in the Irish Sea beside the ages track: 1–2, 3–4 or 5–6. It lasts until the cavalry moves. "At once" effects happen immediately.</div>
+      <div style="font-size: 15px; line-height: 1.36"><b>Leader:</b> most territories right now (tied: earliest in turn order). <b>Thinnest:</b> fewest troops. <b>Defect:</b> the territory goes to the player with the fewest territories, with 1 of their troops; no card drawn.</div>
+      <div style="font-size: 13px; line-height: 1.3; color: #5a4632; font-style: italic">Tested: the deck raises comebacks from 23% to 34% of games and shrinks the winning margin by a quarter. Events lean against the leader and get harsher with time.</div>
+    </div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; gap: 8px">
+    <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px">The eras at a glance</h2>
+    <table style="width: 100%; border-collapse: collapse; font-size: 14px; line-height: 1.25">
+      <thead>
+        <tr>
+          <th style="text-align: left; border-bottom: 1.5px solid #5a4632; padding: 4px 6px; font-weight: 600; width: 64px">Century</th>
+          <th style="text-align: left; border-bottom: 1.5px solid #5a4632; padding: 4px 6px; font-weight: 600">1–2</th>
+          <th style="text-align: left; border-bottom: 1.5px solid #5a4632; padding: 4px 6px; font-weight: 600">3–4</th>
+          <th style="text-align: left; border-bottom: 1.5px solid #5a4632; padding: 4px 6px; font-weight: 600">5–6</th>
+        </tr>
+      </thead>
+      <tbody>
+        <sc-for list="{{eras}}" as="e" hint-placeholder-count="10">
+          <tr>
+            <td style="border-bottom: 1px solid #c9b48c; padding: 5px 6px"><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: {{e.c}}; margin-right: 6px"></span><span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 16px">{{e.r}}</span></td>
+            <td style="border-bottom: 1px solid #c9b48c; padding: 5px 6px">{{e.a}}</td>
+            <td style="border-bottom: 1px solid #c9b48c; padding: 5px 6px">{{e.b}}</td>
+            <td style="border-bottom: 1px solid #c9b48c; padding: 5px 6px">{{e.d}}</td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+    <div style="display: flex; gap: 18px; font-size: 13px; color: #5a4632">
+      <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #4f6b3a; margin-right: 5px"></span>early: boons</span>
+      <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #7d5a12; margin-right: 5px"></span>middle: new ways to fight</span>
+      <span><span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #8e2424; margin-right: 5px"></span>late: the leader pays</span>
+    </div>
+  </div>
+
+  <div style="margin-top: auto; border-top: 1.5px solid #8a7356; padding-top: 10px; font-size: 13px; line-height: 1.35; color: #5a4632">Balanced with a simulator of 20,000 bot games per rule. The bots play simply, so treat the numbers as a guide and adjust after real games.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var E = '#4f6b3a', M = '#7d5a12', L = '#8e2424';
+    var r = function (c, rom, a, b, d) { return { c: c, r: rom, a: a, b: b, d: d }; };
+    return {
+      eras: [
+        r(E, 'V', 'Saxon migration', 'Roman roads', 'Land grab'),
+        r(E, 'VI', 'Petty kingdoms', 'Plague of Justinian', 'Age of saints'),
+        r(E, 'VII', 'Shield walls', 'Peace of the Church', 'Underdog kings'),
+        r(M, 'VIII', 'Viking raids', 'Offa’s Dyke', 'Good harvests'),
+        r(M, 'IX', 'Great Heathen Army', 'Danegeld', 'Alfred’s burhs'),
+        r(M, 'X', 'One kingdom', 'Battle of Brunanburh', 'Hard winter'),
+        r(M, 'XI', 'Norman castles', 'Harrying of the North', 'Domesday survey'),
+        r(L, 'XII', 'The Anarchy', 'Great floods', 'Supply problems'),
+        r(L, 'XIII', 'Magna Carta', 'Barons’ War', 'Camp fever'),
+        r(L, 'XIV', 'Black Death', 'Great Famine', 'Peasants’ Revolt')
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
