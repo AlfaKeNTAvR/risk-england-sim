@@ -99,7 +99,8 @@ fn strategy_table(strats: &[Strategy], s: &Summary) {
 
 fn base(a: &Args) -> Config {
     if a.house {
-        Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne, ..Config::default() }
+        Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne,
+        terrain: TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1, ..TerrainCombat::default() }, ..Config::default() }
     } else {
         Config::default()
     }

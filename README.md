@@ -50,6 +50,7 @@ Standard library only (written in a sandbox without crates.io). Adding `rand`, `
 ### House rules (switches in `Config`)
 - `Timeline::HousePace`: cavalry moves 1 space after every full round; each player rolls a d6 after their turn and a 6 moves it 1 extra space. No gates.
 - `DiceRule::DefenderOneByOne` (house rule since Nov 11): attacker rolls first; the defender rolls one die, looks, then may roll a second. `DefenderSees` (pick 1 or 2 up front) is the earlier variant.
+- `TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1 }` (house rule since Nov 11): attacking into a mountain territory or across a river, the attacker removes 1 committed troop before the first roll, once per battle (2 when both, only Leeds -> Beeston).
 - `CardDraw::OnePerTurn`: classic Risk card draw, for comparison.
 - `Timeline::Off`: the rulebook's "no timeline" variation.
 - `EventMode::Deck` / `EventMode::Force(ev)`: century events (`src/events.rs`, text in `docs/house-rules.html`). Every century the cavalry lands on rolls one of its 3 events; it lasts until the cavalry moves. Pact events are no-ops until pacts exist.
@@ -110,7 +111,7 @@ Findings that shaped the deck:
 
 One by one gives the defender a further ~7% edge per roll; in whole games it shifts little (aggressive bots 66% → 64%, winner holds 26.2 → 25.8 territories). Fixed Nov 11: bots whose rear guard left too few troops kept "attacking" and withdrawing before rolling (200 times per turn); only cautious bots were affected, all earlier event and pact numbers reproduced unchanged.
 
-## Terrain in combat (candidates, not adopted yet)
+## Terrain in combat (house rule since Nov 11: lose 1 climbing / fording)
 
 `cargo run --release --example terrain_report -- 20000`, `Config.terrain` (`TerrainCombat`). Attacker win chance, committed troops fought to the end, one-by-one dice:
 
@@ -157,7 +158,7 @@ Earlier variants:
 
 `docs/house-rules.html` (house rules with a rollable century event deck, 30 events) and `docs/board-graph.html` (interactive board graph) are the pages the group uses at the table. Keep them in sync with the engine when rules change.
 
-`docs/print/` holds the printable table pieces (sources of the "Medieval England Table Pieces" design canvas, letter size): 4 sheets of century event cards (2.4 x 3.4 in), two diplomacy options (square purple/orange pact seals rotated to count down, or treaty cards ticked with dry-erase), all pieces with a 4 mm gap and 5 mm clear inner edge for laminating, knife-cutting and 5 mm corner punching, and a two-sided house rules reference. Event card text and pact rules must match `src/events.rs` and `PactRules::default()`.
+`docs/print/` holds the printable table pieces (sources of the "Medieval England Table Pieces" design canvas, letter size): 4 sheets of century event cards (2.4 x 3.4 in), century plaques (one per century, 3 events each) and a two-sheet era board as event layout options, two diplomacy options (square purple/orange pact seals rotated to count down, or treaty cards ticked with dry-erase), all pieces with a 4 mm gap and 5 mm clear inner edge for laminating, knife-cutting and 5 mm corner punching, and a two-sided house rules reference. Event card text and pact rules must match `src/events.rs` and `PactRules::default()`.
 
 ## Roadmap
 1. ~~Alliance pacts~~ done (see above).

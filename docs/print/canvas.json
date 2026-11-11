@@ -1,1 +1,231 @@
-{"v":3,"createdOnFiles":{"v":1,"at":"2026-11-11T06:10:00Z"},"title":"Medieval England Table Pieces","launch":{"view":"canvas","page":"overview"},"pages":[{"id":"overview","name":"Where it goes"},{"id":"events","name":"Century event cards"},{"id":"diplomacy","name":"Diplomacy options"},{"id":"rules","name":"House rules sheet"}],"boards":{"Main.dc.html":{"x":0,"y":0,"w":1056,"h":816,"title":"Where each piece sits on the board","page":"overview"},"EventsSheet1.dc.html":{"x":0,"y":0,"w":816,"h":1056,"title":"Event cards 1/4: 5th-7th century","page":"events"},"EventsSheet2.dc.html":{"x":896,"y":0,"w":816,"h":1056,"title":"Event cards 2/4: 8th-10th century","page":"events"},"EventsSheet3.dc.html":{"x":1792,"y":0,"w":816,"h":1056,"title":"Event cards 3/4: 11th-13th century","page":"events"},"EventsSheet4.dc.html":{"x":2688,"y":0,"w":816,"h":1056,"title":"Event cards 4/4: 14th century, how-to, blanks","page":"events"},"PactSeals.dc.html":{"x":0,"y":0,"w":816,"h":1056,"title":"Option A: square pact seals (rotate to count down)","page":"diplomacy"},"TreatyCards.dc.html":{"x":896,"y":0,"w":816,"h":1056,"title":"Option B: treaty cards (tick with dry-erase)","page":"diplomacy"},"RulesFront.dc.html":{"x":0,"y":0,"w":816,"h":1056,"title":"House rules, front","page":"rules"},"RulesBack.dc.html":{"x":896,"y":0,"w":816,"h":1056,"title":"House rules, back","page":"rules"}},"order":["Main.dc.html","EventsSheet1.dc.html","EventsSheet2.dc.html","EventsSheet3.dc.html","EventsSheet4.dc.html","PactSeals.dc.html","TreatyCards.dc.html","RulesFront.dc.html","RulesBack.dc.html"],"notes":{"ovtitle":{"x":0,"y":-260,"text":"Where each piece sits on your board","kind":"title1","maxW":1056,"page":"overview"},"evtitle":{"x":0,"y":-260,"text":"Century event cards: 30 cards, 2.4 x 3.25 in","kind":"title1","maxW":3504,"page":"events"},"dptitle":{"x":0,"y":-260,"text":"Diplomacy: seals or treaty cards, pick one","kind":"title1","maxW":1712,"page":"diplomacy"},"rltitle":{"x":0,"y":-260,"text":"House rules reference: print double-sided","kind":"title1","maxW":1712,"page":"rules"}},"designSystems":[]}
+{
+  "v": 3,
+  "attachments": {},
+  "boards": {
+    "EventsSheet1.dc.html": {
+      "h": 1056,
+      "page": "events",
+      "title": "Event cards 1/4: 5th-7th century",
+      "w": 816,
+      "x": 0,
+      "y": 0
+    },
+    "EventsSheet2.dc.html": {
+      "h": 1056,
+      "page": "events",
+      "title": "Event cards 2/4: 8th-10th century",
+      "w": 816,
+      "x": 896,
+      "y": 0
+    },
+    "EventsSheet3.dc.html": {
+      "h": 1056,
+      "page": "events",
+      "title": "Event cards 3/4: 11th-13th century",
+      "w": 816,
+      "x": 1792,
+      "y": 0
+    },
+    "EventsSheet4.dc.html": {
+      "h": 1056,
+      "page": "events",
+      "title": "Event cards 4/4: 14th century, how-to, blanks",
+      "w": 816,
+      "x": 2688,
+      "y": 0
+    },
+    "Main.dc.html": {
+      "h": 816,
+      "page": "overview",
+      "title": "Where each piece sits on the board",
+      "w": 1056,
+      "x": 0,
+      "y": 0
+    },
+    "PactSeals.dc.html": {
+      "h": 1056,
+      "page": "diplomacy",
+      "title": "Option A: square pact seals (rotate to count down)",
+      "w": 816,
+      "x": 0,
+      "y": 0
+    },
+    "RulesBack.dc.html": {
+      "h": 1056,
+      "page": "rules",
+      "title": "House rules, back",
+      "w": 816,
+      "x": 896,
+      "y": 0
+    },
+    "RulesFront.dc.html": {
+      "h": 1056,
+      "page": "rules",
+      "title": "House rules, front",
+      "w": 816,
+      "x": 0,
+      "y": 0
+    },
+    "TreatyCards.dc.html": {
+      "h": 1056,
+      "page": "diplomacy",
+      "title": "Option B: treaty cards (tick with dry-erase)",
+      "w": 816,
+      "x": 896,
+      "y": 0
+    },
+    "PlaqueSheet1.dc.html": {
+      "h": 1056,
+      "page": "eventlayouts",
+      "title": "Option 2 plaques 1/4: 5th-7th century",
+      "w": 816,
+      "x": 0,
+      "y": 0
+    },
+    "PlaqueSheet2.dc.html": {
+      "h": 1056,
+      "page": "eventlayouts",
+      "title": "Option 2 plaques 2/4: 8th-10th century",
+      "w": 816,
+      "x": 896,
+      "y": 0
+    },
+    "PlaqueSheet3.dc.html": {
+      "h": 1056,
+      "page": "eventlayouts",
+      "title": "Option 2 plaques 3/4: 11th-13th century",
+      "w": 816,
+      "x": 1792,
+      "y": 0
+    },
+    "PlaqueSheet4.dc.html": {
+      "h": 1056,
+      "page": "eventlayouts",
+      "title": "Option 2 plaques 4/4: 14th century, how-to, blank",
+      "w": 816,
+      "x": 2688,
+      "y": 0
+    },
+    "EraBoard1.dc.html": {
+      "h": 816,
+      "page": "eventlayouts",
+      "title": "Option 3 era board, left half: 5th-9th century",
+      "w": 1056,
+      "x": 0,
+      "y": 1436
+    },
+    "EraBoard2.dc.html": {
+      "h": 816,
+      "page": "eventlayouts",
+      "title": "Option 3 era board, right half: 10th-14th century",
+      "w": 1056,
+      "x": 1136,
+      "y": 1436
+    }
+  },
+  "createdOnFiles": {
+    "at": "2026-11-11T06:10:00Z",
+    "v": 1
+  },
+  "designSystems": [],
+  "launch": {
+    "page": "overview",
+    "view": "canvas"
+  },
+  "notes": {
+    "dptitle": {
+      "kind": "title1",
+      "maxW": 1712,
+      "page": "diplomacy",
+      "text": "Diplomacy: seals or treaty cards, pick one",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "evtitle": {
+      "kind": "title1",
+      "maxW": 3504,
+      "page": "events",
+      "text": "Century event cards: 30 cards, 2.4 x 3.25 in",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "pltitle": {
+      "kind": "title1",
+      "maxW": 3504,
+      "page": "eventlayouts",
+      "text": "Option 2: one plaque per century (10 plaques, 7.5 x 3.2 in)",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "ebtitle": {
+      "kind": "title1",
+      "maxW": 2192,
+      "page": "eventlayouts",
+      "text": "Option 3: era board, two sheets side by side",
+      "w": 240,
+      "x": 0,
+      "y": 1176
+    },
+    "ovtitle": {
+      "kind": "title1",
+      "maxW": 1056,
+      "page": "overview",
+      "text": "Where each piece sits on your board",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    },
+    "rltitle": {
+      "kind": "title1",
+      "maxW": 1712,
+      "page": "rules",
+      "text": "House rules reference: print double-sided",
+      "w": 240,
+      "x": 0,
+      "y": -260
+    }
+  },
+  "order": [
+    "Main.dc.html",
+    "EventsSheet1.dc.html",
+    "EventsSheet2.dc.html",
+    "EventsSheet3.dc.html",
+    "EventsSheet4.dc.html",
+    "PactSeals.dc.html",
+    "TreatyCards.dc.html",
+    "RulesFront.dc.html",
+    "RulesBack.dc.html",
+    "PlaqueSheet1.dc.html",
+    "PlaqueSheet2.dc.html",
+    "PlaqueSheet3.dc.html",
+    "PlaqueSheet4.dc.html",
+    "EraBoard1.dc.html",
+    "EraBoard2.dc.html"
+  ],
+  "pages": [
+    {
+      "id": "overview",
+      "name": "Where it goes"
+    },
+    {
+      "id": "events",
+      "name": "Century event cards"
+    },
+    {
+      "id": "eventlayouts",
+      "name": "Event plaques and era board"
+    },
+    {
+      "id": "diplomacy",
+      "name": "Diplomacy options"
+    },
+    {
+      "id": "rules",
+      "name": "House rules sheet"
+    }
+  ],
+  "title": "Medieval England Table Pieces"
+}

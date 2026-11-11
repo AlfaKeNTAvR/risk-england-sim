@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Century plaques, 8th to 10th</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=IM+Fell+English:ital@0;1&amp;family=EB+Garamond:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 45px 48px; background: #ffffff; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 15px">
+  <sc-for list="{{plaques}}" as="p" hint-placeholder-count="3">
+    <div style="width: 720px; height: 306px; box-sizing: border-box; border: 1px solid #8a7356; border-radius: 19px; background: #f6ecd6; padding: 19px; display: flex; flex-direction: column; gap: 8px; overflow: hidden">
+      <div style="height: 32px; flex-shrink: 0; border-radius: 6px; background: {{p.band}}; color: #fff8ea; display: flex; align-items: center; justify-content: space-between; padding: 0 12px">
+        <div style="display: flex; align-items: baseline; gap: 8px">
+          <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 22px; line-height: 1">{{p.rom}} century</span>
+          <span style="font-size: 13px">{{p.years}}</span>
+        </div>
+        <span style="font-size: 13px">roll a die, mark the event</span>
+      </div>
+      <div style="flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); min-height: 0">
+        <sc-for list="{{p.events}}" as="e" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 5px; padding: 2px 10px; border-left: {{e.rule}}; min-width: 0">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px; font-weight: 600; border: 1.5px solid #2f241a; border-radius: 4px; padding: 0 6px">{{e.die}}</span>
+              <span style="width: 24px; height: 24px; box-sizing: border-box; border: 1.5px dashed #8a7356; border-radius: 50%"></span>
+            </div>
+            <div style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 18px; line-height: 1.05">{{e.title}}</div>
+            <div style="display: flex"><span style="font-size: 12px; border: 1px solid #8a7356; border-radius: 99px; padding: 0 7px; color: #5a4632">{{e.timing}}</span></div>
+            <div style="font-size: 13.5px; line-height: 1.25">{{e.effect}}</div>
+            <div style="margin-top: auto; font-family: 'IM Fell English', Georgia, serif; font-style: italic; font-size: 12px; line-height: 1.2; color: #5a4632">{{e.hist}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var dash = '1px dashed #c9b48c';
+    var ev = function (i, title, timing, effect, hist) {
+      return { die: ['1–2', '3–4', '5–6'][i], rule: i === 0 ? 'none' : dash, title: title, timing: timing, effect: effect, hist: hist };
+    };
+    var band = '#7d5a12';
+    return {
+      plaques: [
+        { band: band, rom: 'VIII', years: '700–799', events: [
+          ev(0, 'Viking raids', 'At once + century', 'The leader’s port territories each lose 2 troops. No attacks along sea routes this century.', 'The first raid hits Lindisfarne in 793.'),
+          ev(1, 'Offa’s Dyke', 'Whole century', 'Every border between two regions counts as a river crossing for manoeuvres.', 'Kings mark their borders with earthworks.'),
+          ev(2, 'Good harvests', 'Whole century', 'At the start of each turn, get 1 extra troop for every region where you hold 3 or more territories.', 'Full barns across England.')
+        ] },
+        { band: band, rom: 'IX', years: '800–899', events: [
+          ev(0, 'Great Heathen Army', 'Whole century', 'When attacking the leader, add 1 to your highest die.', 'A Viking army lands in 865 and finds the great kingdoms weakest.'),
+          ev(1, 'Danegeld', 'Whole century', 'Before trading on their turn, the leader gives their lowest-star card to the player with the fewest territories. With no cards, they place 2 fewer troops and that player gets 2.', 'The strong pay the Danes to go away.'),
+          ev(2, 'Alfred’s burhs', 'Whole century', 'Defenders add 1 to their highest die, except the leader.', 'Fortified towns hold out against the raiders.')
+        ] },
+        { band: band, rom: 'X', years: '900–999', events: [
+          ev(0, 'One kingdom', 'Whole century', 'At the start of each turn, every player except the leader gets 3 extra troops.', 'Æthelstan’s new kingdom rewards loyal lords.'),
+          ev(1, 'Battle of Brunanburh', 'Whole century', 'Grand alliance: players other than the leader may only attack the leader.', 'Scots, Norse and Britons unite against Æthelstan in 937.'),
+          ev(2, 'Hard winter', 'At once + century', 'Every territory with 6 or more troops loses 2. No manoeuvres into mountain territories this century.', 'Snow closes the passes.')
+        ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

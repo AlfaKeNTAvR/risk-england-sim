@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Century plaques, 11th to 13th</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&amp;family=IM+Fell+English:ital@0;1&amp;family=EB+Garamond:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 45px 48px; background: #ffffff; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 15px">
+  <sc-for list="{{plaques}}" as="p" hint-placeholder-count="3">
+    <div style="width: 720px; height: 306px; box-sizing: border-box; border: 1px solid #8a7356; border-radius: 19px; background: #f6ecd6; padding: 19px; display: flex; flex-direction: column; gap: 8px; overflow: hidden">
+      <div style="height: 32px; flex-shrink: 0; border-radius: 6px; background: {{p.band}}; color: #fff8ea; display: flex; align-items: center; justify-content: space-between; padding: 0 12px">
+        <div style="display: flex; align-items: baseline; gap: 8px">
+          <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 22px; line-height: 1">{{p.rom}} century</span>
+          <span style="font-size: 13px">{{p.years}}</span>
+        </div>
+        <span style="font-size: 13px">roll a die, mark the event</span>
+      </div>
+      <div style="flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); min-height: 0">
+        <sc-for list="{{p.events}}" as="e" hint-placeholder-count="3">
+          <div style="display: flex; flex-direction: column; gap: 5px; padding: 2px 10px; border-left: {{e.rule}}; min-width: 0">
+            <div style="display: flex; justify-content: space-between; align-items: center">
+              <span style="font-size: 14px; font-weight: 600; border: 1.5px solid #2f241a; border-radius: 4px; padding: 0 6px">{{e.die}}</span>
+              <span style="width: 24px; height: 24px; box-sizing: border-box; border: 1.5px dashed #8a7356; border-radius: 50%"></span>
+            </div>
+            <div style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 18px; line-height: 1.05">{{e.title}}</div>
+            <div style="display: flex"><span style="font-size: 12px; border: 1px solid #8a7356; border-radius: 99px; padding: 0 7px; color: #5a4632">{{e.timing}}</span></div>
+            <div style="font-size: 13.5px; line-height: 1.25">{{e.effect}}</div>
+            <div style="margin-top: auto; font-family: 'IM Fell English', Georgia, serif; font-style: italic; font-size: 12px; line-height: 1.2; color: #5a4632">{{e.hist}}</div>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>
+class Component extends DCLogic {
+  renderVals() {
+    var dash = '1px dashed #c9b48c';
+    var ev = function (i, title, timing, effect, hist) {
+      return { die: ['1–2', '3–4', '5–6'][i], rule: i === 0 ? 'none' : dash, title: title, timing: timing, effect: effect, hist: hist };
+    };
+    var mid = '#7d5a12', late = '#8e2424';
+    return {
+      plaques: [
+        { band: mid, rom: 'XI', years: '1000–1099', events: [
+          ev(0, 'Norman castles', 'Whole century', 'Defending a territory with 5 or more troops, the defender may roll 3 dice.', 'Castles rise across the conquered land after 1066.'),
+          ev(1, 'Harrying of the North', 'At once', 'The leader’s North territories lose half their troops, rounded down.', 'William lays waste to the north in 1069–70.'),
+          ev(2, 'Domesday survey', 'Whole century', 'The leader draws at most 1 territory card per turn, however many territories they conquer.', 'Every holding is counted in 1086, and the greatest pay most.')
+        ] },
+        { band: late, rom: 'XII', years: '1100–1199', events: [
+          ev(0, 'The Anarchy', 'At once', 'The leader’s 2 thinnest territories defect to the player with the fewest territories.', 'Civil war between Stephen and Matilda; lords switch sides.'),
+          ev(1, 'Great floods', 'Whole century', 'No manoeuvres across rivers. Attacks across a river crossing roll at most 1 die.', 'Rivers burst their banks.'),
+          ev(2, 'Supply problems', 'Whole century', 'At the start of the leader’s turn, each of their territories with 5 or more troops loses a third, rounded down.', 'The greatest armies can’t be fed.')
+        ] },
+        { band: late, rom: 'XIII', years: '1200–1299', events: [
+          ev(0, 'Magna Carta', 'Whole century', 'The leader can’t trade cards this century.', 'The barons force the king to seal the charter in 1215.'),
+          ev(1, 'Barons’ War', 'At once + century', 'All pacts end: stakes go back, no bonus cards. No new pacts this century.', 'Simon de Montfort leads the barons against the king.'),
+          ev(2, 'Camp fever', 'At once', 'The leader’s largest stack loses half its troops, rounded down.', 'Disease spreads through the biggest siege camp.')
+        ] }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

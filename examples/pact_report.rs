@@ -128,7 +128,8 @@ fn main() {
     let mut args = std::env::args().skip(1);
     let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(20_000);
     let threads: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(2);
-    let base = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne, events: EventMode::Deck, ..Config::default() };
+    let base = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne,
+        terrain: TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1, ..TerrainCombat::default() }, events: EventMode::Deck, ..Config::default() };
     let rules = PactRules::default();
     let on = Config { pacts: Some(rules), ..base };
     println!("{games} games per row; house pace, defender-sees dice, full century deck; 4 players, seats rotated\n");

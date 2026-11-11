@@ -88,6 +88,7 @@ button.roll:hover{background:var(--bg)}
         <tr><td>Timeline</td><td>Cavalry moves after every player's turn, 4 dice gates</td><td>Moves after every full round, plus 1 extra space on a 6</td></tr>
         <tr><td>Defence dice</td><td>Both sides roll together</td><td>Attacker rolls first, defender rolls one die at a time</td></tr>
         <tr><td>Rivers</td><td>"Territories with rivers"</td><td>On borders: 8 river crossings</td></tr>
+        <tr><td>Terrain in attacks</td><td>No effect</td><td>Attacker loses 1 troop climbing a mountain or fording a river</td></tr>
         <tr><td>Power losses</td><td>Unclear</td><td>Only the flipper is hit, never below 1 troop</td></tr>
         <tr><td>Jewel Tower mission</td><td>"Hold for 3 turns"</td><td>3 turns in total, anyone's turns count</td></tr>
         <tr><td>Alliances</td><td>Not covered</td><td>Star-staked pacts, 1-3 turns</td></tr>
@@ -118,10 +119,17 @@ button.roll:hover{background:var(--bg)}
 
   <section class="card" id="terrain">
     <h2>Rivers and mountains</h2>
-    <p>These only affect the manoeuvre at the end of your turn, never attacks.</p>
+    <h3>Manoeuvring</h3>
     <ul>
       <li><b>Crossing a river:</b> at most 5 troops per turn, and they stop on the far side until your next turn.</li>
       <li><b>Entering a mountain territory:</b> the troops stop there until your next turn.</li>
+    </ul>
+    <h3>Attacking</h3>
+    <ul>
+      <li><b>Climbing and fording:</b> when you attack into a mountain territory or across a river, remove 1 of your committed troops before the first roll. It's once per battle, however many rolls it takes.</li>
+      <li>A new attack on the same territory, after you withdraw, costs 1 again.</li>
+      <li>Leeds to Beeston is both a river and a mountain: it costs 2.</li>
+      <li>So commit at least 2 troops: a single climber never reaches the fight.</li>
     </ul>
     <h3>River crossings</h3>
     <p><span class="rv">North:</span> Leeds–Beeston, Leeds–Bolsover, Leeds–Conisbrough. <span class="rv">South:</span> Portchester–Donnington, Donnington–Farnham, Farnham–Jewel Tower, Jewel Tower–Dover, Colchester–Dover. Moving through Jewel Tower to High Wycombe, Berkhamstead, Colchester or Donnington is not a crossing.</p>

@@ -35,6 +35,7 @@ fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
     let cfg = Config {
         timeline: Timeline::HousePace,
         dice: DiceRule::DefenderOneByOne,
+        terrain: TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1, ..TerrainCombat::default() },
         events: mode,
         defect_troops: defect,
         revolt_count: env("REVOLT").unwrap_or(Config::default().revolt_count),
