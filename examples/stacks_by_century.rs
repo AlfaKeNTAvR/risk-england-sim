@@ -9,10 +9,25 @@ fn main() {
     let mut args = std::env::args().skip(1);
     let players: usize = args.next().map(|x| x.parse().unwrap()).unwrap_or(4);
     let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(20000);
-    let pool = [Strategy::BALANCED, Strategy::BALANCED, Strategy::AGGRESSIVE, Strategy::HOARDER, Strategy::BALANCED];
+    let pool = [
+        Strategy::BALANCED,
+        Strategy::BALANCED,
+        Strategy::AGGRESSIVE,
+        Strategy::HOARDER,
+        Strategy::BALANCED,
+    ];
     let strats: Vec<Strategy> = pool[..players].to_vec();
-    let cfg = Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne,
-        terrain: TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1, ..TerrainCombat::default() }, ..Config::default() };
+    let cfg = Config {
+        timeline: Timeline::HouseCircle,
+        last_century_round: true,
+        dice: DiceRule::DefenderOneByOne,
+        terrain: TerrainCombat {
+            mountain_climb_cost: 1,
+            river_cross_cost: 1,
+            ..TerrainCombat::default()
+        },
+        ..Config::default()
+    };
     let sh = Shared::new();
     // per century: count, sum of (largest, 3rd largest, 10th largest, median, leader terr, leader troops, hand stars), share of games reaching it
     let mut acc = vec![[0f64; 8]; 11];
@@ -37,7 +52,9 @@ fn main() {
         }
     }
     println!("{players} players, {games} games, house rules. Averages when a century begins:");
-    println!("century  reached  largest  3rd  10th  median  leader-terr  leader-troops  hand-stars");
+    println!(
+        "century  reached  largest  3rd  10th  median  leader-terr  leader-troops  hand-stars"
+    );
     for (c, a) in acc.iter().enumerate() {
         if a[0] == 0.0 {
             continue;
@@ -47,7 +64,13 @@ fn main() {
             "{:>4}th  {:>6.0}%  {:>7.1}  {:>4.1}  {:>4.1}  {:>6.1}  {:>11.1}  {:>13.1}  {:>10.1}",
             c + 5,
             100.0 * k / games as f64,
-            a[1] / k, a[2] / k, a[3] / k, a[4] / k, a[5] / k, a[6] / k, a[7] / k
+            a[1] / k,
+            a[2] / k,
+            a[3] / k,
+            a[4] / k,
+            a[5] / k,
+            a[6] / k,
+            a[7] / k
         );
     }
 }

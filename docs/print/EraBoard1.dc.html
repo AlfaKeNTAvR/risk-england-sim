@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Era board, 5th to 9th century</title>
+<title>Era board, front</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -14,26 +14,37 @@ body{margin:0}
 </style>
 </helmet>
 <div style="width: 1056px; height: 816px; box-sizing: border-box; padding: 40px 48px; background: #f3e7cf; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 10px">
-  <div style="height: 44px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid #5a4632; padding-bottom: 6px">
-    <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 32px; line-height: 1">The Ages of England</span>
-    <span style="font-size: 14px; color: #5a4632">The cavalry stands on its century. Roll, then mark the event: 1–2, 3–4 or 5–6.</span>
+  <div style="height: 44px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; border-bottom: 2px solid #5a4632; padding-bottom: 6px">
+    <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 32px; line-height: 1; white-space: nowrap">The Ages of England</span>
+    <span style="font-size: 14px; line-height: 1.25; color: #5a4632; text-align: right; ">The golden cavalry stands on its century. The opener rolls, puts the yellow cavalry<br>on the event and one of their own cavalry on “opened by”. Turn over after the IX.</span>
   </div>
   <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
     <div style="flex: 1; min-height: 0; display: flex; gap: 10px">
-      <div style="width: 112px; flex-shrink: 0; border-radius: 8px; background: {{r.band}}; color: #fff8ea; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-        <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 30px; line-height: 1">{{r.rom}}</span>
-        <span style="font-size: 12px">{{r.years}}</span>
-        <span style="width: 40px; height: 40px; box-sizing: border-box; border: 1.5px dashed #fff8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1">cavalry</span>
+      <div style="width: 132px; flex-shrink: 0; border-radius: 8px; background: {{r.band}}; color: #fff8ea; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px">
+        <div style="display: flex; align-items: baseline; gap: 6px">
+          <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 28px; line-height: 1">{{r.rom}}</span>
+          <span style="font-size: 12px">{{r.years}}</span>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+            <span style="width: 46px; height: 46px; box-sizing: border-box; border: 2px solid #e2b93b; border-radius: 50%"></span>
+            <span style="font-size: 11px; line-height: 1">golden</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+            <span style="width: 46px; height: 46px; box-sizing: border-box; border: 1.5px dashed #fff8ea; border-radius: 50%"></span>
+            <span style="font-size: 11px; line-height: 1">opened by</span>
+          </div>
+        </div>
       </div>
       <sc-for list="{{r.events}}" as="e" hint-placeholder-count="3">
-        <div style="flex: 1; min-width: 0; border: 1px solid #c9b48c; border-radius: 8px; background: #fbf4e4; padding: 8px 10px; display: flex; flex-direction: column; gap: 3px">
+        <div style="flex: 1; min-width: 0; border: 1px solid #c9b48c; border-radius: 8px; background: #fbf4e4; padding: 7px 10px; display: flex; flex-direction: column; gap: 3px">
           <div style="display: flex; align-items: center; gap: 7px">
             <span style="font-size: 13px; font-weight: 600; border: 1.5px solid #2f241a; border-radius: 4px; padding: 0 5px">{{e.die}}</span>
             <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 17px; line-height: 1.05; flex: 1; min-width: 0">{{e.title}}</span>
-            <span style="width: 22px; height: 22px; flex-shrink: 0; box-sizing: border-box; border: 1.5px dashed #8a7356; border-radius: 50%"></span>
+            <span style="width: 30px; height: 30px; flex-shrink: 0; box-sizing: border-box; border: 1.5px dashed #b08a1e; border-radius: 50%"></span>
           </div>
           <span style="font-size: 12px; color: #5a4632">{{e.timing}}</span>
-          <span style="font-size: 13px; line-height: 1.22">{{e.effect}}</span>
+          <span style="font-size: 13px; line-height: 1.2">{{e.effect}}</span>
         </div>
       </sc-for>
     </div>
@@ -43,38 +54,135 @@ body{margin:0}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1056,"height":816}}'>
 class Component extends DCLogic {
   renderVals() {
-    var dies = ['1–2', '3–4', '5–6'];
-    var ev = function (i, title, timing, effect) { return { die: dies[i], title: title, timing: timing, effect: effect }; };
-    var E = '#4f6b3a', M = '#7d5a12';
     return {
-      rows: [
-        { band: E, rom: 'V', years: '410–499', events: [
-          ev(0, 'Saxon migration', 'Whole century', 'Every player gets 2 extra troops at the start of each turn.'),
-          ev(1, 'Roman roads', 'Whole century', 'You may make 2 manoeuvres per turn. Rivers and mountains don’t stop them.'),
-          ev(2, 'Land grab', 'At once', 'Every player except the leader draws 1 territory card.')
-        ] },
-        { band: E, rom: 'VI', years: '500–599', events: [
-          ev(0, 'Petty kingdoms', 'At once', 'Every player except the leader gets 2 extra troops on their next turn.'),
-          ev(1, 'Plague of Justinian', 'At once', 'Every territory with 3 or more troops loses 1.'),
-          ev(2, 'Age of saints', 'Whole century', 'Mission bonuses are doubled.')
-        ] },
-        { band: E, rom: 'VII', years: '600–699', events: [
-          ev(0, 'Shield walls', 'Whole century', 'Attackers roll at most 2 dice.'),
-          ev(1, 'Peace of the Church', 'Whole century', 'Pacts can’t be broken. Pacts signed this century pay 1 extra bonus card.'),
-          ev(2, 'Underdog kings', 'Whole century', 'At the start of each turn, the player with the fewest territories gets 3 extra troops.')
-        ] },
-        { band: M, rom: 'VIII', years: '700–799', events: [
-          ev(0, 'Viking raids', 'At once + century', 'The leader’s port territories each lose 2 troops. No attacks along sea routes this century.'),
-          ev(1, 'Offa’s Dyke', 'Whole century', 'Every border between two regions counts as a river crossing for manoeuvres.'),
-          ev(2, 'Good harvests', 'Whole century', 'At the start of each turn, get 1 extra troop for every region where you hold 3 or more territories.')
-        ] },
-        { band: M, rom: 'IX', years: '800–899', events: [
-          ev(0, 'Great Heathen Army', 'Whole century', 'When attacking the leader, add 1 to your highest die.'),
-          ev(1, 'Danegeld', 'Whole century', 'Before trading on their turn, the leader gives their lowest-star card to the player with the fewest territories. With no cards, they place 2 fewer troops and that player gets 2.'),
-          ev(2, 'Alfred’s burhs', 'Whole century', 'Defenders add 1 to their highest die, except the leader.')
-        ] }
+  "rows": [
+    {
+      "rom": "V",
+      "years": "410–499",
+      "band": "#4f6b3a",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Saxon migration",
+          "timing": "Whole century",
+          "effect": "Every player gets 2 extra troops at the start of each turn."
+        },
+        {
+          "die": "3–4",
+          "title": "Roman roads",
+          "timing": "Whole century",
+          "effect": "You may make 2 manoeuvres per turn. Rivers and mountains don’t stop them."
+        },
+        {
+          "die": "5–6",
+          "title": "Land grab",
+          "timing": "At once",
+          "effect": "Every player except the leader draws 1 territory card."
+        }
       ]
-    };
+    },
+    {
+      "rom": "VI",
+      "years": "500–599",
+      "band": "#4f6b3a",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Petty kingdoms",
+          "timing": "At once",
+          "effect": "Every player except the leader gets 2 extra troops on their next turn."
+        },
+        {
+          "die": "3–4",
+          "title": "Plague of Justinian",
+          "timing": "At once",
+          "effect": "Every territory with 3 or more troops loses 1."
+        },
+        {
+          "die": "5–6",
+          "title": "Age of saints",
+          "timing": "Whole century",
+          "effect": "Mission bonuses are doubled."
+        }
+      ]
+    },
+    {
+      "rom": "VII",
+      "years": "600–699",
+      "band": "#4f6b3a",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Shield walls",
+          "timing": "Whole century",
+          "effect": "Attackers roll at most 2 dice."
+        },
+        {
+          "die": "3–4",
+          "title": "Peace of the Church",
+          "timing": "Whole century",
+          "effect": "Pacts can’t be broken. Pacts signed this century pay 1 extra bonus card."
+        },
+        {
+          "die": "5–6",
+          "title": "Underdog kings",
+          "timing": "Whole century",
+          "effect": "At the start of each turn, the player with the fewest territories gets 3 extra troops."
+        }
+      ]
+    },
+    {
+      "rom": "VIII",
+      "years": "700–799",
+      "band": "#7d5a12",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Viking raids",
+          "timing": "At once + century",
+          "effect": "The leader’s port territories each lose 2 troops. No attacks along sea routes this century."
+        },
+        {
+          "die": "3–4",
+          "title": "Offa’s Dyke",
+          "timing": "Whole century",
+          "effect": "Every border between two regions counts as a river crossing for manoeuvres."
+        },
+        {
+          "die": "5–6",
+          "title": "Good harvests",
+          "timing": "Whole century",
+          "effect": "At the start of each turn, get 1 extra troop for every region where you hold 3 or more territories."
+        }
+      ]
+    },
+    {
+      "rom": "IX",
+      "years": "800–899",
+      "band": "#7d5a12",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Great Heathen Army",
+          "timing": "Whole century",
+          "effect": "When attacking the leader, add 1 to your highest die."
+        },
+        {
+          "die": "3–4",
+          "title": "Danegeld",
+          "timing": "Whole century",
+          "effect": "Before trading on their turn, the leader gives their lowest-star card to the player with the fewest territories. With no cards, they place 2 fewer troops and that player gets 2."
+        },
+        {
+          "die": "5–6",
+          "title": "Alfred’s burhs",
+          "timing": "Whole century",
+          "effect": "Defenders add 1 to their highest die, except the leader."
+        }
+      ]
+    }
+  ]
+};
   }
 }
 </script>

@@ -7,7 +7,12 @@ use risk_england_sim::combat::DiceRule;
 use risk_england_sim::events::{EventMode, ALL};
 use risk_england_sim::game::*;
 
-const STRATS: [Strategy; 4] = [Strategy::BALANCED, Strategy::BALANCED, Strategy::AGGRESSIVE, Strategy::HOARDER];
+const STRATS: [Strategy; 4] = [
+    Strategy::BALANCED,
+    Strategy::BALANCED,
+    Strategy::AGGRESSIVE,
+    Strategy::HOARDER,
+];
 
 #[derive(Default, Clone)]
 struct Acc {
@@ -30,12 +35,20 @@ fn add(a: &mut [f64; 6], b: &[f64; 6]) {
 }
 
 fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
-    let defect: u32 = std::env::var("DEFECT").ok().and_then(|v| v.parse().ok()).unwrap_or(Config::default().defect_troops);
+    let defect: u32 = std::env::var("DEFECT")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(Config::default().defect_troops);
     let env = |k: &str| std::env::var(k).ok().and_then(|v| v.parse::<usize>().ok());
     let cfg = Config {
-        timeline: Timeline::HousePace,
+        timeline: Timeline::HouseCircle,
+        last_century_round: true,
         dice: DiceRule::DefenderOneByOne,
-        terrain: TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1, ..TerrainCombat::default() },
+        terrain: TerrainCombat {
+            mountain_climb_cost: 1,
+            river_cross_cost: 1,
+            ..TerrainCombat::default()
+        },
         events: mode,
         defect_troops: defect,
         revolt_count: env("REVOLT").unwrap_or(Config::default().revolt_count),
@@ -52,18 +65,21 @@ fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
                     for g in t * per..((t + 1) * per).min(games) {
                         let rot = (g % 4) as usize;
                         let strats: Vec<Strategy> = (0..4).map(|s| STRATS[(s + rot) % 4]).collect();
-                        let r = Game::new(cfg, &sh, &strats, g.wrapping_mul(0x9E37_79B9) + 11).play();
+                        let r =
+                            Game::new(cfg, &sh, &strats, g.wrapping_mul(0x9E37_79B9) + 11).play();
                         a.games += 1.0;
                         a.rounds += r.rounds as f64;
                         let share = 1.0 / r.winners.len() as f64;
                         for &w in &r.winners {
                             a.seat_wins[w] += share;
                         }
-                        let mut leaders: Vec<usize> = r.snapshots.iter().map(|s| s.leader).collect();
+                        let mut leaders: Vec<usize> =
+                            r.snapshots.iter().map(|s| s.leader).collect();
                         if r.winners.len() == 1 {
                             leaders.push(r.winners[0]);
                         }
-                        a.lead_changes += leaders.windows(2).filter(|w| w[0] != w[1]).count() as f64;
+                        a.lead_changes +=
+                            leaders.windows(2).filter(|w| w[0] != w[1]).count() as f64;
                         let mid = r.snapshots[r.snapshots.len() / 2].leader;
                         if r.winners.len() == 1 && r.winners[0] != mid {
                             a.comebacks += 1.0;
@@ -75,12 +91,29 @@ fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
                             if c.space >= 10 {
                                 continue;
                             }
-                            let next = r.centuries.get(i + 1).map(|n| &n.territories).unwrap_or(&r.territories);
-                            let next_leader = (0..4).max_by_key(|&p| (next[p], std::cmp::Reverse(p))).unwrap();
+                            let next = r
+                                .centuries
+                                .get(i + 1)
+                                .map(|n| &n.territories)
+                                .unwrap_or(&r.territories);
+                            let next_leader = (0..4)
+                                .max_by_key(|&p| (next[p], std::cmp::Reverse(p)))
+                                .unwrap();
                             let toppled = (next_leader != c.leader) as u8 as f64;
-                            let wins = if r.winners.contains(&c.leader) { share } else { 0.0 };
+                            let wins = if r.winners.contains(&c.leader) {
+                                share
+                            } else {
+                                0.0
+                            };
                             let d_share = next[c.leader] as f64 / 42.0 - c.leader_share;
-                            let row = [1.0, toppled, wins, d_share, c.troops_lost_at_once as f64, c.largest_stack as f64];
+                            let row = [
+                                1.0,
+                                toppled,
+                                wins,
+                                d_share,
+                                c.troops_lost_at_once as f64,
+                                c.largest_stack as f64,
+                            ];
                             add(&mut a.space[c.space], &row);
                             if c.event.is_some() {
                                 if let EventMode::Force(_) = mode {
@@ -115,7 +148,11 @@ fn run(mode: EventMode, games: u64, threads: u64) -> Acc {
 
 fn game_line(label: &str, a: &Acc) {
     let g = a.games;
-    let seats: Vec<String> = a.seat_wins.iter().map(|w| format!("{:.0}", 100.0 * w / g)).collect();
+    let seats: Vec<String> = a
+        .seat_wins
+        .iter()
+        .map(|w| format!("{:.0}", 100.0 * w / g))
+        .collect();
     println!(
         "{label:<22} rounds {:4.1} | lead changes {:4.2} | comebacks {:4.1}% | final margin {:4.1} terr | seats {}%",
         a.rounds / g,
@@ -131,7 +168,7 @@ fn main() {
     let games: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(20_000);
     let threads: u64 = args.next().map(|x| x.parse().unwrap()).unwrap_or(2);
     let only: Option<String> = args.next().map(|x| x.to_lowercase());
-    println!("{games} games per row, 4 players (balanced x2, aggressive, hoarder), house pace + defender-sees dice\n");
+    println!("{games} games per row, 4 players (balanced x2, aggressive, hoarder), opener circle + finish round, one-by-one dice\n");
 
     let base = run(EventMode::Off, games, threads);
     let deck = run(EventMode::Deck, games, threads);
@@ -159,7 +196,10 @@ fn main() {
     println!("\n== Each event on its own (vs the same century with no event)");
     println!("{:<22} cent  toppled (base)   leader wins (base)  leader share  lost at once | game: lead chg  comebacks  margin", "event");
     for e in ALL {
-        if only.as_ref().is_some_and(|o| !e.name().to_lowercase().contains(o.as_str())) {
+        if only
+            .as_ref()
+            .is_some_and(|o| !e.name().to_lowercase().contains(o.as_str()))
+        {
             continue;
         }
         let a = run(EventMode::Force(e), games, threads);
@@ -184,5 +224,11 @@ fn main() {
             a.margin / g - base.margin / base.games,
             if e.simulated() { "" } else { "  (pacts not simulated)" }
         );
+        let seats: Vec<String> = a
+            .seat_wins
+            .iter()
+            .map(|w| format!("{:.0}", 100.0 * w / g))
+            .collect();
+        println!("{:<22}       seats {}%", "", seats.join("/"));
     }
 }

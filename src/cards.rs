@@ -22,16 +22,64 @@ pub struct Mission {
 use MissionGoal::*;
 
 pub static MISSIONS: [Mission; 10] = [
-    Mission { text: "Capture the port territories of Dover, Barnard and St Briavels", troops: 5, goal: Hold(&["Dover", "Barnard", "St Briavels"]) },
-    Mission { text: "Capture the smallest territory, Piel", troops: 2, goal: Hold(&["Piel"]) },
-    Mission { text: "Capture 2 regions", troops: 6, goal: Regions(2) },
-    Mission { text: "Capture the south coast: Dover, Battle, Portchester, Sherborne, Okehampton, Tintagel", troops: 5, goal: Hold(&["Dover", "Battle", "Portchester", "Sherborne", "Okehampton", "Tintagel"]) },
-    Mission { text: "Capture Dunstanburgh and Carlisle", troops: 2, goal: Hold(&["Dunstanburgh", "Carlisle"]) },
-    Mission { text: "Capture the port territories of Whalley, Portchester and Tintagel", troops: 5, goal: Hold(&["Whalley", "Portchester", "Tintagel"]) },
-    Mission { text: "Capture the tri-border territories: Bosworth, Bushmede, High Wycombe", troops: 3, goal: Hold(&["Bosworth", "Bushmede", "High Wycombe"]) },
-    Mission { text: "Capture and hold Jewel Tower for 3 turns", troops: 2, goal: HoldJewelTower { turns: 3 } },
-    Mission { text: "Capture the island strongholds of Scilly and Carisbrooke", troops: 5, goal: Hold(&["Scilly", "Carisbrooke"]) },
-    Mission { text: "Capture both ports of a sea route", troops: 3, goal: AnySeaRoute },
+    Mission {
+        text: "Capture the port territories of Dover, Barnard and St Briavels",
+        troops: 5,
+        goal: Hold(&["Dover", "Barnard", "St Briavels"]),
+    },
+    Mission {
+        text: "Capture the smallest territory, Piel",
+        troops: 2,
+        goal: Hold(&["Piel"]),
+    },
+    Mission {
+        text: "Capture 2 regions",
+        troops: 6,
+        goal: Regions(2),
+    },
+    Mission {
+        text:
+            "Capture the south coast: Dover, Battle, Portchester, Sherborne, Okehampton, Tintagel",
+        troops: 5,
+        goal: Hold(&[
+            "Dover",
+            "Battle",
+            "Portchester",
+            "Sherborne",
+            "Okehampton",
+            "Tintagel",
+        ]),
+    },
+    Mission {
+        text: "Capture Dunstanburgh and Carlisle",
+        troops: 2,
+        goal: Hold(&["Dunstanburgh", "Carlisle"]),
+    },
+    Mission {
+        text: "Capture the port territories of Whalley, Portchester and Tintagel",
+        troops: 5,
+        goal: Hold(&["Whalley", "Portchester", "Tintagel"]),
+    },
+    Mission {
+        text: "Capture the tri-border territories: Bosworth, Bushmede, High Wycombe",
+        troops: 3,
+        goal: Hold(&["Bosworth", "Bushmede", "High Wycombe"]),
+    },
+    Mission {
+        text: "Capture and hold Jewel Tower for 3 turns",
+        troops: 2,
+        goal: HoldJewelTower { turns: 3 },
+    },
+    Mission {
+        text: "Capture the island strongholds of Scilly and Carisbrooke",
+        troops: 5,
+        goal: Hold(&["Scilly", "Carisbrooke"]),
+    },
+    Mission {
+        text: "Capture both ports of a sea route",
+        troops: 3,
+        goal: AnySeaRoute,
+    },
 ];
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -76,6 +124,9 @@ pub static POWER_DECK: [Power; 10] = [
 impl Power {
     /// Cards that are kept face up after flipping and played later.
     pub fn is_keepable(self) -> bool {
-        matches!(self, Power::WeaponStash | Power::Trainees | Power::Artillery | Power::EnemyDefect)
+        matches!(
+            self,
+            Power::WeaponStash | Power::Trainees | Power::Artillery | Power::EnemyDefect
+        )
     }
 }

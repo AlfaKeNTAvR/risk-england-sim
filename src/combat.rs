@@ -141,7 +141,12 @@ pub struct Mods {
 
 impl Default for Mods {
     fn default() -> Self {
-        Mods { att_max: 3, att_plus: 0, def_plus: 0, def_max: 2 }
+        Mods {
+            att_max: 3,
+            att_plus: 0,
+            def_plus: 0,
+            def_max: 2,
+        }
     }
 }
 
@@ -231,7 +236,11 @@ mod tests {
                             let (x, y) = compare(&a, &d);
                             classic.0 += x as f64;
                             classic.1 += y as f64;
-                            let (x, y) = if k == 2 { compare(&a, &d) } else { compare(&a, &[d1]) };
+                            let (x, y) = if k == 2 {
+                                compare(&a, &d)
+                            } else {
+                                compare(&a, &[d1])
+                            };
                             house.0 += x as f64;
                             house.1 += y as f64;
                         }

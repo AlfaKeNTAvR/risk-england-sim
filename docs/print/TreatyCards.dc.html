@@ -16,7 +16,7 @@ body{margin:0}
 <div style="width: 816px; height: 1056px; box-sizing: border-box; padding: 48px; background: #ffffff; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 22px; align-items: center">
   <div style="width: 600px; display: flex; flex-direction: column; gap: 4px">
     <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 28px; line-height: 1">Option B: treaty cards</span>
-    <span style="font-size: 15px; line-height: 1.4; color: #5a4632">One card per pact, at the edge of the board between the two signers. Each signer tucks their stake face up under their side, stars showing. Circle the length, and cross off one of your boxes with dry-erase marker at the end of each of your turns.</span>
+    <span style="font-size: 15px; line-height: 1.4; color: #5a4632">One card per pact, at the edge of the board between the two signers. Each signer tucks their stake face up under their side, stars showing. Stand one of your cavalry on your number of turns. At the end of each of your turns, move it one space right. No marker needed.</span>
   </div>
 
   <sc-for list="{{treaties}}" as="t" hint-placeholder-count="2">
@@ -29,17 +29,24 @@ body{margin:0}
         <sc-for list="{{t.sides}}" as="sd" hint-placeholder-count="2">
           <div style="flex: 1; border: 1.5px dashed #8a7356; border-radius: 8px; padding: 10px 14px; display: flex; flex-direction: column; gap: 9px">
             <span style="font-size: 13px; letter-spacing: 0.06em; color: #5a4632">SIGNER</span>
-            <div style="display: flex; align-items: center; gap: 10px">
-              <span style="font-size: 15px; width: 52px">Turns</span>
-              <span style="width: 30px; height: 30px; box-sizing: border-box; border: 1.5px solid #5a4632; display: flex; align-items: center; justify-content: center; font-size: 16px">1</span>
-              <span style="width: 30px; height: 30px; box-sizing: border-box; border: 1.5px solid #5a4632; display: flex; align-items: center; justify-content: center; font-size: 16px">2</span>
-              <span style="width: 30px; height: 30px; box-sizing: border-box; border: 1.5px solid #5a4632; display: flex; align-items: center; justify-content: center; font-size: 16px">3</span>
+            <div style="display: flex; align-items: center; gap: 8px">
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 3px">
+                <span style="width: 40px; height: 40px; box-sizing: border-box; border: 1.5px solid #5a4632; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'IM Fell English SC', Georgia, serif; font-size: 18px; color: #8a7356">3</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 3px">
+                <span style="width: 40px; height: 40px; box-sizing: border-box; border: 1.5px solid #5a4632; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'IM Fell English SC', Georgia, serif; font-size: 18px; color: #8a7356">2</span>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: center; gap: 3px">
+                <span style="width: 40px; height: 40px; box-sizing: border-box; border: 1.5px solid #5a4632; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-family: 'IM Fell English SC', Georgia, serif; font-size: 18px; color: #8a7356">1</span>
+              </div>
+              <span style="font-size: 18px; color: #8a7356">→</span>
+              <span style="width: 52px; height: 40px; box-sizing: border-box; border: 2px solid #5a4632; border-radius: 20px; display: flex; align-items: center; justify-content: center; font-family: 'IM Fell English SC', Georgia, serif; font-size: 16px">kept</span>
             </div>
             <span style="font-size: 14px; line-height: 1.25">Stake under this side: as many stars as turns.</span>
           </div>
         </sc-for>
       </div>
-      <div style="font-size: 14px; line-height: 1.3"><b>Kept:</b> stakes back, plus (turns − 1) cards each. <b>Broken:</b> the victim takes both stakes; the betrayer takes an oathbreaker seal.</div>
+      <div style="font-size: 14px; line-height: 1.3"><b>Kept:</b> both cavalry on “kept”. Stakes back, plus (turns − 1) cards each. <br><b>Broken:</b> the victim takes both stakes; the betrayer takes an oathbreaker seal.</div>
     </div>
   </sc-for>
 
@@ -53,7 +60,7 @@ body{margin:0}
     </sc-for>
   </div>
 
-  <span style="width: 621px; font-size: 13px; line-height: 1.4; color: #5a4632">Laminate, cut along each outline, then round the corners with the 5 mm punch. Treaty cards are 6.25 x 2.8 in; oathbreaker seals 1.5 in square.</span>
+  <span style="width: 621px; font-size: 13px; line-height: 1.4; color: #5a4632">Cut along each outline, then round the corners with the 5 mm punch. Treaty cards are 6.25 x 2.8 in; oathbreaker seals 1.5 in square.</span>
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":816,"height":1056}}'>

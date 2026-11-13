@@ -16,7 +16,9 @@ fn parse() -> Args {
         experiment: "all".into(),
         games: 20_000,
         seed: 1,
-        threads: std::thread::available_parallelism().map(|n| n.get()).unwrap_or(4),
+        threads: std::thread::available_parallelism()
+            .map(|n| n.get())
+            .unwrap_or(4),
         house: false,
     };
     let mut it = std::env::args().skip(1);
@@ -28,7 +30,7 @@ fn parse() -> Args {
             "--house" => a.house = true,
             "-h" | "--help" => {
                 println!("usage: risk-england-sim [pace|dice|cards|powers|styles|all] [--games N] [--seed S] [--threads T] [--house]");
-                println!("  --house  use the group's house rules (house pace + defender-sees dice) as the base config");
+                println!("  --house  use the group's house rules (opener circle, one-by-one dice, climb/ford cost 1) as the base config");
                 std::process::exit(0);
             }
             e => a.experiment = e.to_string(),
@@ -64,7 +66,12 @@ fn game_line(label: &str, s: &Summary) {
 }
 
 fn seats_line(s: &Summary) {
-    let seats: Vec<String> = s.seat_wins.iter().enumerate().map(|(i, w)| format!("seat {}: {}", i + 1, pct(*w))).collect();
+    let seats: Vec<String> = s
+        .seat_wins
+        .iter()
+        .enumerate()
+        .map(|(i, w)| format!("seat {}: {}", i + 1, pct(*w)))
+        .collect();
     println!("{:<22} {}", "  win share by seat", seats.join("  "));
 }
 
@@ -77,7 +84,9 @@ fn strategy_table(strats: &[Strategy], s: &Summary) {
         }
     }
     for name in names {
-        let idx: Vec<usize> = (0..strats.len()).filter(|&i| strats[i].name == name).collect();
+        let idx: Vec<usize> = (0..strats.len())
+            .filter(|&i| strats[i].name == name)
+            .collect();
         let k = idx.len() as f64;
         let w: f64 = idx.iter().map(|&i| s.strategy_wins[i]).sum::<f64>() / k;
         let ct: f64 = idx.iter().map(|&i| s.card_troops[i]).sum::<f64>() / k;
@@ -94,13 +103,26 @@ fn strategy_table(strats: &[Strategy], s: &Summary) {
             bf
         );
     }
-    println!("  (fair share with {} players = {})", strats.len(), pct(1.0 / strats.len() as f64));
+    println!(
+        "  (fair share with {} players = {})",
+        strats.len(),
+        pct(1.0 / strats.len() as f64)
+    );
 }
 
 fn base(a: &Args) -> Config {
     if a.house {
-        Config { timeline: Timeline::HousePace, dice: DiceRule::DefenderOneByOne,
-        terrain: TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1, ..TerrainCombat::default() }, ..Config::default() }
+        Config {
+            timeline: Timeline::HouseCircle,
+            last_century_round: true,
+            dice: DiceRule::DefenderOneByOne,
+            terrain: TerrainCombat {
+                mountain_climb_cost: 1,
+                river_cross_cost: 1,
+                ..TerrainCombat::default()
+            },
+            ..Config::default()
+        }
     } else {
         Config::default()
     }
@@ -110,8 +132,27 @@ fn pace(a: &Args) {
     let b = base(a);
     header("Timeline pace (4 balanced bots)", a, &b);
     let strats = [Strategy::BALANCED; 4];
-    for (label, tl) in [("official", Timeline::Official), ("house pace", Timeline::HousePace), ("no timeline", Timeline::Off)] {
-        let s = run(Config { timeline: tl, ..b }, &strats, a.games, a.seed, a.threads);
+    for (label, tl, fin, last) in [
+        ("official", Timeline::Official, false, false),
+        ("house pace", Timeline::HousePace, false, false),
+        ("circle from opener", Timeline::HouseCircle, false, false),
+        ("circle + finish round", Timeline::HouseCircle, true, false),
+        (
+            "circle, 14th to round end",
+            Timeline::HouseCircle,
+            false,
+            true,
+        ),
+        ("house pace + finish rnd", Timeline::HousePace, true, false),
+        ("no timeline", Timeline::Off, false, false),
+    ] {
+        let cfg = Config {
+            timeline: tl,
+            finish_round: fin,
+            last_century_round: last,
+            ..b
+        };
+        let s = run(cfg, &strats, a.games, a.seed, a.threads);
         game_line(label, &s);
         seats_line(&s);
     }
@@ -121,7 +162,10 @@ fn dice(a: &Args) {
     let b = base(a);
     header("Dice rule (4 balanced bots)", a, &b);
     let strats = [Strategy::BALANCED; 4];
-    for (label, d) in [("classic", DiceRule::Classic), ("defender sees", DiceRule::DefenderSees)] {
+    for (label, d) in [
+        ("classic", DiceRule::Classic),
+        ("defender sees", DiceRule::DefenderSees),
+    ] {
         let s = run(Config { dice: d, ..b }, &strats, a.games, a.seed, a.threads);
         game_line(label, &s);
         seats_line(&s);
@@ -131,9 +175,23 @@ fn dice(a: &Args) {
 fn cards(a: &Args) {
     let b = base(a);
     header("Card trading: when to cash in", a, &b);
-    let strats = [Strategy::TRADE_AT_3, Strategy::BALANCED, Strategy::TRADE_AT_8, Strategy::HOARDER];
-    for (label, cd) in [("1 card per capture", CardDraw::PerCapture), ("max 1 card per turn", CardDraw::OnePerTurn)] {
-        let s = run(Config { card_draw: cd, ..b }, &strats, a.games, a.seed, a.threads);
+    let strats = [
+        Strategy::TRADE_AT_3,
+        Strategy::BALANCED,
+        Strategy::TRADE_AT_8,
+        Strategy::HOARDER,
+    ];
+    for (label, cd) in [
+        ("1 card per capture", CardDraw::PerCapture),
+        ("max 1 card per turn", CardDraw::OnePerTurn),
+    ] {
+        let s = run(
+            Config { card_draw: cd, ..b },
+            &strats,
+            a.games,
+            a.seed,
+            a.threads,
+        );
         println!("-- {label} (balanced trades at 6, hoarder at 10)");
         game_line("", &s);
         strategy_table(&strats, &s);
@@ -143,7 +201,12 @@ fn cards(a: &Args) {
 fn powers(a: &Args) {
     let b = base(a);
     header("Power cards: flip or not", a, &b);
-    let strats = [Strategy::FLIPPER, Strategy::NEVER_FLIP, Strategy::FLIPPER, Strategy::NEVER_FLIP];
+    let strats = [
+        Strategy::FLIPPER,
+        Strategy::NEVER_FLIP,
+        Strategy::FLIPPER,
+        Strategy::NEVER_FLIP,
+    ];
     let s = run(b, &strats, a.games, a.seed, a.threads);
     game_line("", &s);
     strategy_table(&strats, &s);
@@ -152,7 +215,12 @@ fn powers(a: &Args) {
 fn styles(a: &Args) {
     let b = base(a);
     header("Play styles", a, &b);
-    let strats = [Strategy::AGGRESSIVE, Strategy::BALANCED, Strategy::CAUTIOUS, Strategy::HOARDER];
+    let strats = [
+        Strategy::AGGRESSIVE,
+        Strategy::BALANCED,
+        Strategy::CAUTIOUS,
+        Strategy::HOARDER,
+    ];
     let s = run(b, &strats, a.games, a.seed, a.threads);
     game_line("", &s);
     strategy_table(&strats, &s);
@@ -179,5 +247,9 @@ fn main() {
             std::process::exit(2);
         }
     }
-    eprintln!("\ndone in {:.1}s on {} threads", t0.elapsed().as_secs_f64(), a.threads);
+    eprintln!(
+        "\ndone in {:.1}s on {} threads",
+        t0.elapsed().as_secs_f64(),
+        a.threads
+    );
 }

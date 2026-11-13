@@ -5,7 +5,7 @@
     "EventsSheet1.dc.html": {
       "h": 1056,
       "page": "events",
-      "title": "Event cards 1/4: 5th-7th century",
+      "title": "Event cards 1/4: 5th-7th century (one side)",
       "w": 816,
       "x": 0,
       "y": 0
@@ -53,7 +53,7 @@
     "RulesBack.dc.html": {
       "h": 1056,
       "page": "rules",
-      "title": "House rules, back",
+      "title": "Letter: BACK",
       "w": 816,
       "x": 896,
       "y": 0
@@ -61,7 +61,7 @@
     "RulesFront.dc.html": {
       "h": 1056,
       "page": "rules",
-      "title": "House rules, front",
+      "title": "Letter: FRONT",
       "w": 816,
       "x": 0,
       "y": 0
@@ -69,57 +69,89 @@
     "TreatyCards.dc.html": {
       "h": 1056,
       "page": "diplomacy",
-      "title": "Option B: treaty cards (tick with dry-erase)",
+      "title": "Option B: treaty cards (cavalry track, no marker)",
       "w": 816,
       "x": 896,
       "y": 0
     },
     "PlaqueSheet1.dc.html": {
       "h": 1056,
-      "page": "eventlayouts",
-      "title": "Option 2 plaques 1/4: 5th-7th century",
+      "page": "plaques",
+      "title": "Sheet 1 FRONT: V, VII, IX",
       "w": 816,
       "x": 0,
       "y": 0
     },
     "PlaqueSheet2.dc.html": {
       "h": 1056,
-      "page": "eventlayouts",
-      "title": "Option 2 plaques 2/4: 8th-10th century",
+      "page": "plaques",
+      "title": "Sheet 1 BACK: VI, VIII, X",
       "w": 816,
       "x": 896,
       "y": 0
     },
     "PlaqueSheet3.dc.html": {
       "h": 1056,
-      "page": "eventlayouts",
-      "title": "Option 2 plaques 3/4: 11th-13th century",
+      "page": "plaques",
+      "title": "Sheet 2 FRONT: XI, XIII, how-to",
       "w": 816,
       "x": 1792,
       "y": 0
     },
     "PlaqueSheet4.dc.html": {
       "h": 1056,
-      "page": "eventlayouts",
-      "title": "Option 2 plaques 4/4: 14th century, how-to, blank",
+      "page": "plaques",
+      "title": "Sheet 2 BACK: XII, XIV, blank",
       "w": 816,
       "x": 2688,
       "y": 0
     },
     "EraBoard1.dc.html": {
       "h": 816,
-      "page": "eventlayouts",
-      "title": "Option 3 era board, left half: 5th-9th century",
+      "page": "eraboard",
+      "title": "FRONT: 5th-9th century",
       "w": 1056,
       "x": 0,
-      "y": 1436
+      "y": 0
     },
     "EraBoard2.dc.html": {
       "h": 816,
-      "page": "eventlayouts",
-      "title": "Option 3 era board, right half: 10th-14th century",
+      "page": "eraboard",
+      "title": "BACK: 10th-14th century (flip on short edge)",
       "w": 1056,
       "x": 1136,
+      "y": 0
+    },
+    "RulesA5p1.dc.html": {
+      "h": 1056,
+      "page": "rules",
+      "title": "A5 sheet 1 FRONT: page 1",
+      "w": 816,
+      "x": 0,
+      "y": 1436
+    },
+    "RulesA5p2.dc.html": {
+      "h": 1056,
+      "page": "rules",
+      "title": "A5 sheet 1 BACK: page 2",
+      "w": 816,
+      "x": 896,
+      "y": 1436
+    },
+    "RulesA5p3.dc.html": {
+      "h": 1056,
+      "page": "rules",
+      "title": "A5 sheet 2 FRONT: page 3",
+      "w": 816,
+      "x": 1792,
+      "y": 1436
+    },
+    "RulesA5p4.dc.html": {
+      "h": 1056,
+      "page": "rules",
+      "title": "A5 sheet 2 BACK: page 4",
+      "w": 816,
+      "x": 2688,
       "y": 1436
     }
   },
@@ -154,8 +186,8 @@
     "pltitle": {
       "kind": "title1",
       "maxW": 3504,
-      "page": "eventlayouts",
-      "text": "Option 2: one plaque per century (10 plaques, 7.5 x 3.2 in)",
+      "page": "plaques",
+      "text": "Century plaques: 6 plaques, 7.5 x 3.2 in, printed on both sides (flip on long edge)",
       "w": 240,
       "x": 0,
       "y": -260
@@ -163,11 +195,11 @@
     "ebtitle": {
       "kind": "title1",
       "maxW": 2192,
-      "page": "eventlayouts",
-      "text": "Option 3: era board, two sheets side by side",
+      "page": "eraboard",
+      "text": "Era board: one landscape sheet, both sides (flip on short edge)",
       "w": 240,
       "x": 0,
-      "y": 1176
+      "y": -260
     },
     "ovtitle": {
       "kind": "title1",
@@ -182,10 +214,19 @@
       "kind": "title1",
       "maxW": 1712,
       "page": "rules",
-      "text": "House rules reference: print double-sided",
+      "text": "House rules: letter (1 sheet, both sides) or A5 book size (2 sheets, both sides, cut on the marks)",
       "w": 240,
       "x": 0,
       "y": -260
+    },
+    "rla5": {
+      "kind": "title1",
+      "maxW": 3504,
+      "page": "rules",
+      "text": "A5 book size: trim on the corner marks",
+      "w": 240,
+      "x": 0,
+      "y": 1176
     }
   },
   "order": [
@@ -194,16 +235,20 @@
     "EventsSheet2.dc.html",
     "EventsSheet3.dc.html",
     "EventsSheet4.dc.html",
-    "PactSeals.dc.html",
-    "TreatyCards.dc.html",
-    "RulesFront.dc.html",
-    "RulesBack.dc.html",
     "PlaqueSheet1.dc.html",
     "PlaqueSheet2.dc.html",
     "PlaqueSheet3.dc.html",
     "PlaqueSheet4.dc.html",
     "EraBoard1.dc.html",
-    "EraBoard2.dc.html"
+    "EraBoard2.dc.html",
+    "PactSeals.dc.html",
+    "TreatyCards.dc.html",
+    "RulesFront.dc.html",
+    "RulesBack.dc.html",
+    "RulesA5p1.dc.html",
+    "RulesA5p2.dc.html",
+    "RulesA5p3.dc.html",
+    "RulesA5p4.dc.html"
   ],
   "pages": [
     {
@@ -215,8 +260,12 @@
       "name": "Century event cards"
     },
     {
-      "id": "eventlayouts",
-      "name": "Event plaques and era board"
+      "id": "plaques",
+      "name": "Century plaques (2 sheets, both sides)"
+    },
+    {
+      "id": "eraboard",
+      "name": "Era board (1 sheet, both sides)"
     },
     {
       "id": "diplomacy",
@@ -224,7 +273,7 @@
     },
     {
       "id": "rules",
-      "name": "House rules sheet"
+      "name": "House rules: letter or A5"
     }
   ],
   "title": "Medieval England Table Pieces"

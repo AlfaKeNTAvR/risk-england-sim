@@ -48,7 +48,9 @@ Standard library only (written in a sandbox without crates.io). Adding `rand`, `
 - Power losses never take a territory below 1 troop. Fixed losses (lose 2 / lose 3) must come from a territory that can take the full loss if one exists, else the largest.
 
 ### House rules (switches in `Config`)
-- `Timeline::HousePace`: cavalry moves 1 space after every full round; each player rolls a d6 after their turn and a 6 moves it 1 extra space. No gates.
+- `Timeline::HouseCircle` + `last_century_round` (house rule since Nov 13): the player whose turn moves the cavalry **opens** the new century: they roll its event and put one of their own cavalry on it. A century lasts until play comes back round to its opener, or ends early when any player rolls a 6 after their turn. The 14th century instead ends at the end of a round (after the last player in turn order) or on a 6; reaching the 15th ends the game at once. At the start the first player opens the 5th century. Ties for leader / fewest territories stay "earliest in turn order" (`tie_roll` tested: a roll-off barely changes seat shares).
+- `Timeline::HousePace`: the earlier house pace. Cavalry moves 1 space after every full round; each player rolls a d6 after their turn and a 6 moves it 1 extra space. No gates.
+- `finish_round`, `sudden_end`: tested endings (finish the round at the 15th; keep playing until a roll ends it). Both rejected, see the timeline table.
 - `DiceRule::DefenderOneByOne` (house rule since Nov 11): attacker rolls first; the defender rolls one die, looks, then may roll a second. `DefenderSees` (pick 1 or 2 up front) is the earlier variant.
 - `TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1 }` (house rule since Nov 11): attacking into a mountain territory or across a river, the attacker removes 1 committed troop before the first roll, once per battle (2 when both, only Leeds -> Beeston).
 - `CardDraw::OnePerTurn`: classic Risk card draw, for comparison.
@@ -70,9 +72,21 @@ Standard library only (written in a sandbox without crates.io). Adding `rand`, `
 |---|---|---|---|
 | Official | 3.9 | 3.5 | 34% / 27% / 22% / 17% |
 | House pace | 6.3 | 5.9 | 25% / 26% / 25% / 25% |
+| Opener circle, 14th ends at round end (house rule) | 7.6 | 7.4 | 26% / 25% / 25% / 23% |
 | No timeline | 20.0 | 16.0 | 32% / 27% / 22% / 19% |
 
 The official timeline ends mid-round, so earlier seats get more turns: seat 1 wins twice as often as seat 4. The house pace advances on round boundaries and removes the seat bias almost completely, while giving ~70% more turns.
+
+**Century opener (Nov 13)**, house dice and terrain, 20,000 games, seats 1/2/3/4. Bots without events / with the full event deck (balanced x2, aggressive, hoarder):
+
+| Ending | Turns per player | No events | Event deck |
+|---|---|---|---|
+| House pace | 6.1 | 27 / 25 / 25 / 23 | 25 / 26 / 23 / 26 |
+| Circle, game ends at once on the 15th | 7.7 | 30 / 27 / 24 / 20 | 30 / 27 / 21 / 21 |
+| Circle + finish the round | 8.0 | 25 / 25 / 25 / 25 | 20 / 23 / 25 / 32 |
+| Circle, 14th ends at round end (chosen) | 7.4 | 26 / 25 / 25 / 23 | 23 / 25 / 24 / 28 |
+
+The last turn of the game is worth a lot once events make the end swingy (comebacks 22% → 33%): finishing the round always gives it to seat 4. Ending the 14th century at a round boundary (or on a 6) keeps turns nearly equal and the last turn mostly random. A random "sudden end" after the 15th (roll 4+/5+/6 after each turn) did not fix seat 1's edge (30/27/21/21).
 
 **Dice rule** (house pace): `DefenderSees` barely changes outcomes for these bots (battles won 85.7% → 84.9%), because they only attack at 1.5:1 or better, where the rule matters little. It mostly bites in even fights, which these bots avoid.
 
@@ -126,6 +140,8 @@ Whole games (house rules, events, pacts): mountain conquest rate 81% → 64% wit
 
 ## Alliance pacts: balance report
 
+Rerun with the opener circle (Nov 13): loyal 37.6% ±0.7, opportunist 24.5%, backstabber 17.0%, no pacts 20.8%. Longer games give kept pacts more time to pay out, so loyalty leans further ahead than under house pace (33.4%).
+
 `cargo run --release --example pact_report -- 20000` (house pace, defender-sees dice, full event deck, 4 players).
 `Config.pacts = Some(PactRules::default())`; bots: `LOYAL` (never betrays), `OPPORTUNIST` (betrays when attacking the partner scores 1.5x the best other attack), `BACKSTABBER` (betrays at 1.0x), `NO_PACTS`. Bots propose to the neighbour pressing hardest on their borders, never to their own best target, and refuse a leader holding 40%+ of the board.
 
@@ -158,7 +174,7 @@ Earlier variants:
 
 `docs/house-rules.html` (house rules with a rollable century event deck, 30 events) and `docs/board-graph.html` (interactive board graph) are the pages the group uses at the table. Keep them in sync with the engine when rules change.
 
-`docs/print/` holds the printable table pieces (sources of the "Medieval England Table Pieces" design canvas, letter size): 4 sheets of century event cards (2.4 x 3.4 in), century plaques (one per century, 3 events each) and a two-sheet era board as event layout options, two diplomacy options (square purple/orange pact seals rotated to count down, or treaty cards ticked with dry-erase), all pieces with a 4 mm gap and 5 mm clear inner edge for laminating, knife-cutting and 5 mm corner punching, and a two-sided house rules reference. Event card text and pact rules must match `src/events.rs` and `PactRules::default()`.
+`docs/print/` holds the printable table pieces (sources of the "Medieval England Table Pieces" design canvas, letter size): 4 sheets of century event cards (2.4 x 3.4 in), 6 double-sided century plaques (2 sheets) and a double-sided era board as event layout options, two diplomacy options (square purple/orange pact seals rotated to count down, or treaty cards with a cavalry track), all pieces with a 4 mm gap and 5 mm clear inner edge for cutting and 5 mm corner punching, and the house rules as a double-sided letter sheet or four A5 book-size pages. Printer settings and duplex alignment: `docs/PRINTING.md`. Event card text and pact rules must match `src/events.rs` and `PactRules::default()`.
 
 ## Roadmap
 1. ~~Alliance pacts~~ done (see above).

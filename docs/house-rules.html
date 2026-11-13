@@ -77,7 +77,7 @@ button.roll:hover{background:var(--bg)}
   </header>
 
   <nav aria-label="Sections">
-    <a href="#changes">At a glance</a><a href="#timeline">Timeline</a><a href="#dice">Dice</a><a href="#terrain">Rivers and mountains</a><a href="#cards">Cards</a><a href="#pacts">Pacts</a><a href="#events">Century events</a>
+    <a href="#changes">At a glance</a><a href="#timeline">Centuries</a><a href="#dice">Dice</a><a href="#terrain">Rivers and mountains</a><a href="#cards">Cards</a><a href="#pacts">Pacts</a><a href="#events">Century events</a>
   </nav>
 
   <section class="card" id="changes">
@@ -85,7 +85,7 @@ button.roll:hover{background:var(--bg)}
     <div class="tbl"><table>
       <thead><tr><th>Topic</th><th>Rulebook</th><th>Our rule</th></tr></thead>
       <tbody>
-        <tr><td>Timeline</td><td>Cavalry moves after every player's turn, 4 dice gates</td><td>Moves after every full round, plus 1 extra space on a 6</td></tr>
+        <tr><td>Timeline</td><td>Cavalry moves after every player's turn, 4 dice gates</td><td>Each century runs one circle from the player who opened it, or ends early on a 6</td></tr>
         <tr><td>Defence dice</td><td>Both sides roll together</td><td>Attacker rolls first, defender rolls one die at a time</td></tr>
         <tr><td>Rivers</td><td>"Territories with rivers"</td><td>On borders: 8 river crossings</td></tr>
         <tr><td>Terrain in attacks</td><td>No effect</td><td>Attacker loses 1 troop climbing a mountain or fording a river</td></tr>
@@ -98,12 +98,12 @@ button.roll:hover{background:var(--bg)}
   </section>
 
   <section class="card" id="timeline">
-    <h2>Timeline pace</h2>
+    <h2>Centuries</h2>
     <ol>
-      <li>The cavalry starts on the 5th century.</li>
-      <li>After each player's turn, that player rolls a die. On a 6 the cavalry moves 1 space.</li>
-      <li>After every full round, the cavalry moves 1 space. Ignore the printed dice gates.</li>
-      <li>When it reaches the 15th century, the game ends. Most territories wins.</li>
+      <li><b>Who starts:</b> everyone rolls a die; highest goes first, re-roll ties. Deal the territory cards as the rulebook says (the players going last get any extra). The cavalry starts on the 5th century, and the first player opens it.</li>
+      <li><b>Opening a century:</b> whoever's turn moves the golden cavalry opens the next century. They roll its event, mark the event with the yellow cavalry, and stand one of their own cavalry on the century.</li>
+      <li><b>Moving on:</b> after each player's turn, that player rolls a die. On a 6 the cavalry moves 1 space. Otherwise it moves when play comes back round to the opener, so a century lasts at most one full circle. Ignore the printed dice gates.</li>
+      <li><b>The end:</b> the 14th century ends at the end of a round (after the last player in turn order), or on a 6. Reaching the 15th ends the game at once. Most territories wins.</li>
     </ol>
   </section>
 
@@ -156,8 +156,8 @@ button.roll:hover{background:var(--bg)}
     <p>There are two pacts in the game, purple and orange. A player can be in one pact at a time.</p>
     <ol>
       <li><b>Sign:</b> two players agree a length of 1, 2 or 3 turns each and take a treaty card. Each places territory cards face up under their side of it, worth exactly as many stars as the pact lasts: 1 star for 1 turn, 2 stars for 2 turns, 3 stars for 3 turns. If you can't make the exact amount, you can't sign.</li>
-      <li><b>During:</b> the two may not attack each other. At the end of each of your turns, cross off one of your boxes on the treaty card.</li>
-      <li><b>Kept:</b> when both have crossed off all their turns, each takes back their stake plus bonus cards from the deck: pact length minus 1, so at most 2. Renewing straight away is fine.</li>
+      <li><b>During:</b> the two may not attack each other. Each signer stands one of their cavalry on their number of turns on the treaty card. At the end of each of your turns, move it one space on.</li>
+      <li><b>Kept:</b> when both cavalry reach “kept”, each takes back their stake plus bonus cards from the deck: pact length minus 1, so at most 2. Renewing straight away is fine.</li>
       <li><b>Broken:</b> the moment one attacks the other, the victim takes both stakes. The betrayer draws territory cards as normal that turn, but takes an oathbreaker seal: no pacts until the cavalry moves.</li>
     </ol>
     <p class="sub">A handshake truce without a stake is still allowed, as in normal Risk. It just isn't binding.</p>
@@ -165,7 +165,7 @@ button.roll:hover{background:var(--bg)}
 
   <section class="card" id="events">
     <h2>Century events</h2>
-    <p>Each century is an era: its event changes how the game works for as long as the cavalry stays there. When the cavalry enters a new century, roll a die: 1-2 is the first event, 3-4 the second, 5-6 the third. Effects marked <b>At once</b> happen when the century begins; everything else lasts the whole century. Every century happens: a 6 just moves the cavalry on early, so that century is shorter. Losses never take a territory below 1 troop.</p>
+    <p>Each century is an era: its event changes how the game works for as long as the cavalry stays there. When a century opens, the opener rolls a die: 1-2 is the first event, 3-4 the second, 5-6 the third. Mark it with the yellow cavalry. Effects marked <b>At once</b> happen when the century begins; everything else lasts the whole century. Every century happens: a 6 just moves the cavalry on early, so that century is shorter. Losses never take a territory below 1 troop.</p>
     <p>Events escalate and lean against the leader. Early centuries bring boons and small shocks, the middle ones change how fighting works, and late ones break up the leader's position.</p>
     <p><b>The leader</b> is the player with the most territories at that moment (on a tie, the tied player earliest in turn order). <b>Defect:</b> the territory switches to the player with the fewest territories; remove its troops and place 1 of the new owner's troops there. No card is drawn for it. <b>Thinnest</b> means fewest troops; on a tie, the owner picks.</p>
     <p class="sub">The 15th century has no events: reaching it ends the game.</p>

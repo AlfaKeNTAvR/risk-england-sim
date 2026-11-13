@@ -69,96 +69,164 @@ use EdgeKind::*;
 use Region::*;
 
 const fn t(name: &'static str, region: Region, mountain: bool, stars: u8) -> Territory {
-    Territory { name, region, mountain, stars }
+    Territory {
+        name,
+        region,
+        mountain,
+        stars,
+    }
 }
 
 pub static TERRITORIES: [Territory; N_TERR] = [
     // North (9)
-    t("Dunstanburgh", North, false, 2),       // 0
-    t("Carlisle", North, true, 2),            // 1
-    t("Barnard", North, false, 1),            // 2
-    t("Brougham", North, true, 1),            // 3
-    t("Piel", North, false, 1),               // 4
-    t("Cliffords", North, true, 2),           // 5
-    t("Whalley", North, false, 2),            // 6
-    t("Leeds", North, false, 1),              // 7
-    t("Conisbrough", North, false, 2),        // 8
+    t("Dunstanburgh", North, false, 2), // 0
+    t("Carlisle", North, true, 2),      // 1
+    t("Barnard", North, false, 1),      // 2
+    t("Brougham", North, true, 1),      // 3
+    t("Piel", North, false, 1),         // 4
+    t("Cliffords", North, true, 2),     // 5
+    t("Whalley", North, false, 2),      // 6
+    t("Leeds", North, false, 1),        // 7
+    t("Conisbrough", North, false, 2),  // 8
     // Midlands (11)
-    t("Beeston", Midlands, true, 2),          // 9
-    t("Bolsover", Midlands, false, 2),        // 10
-    t("Nottingham", Midlands, false, 1),      // 11
-    t("Bolingbroke", Midlands, false, 2),     // 12
-    t("Wall", Midlands, true, 2),             // 13
-    t("Stokesay", Midlands, false, 2),        // 14
+    t("Beeston", Midlands, true, 2),            // 9
+    t("Bolsover", Midlands, false, 2),          // 10
+    t("Nottingham", Midlands, false, 1),        // 11
+    t("Bolingbroke", Midlands, false, 2),       // 12
+    t("Wall", Midlands, true, 2),               // 13
+    t("Stokesay", Midlands, false, 2),          // 14
     t("Ashby de la Zouch", Midlands, false, 1), // 15
-    t("Kenilworth", Midlands, false, 1),      // 16
-    t("Leigh Court", Midlands, false, 1),     // 17
-    t("Goodrich", Midlands, false, 1),        // 18
-    t("Bosworth", Midlands, false, 2),        // 19
+    t("Kenilworth", Midlands, false, 1),        // 16
+    t("Leigh Court", Midlands, false, 1),       // 17
+    t("Goodrich", Midlands, false, 1),          // 18
+    t("Bosworth", Midlands, false, 2),          // 19
     // East Anglia (6)
-    t("Castle Acre", EastAnglia, false, 2),   // 20
-    t("Longthorpe", EastAnglia, false, 2),    // 21
-    t("Framlingham", EastAnglia, false, 2),   // 22
-    t("Bushmede", EastAnglia, false, 1),      // 23
-    t("Berkhamstead", EastAnglia, false, 1),  // 24
-    t("Colchester", EastAnglia, false, 2),    // 25
+    t("Castle Acre", EastAnglia, false, 2),  // 20
+    t("Longthorpe", EastAnglia, false, 2),   // 21
+    t("Framlingham", EastAnglia, false, 2),  // 22
+    t("Bushmede", EastAnglia, false, 1),     // 23
+    t("Berkhamstead", EastAnglia, false, 1), // 24
+    t("Colchester", EastAnglia, false, 2),   // 25
     // South East (9)
-    t("Uffington", SouthEast, false, 2),      // 26
-    t("High Wycombe", SouthEast, false, 1),   // 27
-    t("Donnington", SouthEast, false, 1),     // 28
-    t("Jewel Tower", SouthEast, false, 1),    // 29
-    t("Farnham", SouthEast, false, 1),        // 30
-    t("Portchester", SouthEast, false, 2),    // 31
-    t("Dover", SouthEast, false, 2),          // 32
-    t("Battle", SouthEast, false, 2),         // 33
-    t("Carisbrooke", SouthEast, false, 1),    // 34
+    t("Uffington", SouthEast, false, 2),    // 26
+    t("High Wycombe", SouthEast, false, 1), // 27
+    t("Donnington", SouthEast, false, 1),   // 28
+    t("Jewel Tower", SouthEast, false, 1),  // 29
+    t("Farnham", SouthEast, false, 1),      // 30
+    t("Portchester", SouthEast, false, 2),  // 31
+    t("Dover", SouthEast, false, 2),        // 32
+    t("Battle", SouthEast, false, 2),       // 33
+    t("Carisbrooke", SouthEast, false, 1),  // 34
     // West Country (7)
-    t("St Briavels", WestCountry, true, 2),   // 35
-    t("Old Sarum", WestCountry, true, 2),     // 36
-    t("Farleigh", WestCountry, false, 2),     // 37
-    t("Sherborne", WestCountry, false, 1),    // 38
-    t("Okehampton", WestCountry, false, 2),   // 39
-    t("Tintagel", WestCountry, false, 2),     // 40
-    t("Scilly", WestCountry, false, 1),       // 41
+    t("St Briavels", WestCountry, true, 2), // 35
+    t("Old Sarum", WestCountry, true, 2),   // 36
+    t("Farleigh", WestCountry, false, 2),   // 37
+    t("Sherborne", WestCountry, false, 1),  // 38
+    t("Okehampton", WestCountry, false, 2), // 39
+    t("Tintagel", WestCountry, false, 2),   // 40
+    t("Scilly", WestCountry, false, 1),     // 41
 ];
 
 pub static EDGES: &[(&str, &str, EdgeKind)] = &[
-    ("Dunstanburgh", "Carlisle", Land), ("Dunstanburgh", "Barnard", Land),
-    ("Carlisle", "Barnard", Land), ("Carlisle", "Brougham", Land), ("Carlisle", "Piel", Land),
-    ("Barnard", "Brougham", Land), ("Barnard", "Cliffords", Land),
-    ("Brougham", "Piel", Land), ("Brougham", "Whalley", Land), ("Brougham", "Cliffords", Land),
-    ("Piel", "Whalley", Land), ("Cliffords", "Whalley", Land), ("Cliffords", "Leeds", Land),
-    ("Cliffords", "Conisbrough", Land), ("Whalley", "Leeds", Land), ("Whalley", "Beeston", Land),
-    ("Leeds", "Conisbrough", River), ("Leeds", "Beeston", River), ("Leeds", "Bolsover", River),
-    ("Conisbrough", "Bolsover", Land), ("Conisbrough", "Nottingham", Land), ("Conisbrough", "Bolingbroke", Land),
-    ("Beeston", "Bolsover", Land), ("Beeston", "Wall", Land), ("Beeston", "Stokesay", Land),
-    ("Bolsover", "Nottingham", Land), ("Bolsover", "Wall", Land), ("Bolsover", "Ashby de la Zouch", Land),
-    ("Nottingham", "Bolingbroke", Land), ("Nottingham", "Ashby de la Zouch", Land),
-    ("Bolingbroke", "Ashby de la Zouch", Land), ("Bolingbroke", "Longthorpe", Land), ("Bolingbroke", "Castle Acre", Land),
-    ("Wall", "Stokesay", Land), ("Wall", "Kenilworth", Land), ("Wall", "Leigh Court", Land),
-    ("Stokesay", "Leigh Court", Land), ("Stokesay", "Goodrich", Land),
-    ("Ashby de la Zouch", "Kenilworth", Land), ("Ashby de la Zouch", "Bosworth", Land), ("Ashby de la Zouch", "Longthorpe", Land),
-    ("Kenilworth", "Bosworth", Land), ("Kenilworth", "Leigh Court", Land), ("Kenilworth", "St Briavels", Land), ("Kenilworth", "Uffington", Land),
-    ("Leigh Court", "Goodrich", Land), ("Leigh Court", "St Briavels", Land), ("Goodrich", "St Briavels", Land),
-    ("Bosworth", "Longthorpe", Land), ("Bosworth", "Bushmede", Land), ("Bosworth", "High Wycombe", Land), ("Bosworth", "Uffington", Land),
-    ("Castle Acre", "Longthorpe", Land), ("Castle Acre", "Framlingham", Land),
-    ("Longthorpe", "Framlingham", Land), ("Longthorpe", "Bushmede", Land), ("Longthorpe", "Berkhamstead", Land), ("Longthorpe", "Colchester", Land),
-    ("Framlingham", "Colchester", Land), ("Bushmede", "Berkhamstead", Land), ("Bushmede", "High Wycombe", Land),
-    ("Berkhamstead", "Colchester", Land), ("Berkhamstead", "High Wycombe", Land), ("Berkhamstead", "Jewel Tower", Land),
-    ("Colchester", "Jewel Tower", Land), ("Colchester", "Dover", River),
-    ("Uffington", "High Wycombe", Land), ("Uffington", "Donnington", Land), ("Uffington", "St Briavels", Land), ("Uffington", "Old Sarum", Land),
-    ("High Wycombe", "Donnington", Land), ("High Wycombe", "Jewel Tower", Land),
-    ("Donnington", "Jewel Tower", Land), ("Donnington", "Old Sarum", Land),
-    ("Donnington", "Portchester", River), ("Donnington", "Farnham", River),
-    ("Jewel Tower", "Farnham", River), ("Jewel Tower", "Dover", River),
-    ("Farnham", "Portchester", Land), ("Farnham", "Dover", Land), ("Farnham", "Battle", Land),
-    ("Portchester", "Battle", Land), ("Portchester", "Old Sarum", Land), ("Portchester", "Sherborne", Land),
+    ("Dunstanburgh", "Carlisle", Land),
+    ("Dunstanburgh", "Barnard", Land),
+    ("Carlisle", "Barnard", Land),
+    ("Carlisle", "Brougham", Land),
+    ("Carlisle", "Piel", Land),
+    ("Barnard", "Brougham", Land),
+    ("Barnard", "Cliffords", Land),
+    ("Brougham", "Piel", Land),
+    ("Brougham", "Whalley", Land),
+    ("Brougham", "Cliffords", Land),
+    ("Piel", "Whalley", Land),
+    ("Cliffords", "Whalley", Land),
+    ("Cliffords", "Leeds", Land),
+    ("Cliffords", "Conisbrough", Land),
+    ("Whalley", "Leeds", Land),
+    ("Whalley", "Beeston", Land),
+    ("Leeds", "Conisbrough", River),
+    ("Leeds", "Beeston", River),
+    ("Leeds", "Bolsover", River),
+    ("Conisbrough", "Bolsover", Land),
+    ("Conisbrough", "Nottingham", Land),
+    ("Conisbrough", "Bolingbroke", Land),
+    ("Beeston", "Bolsover", Land),
+    ("Beeston", "Wall", Land),
+    ("Beeston", "Stokesay", Land),
+    ("Bolsover", "Nottingham", Land),
+    ("Bolsover", "Wall", Land),
+    ("Bolsover", "Ashby de la Zouch", Land),
+    ("Nottingham", "Bolingbroke", Land),
+    ("Nottingham", "Ashby de la Zouch", Land),
+    ("Bolingbroke", "Ashby de la Zouch", Land),
+    ("Bolingbroke", "Longthorpe", Land),
+    ("Bolingbroke", "Castle Acre", Land),
+    ("Wall", "Stokesay", Land),
+    ("Wall", "Kenilworth", Land),
+    ("Wall", "Leigh Court", Land),
+    ("Stokesay", "Leigh Court", Land),
+    ("Stokesay", "Goodrich", Land),
+    ("Ashby de la Zouch", "Kenilworth", Land),
+    ("Ashby de la Zouch", "Bosworth", Land),
+    ("Ashby de la Zouch", "Longthorpe", Land),
+    ("Kenilworth", "Bosworth", Land),
+    ("Kenilworth", "Leigh Court", Land),
+    ("Kenilworth", "St Briavels", Land),
+    ("Kenilworth", "Uffington", Land),
+    ("Leigh Court", "Goodrich", Land),
+    ("Leigh Court", "St Briavels", Land),
+    ("Goodrich", "St Briavels", Land),
+    ("Bosworth", "Longthorpe", Land),
+    ("Bosworth", "Bushmede", Land),
+    ("Bosworth", "High Wycombe", Land),
+    ("Bosworth", "Uffington", Land),
+    ("Castle Acre", "Longthorpe", Land),
+    ("Castle Acre", "Framlingham", Land),
+    ("Longthorpe", "Framlingham", Land),
+    ("Longthorpe", "Bushmede", Land),
+    ("Longthorpe", "Berkhamstead", Land),
+    ("Longthorpe", "Colchester", Land),
+    ("Framlingham", "Colchester", Land),
+    ("Bushmede", "Berkhamstead", Land),
+    ("Bushmede", "High Wycombe", Land),
+    ("Berkhamstead", "Colchester", Land),
+    ("Berkhamstead", "High Wycombe", Land),
+    ("Berkhamstead", "Jewel Tower", Land),
+    ("Colchester", "Jewel Tower", Land),
+    ("Colchester", "Dover", River),
+    ("Uffington", "High Wycombe", Land),
+    ("Uffington", "Donnington", Land),
+    ("Uffington", "St Briavels", Land),
+    ("Uffington", "Old Sarum", Land),
+    ("High Wycombe", "Donnington", Land),
+    ("High Wycombe", "Jewel Tower", Land),
+    ("Donnington", "Jewel Tower", Land),
+    ("Donnington", "Old Sarum", Land),
+    ("Donnington", "Portchester", River),
+    ("Donnington", "Farnham", River),
+    ("Jewel Tower", "Farnham", River),
+    ("Jewel Tower", "Dover", River),
+    ("Farnham", "Portchester", Land),
+    ("Farnham", "Dover", Land),
+    ("Farnham", "Battle", Land),
+    ("Portchester", "Battle", Land),
+    ("Portchester", "Old Sarum", Land),
+    ("Portchester", "Sherborne", Land),
     ("Dover", "Battle", Land),
-    ("St Briavels", "Old Sarum", Land), ("St Briavels", "Farleigh", Land),
-    ("Old Sarum", "Farleigh", Land), ("Old Sarum", "Sherborne", Land), ("Farleigh", "Sherborne", Land),
-    ("Farleigh", "Okehampton", Land), ("Sherborne", "Okehampton", Land), ("Okehampton", "Tintagel", Land),
-    ("Whalley", "St Briavels", Sea), ("Barnard", "Bolingbroke", Sea), ("Bolingbroke", "Dover", Sea),
-    ("Dover", "Portchester", Sea), ("Portchester", "Carisbrooke", Sea), ("Tintagel", "Scilly", Sea),
+    ("St Briavels", "Old Sarum", Land),
+    ("St Briavels", "Farleigh", Land),
+    ("Old Sarum", "Farleigh", Land),
+    ("Old Sarum", "Sherborne", Land),
+    ("Farleigh", "Sherborne", Land),
+    ("Farleigh", "Okehampton", Land),
+    ("Sherborne", "Okehampton", Land),
+    ("Okehampton", "Tintagel", Land),
+    ("Whalley", "St Briavels", Sea),
+    ("Barnard", "Bolingbroke", Sea),
+    ("Bolingbroke", "Dover", Sea),
+    ("Dover", "Portchester", Sea),
+    ("Portchester", "Carisbrooke", Sea),
+    ("Tintagel", "Scilly", Sea),
 ];
 
 pub fn id(name: &str) -> usize {
@@ -181,7 +249,10 @@ impl Graph {
         let mut sea_routes = Vec::new();
         for &(a, b, k) in EDGES {
             let (a, b) = (id(a), id(b));
-            assert!(!adj[a].iter().any(|&(n, _)| n == b), "duplicate edge {a}-{b}");
+            assert!(
+                !adj[a].iter().any(|&(n, _)| n == b),
+                "duplicate edge {a}-{b}"
+            );
             adj[a].push((b, k));
             adj[b].push((a, k));
             if k == Sea {
@@ -192,7 +263,11 @@ impl Graph {
         for (i, t) in TERRITORIES.iter().enumerate() {
             region_members[t.region.idx()].push(i);
         }
-        Graph { adj, region_members, sea_routes }
+        Graph {
+            adj,
+            region_members,
+            sea_routes,
+        }
     }
 
     pub fn edge(&self, a: usize, b: usize) -> Option<EdgeKind> {
@@ -244,7 +319,9 @@ mod tests {
         let mut seen = [false; N_TERR];
         let mut stack = vec![0];
         while let Some(x) = stack.pop() {
-            if seen[x] { continue; }
+            if seen[x] {
+                continue;
+            }
             seen[x] = true;
             stack.extend(g.adj[x].iter().map(|&(n, _)| n));
         }

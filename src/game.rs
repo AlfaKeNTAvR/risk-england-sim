@@ -16,6 +16,10 @@ pub enum Timeline {
     /// House rule: 1 space after every full round, plus each player rolls a
     /// d6 after their turn and a 6 moves it 1 extra space. No gates.
     HousePace,
+    /// House rule (Nov 13): the player whose turn moved the cavalry opens the
+    /// new century. After each turn that player rolls; a 6 moves the cavalry.
+    /// Otherwise a century lasts at most one full circle of turns after it opened.
+    HouseCircle,
     /// Rulebook variation: no timeline, play until one army holds everything
     /// (capped by `max_rounds`).
     Off,
@@ -46,6 +50,19 @@ pub struct Config {
     /// Great Famine: 1-troop territories count half at the final count
     /// (false = they don't count at all).
     pub famine_half: bool,
+    /// When the cavalry reaches the 15th, finish the round so every seat gets
+    /// the same number of turns.
+    pub finish_round: bool,
+    /// Ties for leader or fewest territories are settled by a roll-off
+    /// (false = earliest in turn order).
+    pub tie_roll: bool,
+    /// Once the cavalry reaches the 15th, play goes on; after each turn that
+    /// player rolls a die and the game ends on this number or higher.
+    /// Overrides `finish_round`. None = off.
+    pub sudden_end: Option<u8>,
+    /// Opener circle only: the 14th century ends at the end of a round (after
+    /// the last player in turn order) instead of a circle from its opener.
+    pub last_century_round: bool,
     /// House rule: alliance pacts (None = no pacts).
     pub pacts: Option<PactRules>,
     /// House rule candidates: terrain in combat.
@@ -138,7 +155,11 @@ impl Pact {
         self.a == p || self.b == p
     }
     fn other(&self, p: usize) -> usize {
-        if self.a == p { self.b } else { self.a }
+        if self.a == p {
+            self.b
+        } else {
+            self.a
+        }
     }
 }
 
@@ -157,6 +178,10 @@ impl Default for Config {
             revolt_count: 3,
             famine_half: true,
             pacts: None,
+            finish_round: false,
+            tie_roll: false,
+            sudden_end: None,
+            last_century_round: false,
             terrain: TerrainCombat::default(),
         }
     }
@@ -192,7 +217,13 @@ impl Shared {
             ports[a] = true;
             ports[b] = true;
         }
-        Shared { graph, table: DefenderTable::build(), jewel_tower: id("Jewel Tower"), mission_ids, ports }
+        Shared {
+            graph,
+            table: DefenderTable::build(),
+            jewel_tower: id("Jewel Tower"),
+            mission_ids,
+            ports,
+        }
     }
 }
 
@@ -316,6 +347,10 @@ pub struct Game<'a> {
     pacts: Vec<Pact>,
     terrain_attacks: [u32; 3],
     terrain_wins: [u32; 3],
+    since_open: usize,
+    /// Tie-break rank per player (lower wins a tie). Re-rolled each century
+    /// when `cfg.tie_roll` is set.
+    tie_rank: Vec<usize>,
 }
 
 impl<'a> Game<'a> {
@@ -392,6 +427,8 @@ impl<'a> Game<'a> {
             pacts: Vec::new(),
             terrain_attacks: [0; 3],
             terrain_wins: [0; 3],
+            since_open: 0,
+            tie_rank: (0..strategies.len()).collect(),
         }
     }
 
@@ -401,12 +438,16 @@ impl<'a> Game<'a> {
 
     fn leader(&self) -> usize {
         let n = self.players.len();
-        (0..n).max_by_key(|&p| (self.count(p), std::cmp::Reverse(p))).unwrap()
+        (0..n)
+            .max_by_key(|&p| (self.count(p), std::cmp::Reverse(self.tie_rank[p])))
+            .unwrap()
     }
 
     fn weakest(&self) -> Option<usize> {
         let n = self.players.len();
-        (0..n).filter(|&p| self.players[p].alive).min_by_key(|&p| (self.count(p), p))
+        (0..n)
+            .filter(|&p| self.players[p].alive)
+            .min_by_key(|&p| (self.count(p), self.tie_rank[p]))
     }
 
     /// Lose troops on one territory, never below 1. Returns troops removed.
@@ -424,14 +465,18 @@ impl<'a> Game<'a> {
     /// The leader's `k` thinnest territories switch to the player with the
     /// fewest territories, with `defect_troops` troops each. No cards drawn.
     fn defect(&mut self, leader: usize, k: usize) {
-        let Some(w) = self.weakest().filter(|&w| w != leader) else { return };
+        let Some(w) = self.weakest().filter(|&w| w != leader) else {
+            return;
+        };
         let mut mine: Vec<usize> = (0..N_TERR).filter(|&t| self.owner[t] == leader).collect();
         if mine.len() <= k {
             return;
         }
         // Thinnest first; among equals prefer territories bordering the weakest player.
         mine.sort_by_key(|&t| {
-            let near = self.sh.graph.adj[t].iter().any(|&(n, _)| self.owner[n] == w);
+            let near = self.sh.graph.adj[t]
+                .iter()
+                .any(|&(n, _)| self.owner[n] == w);
             (self.troops[t], !near)
         });
         for &t in mine.iter().take(k) {
@@ -444,6 +489,10 @@ impl<'a> Game<'a> {
     /// immediate effect.
     #[allow(clippy::needless_range_loop)] // indexes several per-territory arrays
     fn begin_century(&mut self) {
+        self.since_open = 0;
+        if self.cfg.tie_roll {
+            self.rng.shuffle(&mut self.tie_rank);
+        }
         let space = self.cavalry;
         self.event = match self.cfg.events {
             EventMode::Off => None,
@@ -463,9 +512,15 @@ impl<'a> Game<'a> {
                 let x = self.troops[t];
                 lost += match e {
                     Ev::PlagueOfJustinian if x >= th::PLAGUE_6TH => self.shrink(t, x - 1),
-                    Ev::VikingRaids if self.sh.ports[t] && self.owner[t] == leader => self.shrink(t, x.saturating_sub(2)),
+                    Ev::VikingRaids if self.sh.ports[t] && self.owner[t] == leader => {
+                        self.shrink(t, x.saturating_sub(2))
+                    }
                     Ev::HardWinter if x >= th::WINTER_10TH => self.shrink(t, x - 2),
-                    Ev::HarryingOfTheNorth if TERRITORIES[t].region == Region::North && self.owner[t] == leader => self.shrink(t, x - x / 2),
+                    Ev::HarryingOfTheNorth
+                        if TERRITORIES[t].region == Region::North && self.owner[t] == leader =>
+                    {
+                        self.shrink(t, x - x / 2)
+                    }
                     Ev::BlackDeath if Some(self.owner[t]) != weakest => self.shrink(t, x - x / 2),
                     _ => 0,
                 };
@@ -477,7 +532,10 @@ impl<'a> Game<'a> {
             Some(Ev::TheAnarchy) => self.defect(leader, 2),
             Some(Ev::CampFever) => {
                 // The leader's largest army loses half.
-                if let Some(t) = (0..N_TERR).filter(|&t| self.owner[t] == leader).max_by_key(|&t| self.troops[t]) {
+                if let Some(t) = (0..N_TERR)
+                    .filter(|&t| self.owner[t] == leader)
+                    .max_by_key(|&t| self.troops[t])
+                {
                     let x = self.troops[t];
                     lost += self.shrink(t, x - x / 2);
                 }
@@ -533,17 +591,29 @@ impl<'a> Game<'a> {
     }
 
     fn oathbreaker(&self, p: usize) -> bool {
-        self.players[p].oath_until.is_some_and(|s| self.cavalry <= s)
+        self.players[p]
+            .oath_until
+            .is_some_and(|s| self.cavalry <= s)
     }
 
     fn borders(&self, p: usize, q: usize) -> bool {
-        (0..N_TERR).any(|t| self.owner[t] == p && self.sh.graph.adj[t].iter().any(|&(n, _)| self.owner[n] == q))
+        (0..N_TERR).any(|t| {
+            self.owner[t] == p
+                && self.sh.graph.adj[t]
+                    .iter()
+                    .any(|&(n, _)| self.owner[n] == q)
+        })
     }
 
     /// Troops q has next to p's territories.
     fn pressure(&self, q: usize, p: usize) -> u32 {
         (0..N_TERR)
-            .filter(|&t| self.owner[t] == q && self.sh.graph.adj[t].iter().any(|&(n, _)| self.owner[n] == p))
+            .filter(|&t| {
+                self.owner[t] == q
+                    && self.sh.graph.adj[t]
+                        .iter()
+                        .any(|&(n, _)| self.owner[n] == p)
+            })
             .map(|t| self.troops[t])
             .sum()
     }
@@ -558,7 +628,9 @@ impl<'a> Game<'a> {
     /// Would q happily accept a pact with p? q refuses if p is its best target,
     /// or if p is a runaway leader (40%+ of the board).
     fn accepts(&self, q: usize, p: usize) -> bool {
-        let best_target_is_p = self.best_attack_on(q, false).is_some_and(|b| self.owner[b.1] == p);
+        let best_target_is_p = self
+            .best_attack_on(q, false)
+            .is_some_and(|b| self.owner[b.1] == p);
         let runaway = self.count(p) * 10 >= N_TERR * 4 && self.leader() == p;
         !best_target_is_p && !runaway
     }
@@ -566,8 +638,16 @@ impl<'a> Game<'a> {
     /// Cheapest set of p's cards worth exactly `stars` stars (prefers 1-star cards).
     fn star_stake(&self, p: usize, stars: u32) -> Option<Vec<usize>> {
         let hand = &self.players[p].hand;
-        let ones: Vec<usize> = hand.iter().copied().filter(|&c| TERRITORIES[c].stars == 1).collect();
-        let twos: Vec<usize> = hand.iter().copied().filter(|&c| TERRITORIES[c].stars == 2).collect();
+        let ones: Vec<usize> = hand
+            .iter()
+            .copied()
+            .filter(|&c| TERRITORIES[c].stars == 1)
+            .collect();
+        let twos: Vec<usize> = hand
+            .iter()
+            .copied()
+            .filter(|&c| TERRITORIES[c].stars == 2)
+            .collect();
         for n1 in (0..=ones.len().min(stars as usize)).rev() {
             let rest = stars as usize - n1;
             if rest.is_multiple_of(2) && rest / 2 <= twos.len() {
@@ -612,7 +692,10 @@ impl<'a> Game<'a> {
             }
         }
         let Some((q, _)) = best else { return };
-        let mut len = self.players[p].strat.pact_len.clamp(1, rules.max_len.max(1));
+        let mut len = self.players[p]
+            .strat
+            .pact_len
+            .clamp(1, rules.max_len.max(1));
         if rules.stars_per_turn {
             // Shorten the pact until both sides can stake exactly `len` stars.
             while len >= 1 {
@@ -622,7 +705,16 @@ impl<'a> Game<'a> {
                     let extra_bonus = u32::from(self.ev(Ev::PeaceOfTheChurch));
                     self.players[p].stats.pacts_signed += 1;
                     self.players[q].stats.pacts_signed += 1;
-                    self.pacts.push(Pact { a: p, b: q, len, done_a: 0, done_b: 0, pile_a, pile_b, extra_bonus });
+                    self.pacts.push(Pact {
+                        a: p,
+                        b: q,
+                        len,
+                        done_a: 0,
+                        done_b: 0,
+                        pile_a,
+                        pile_b,
+                        extra_bonus,
+                    });
                     return;
                 }
                 len -= 1;
@@ -643,11 +735,24 @@ impl<'a> Game<'a> {
             let extra_bonus = u32::from(self.ev(Ev::PeaceOfTheChurch));
             self.players[p].stats.pacts_signed += 1;
             self.players[q].stats.pacts_signed += 1;
-            self.pacts.push(Pact { a: p, b: q, len, done_a: 0, done_b: 0, pile_a, pile_b, extra_bonus });
+            self.pacts.push(Pact {
+                a: p,
+                b: q,
+                len,
+                done_a: 0,
+                done_b: 0,
+                pile_a,
+                pile_b,
+                extra_bonus,
+            });
             return;
         }
         let hand_min = self.players[p].hand.len().min(self.players[q].hand.len());
-        let mut stake = if len <= 2 { rules.stake_short } else { rules.stake_long };
+        let mut stake = if len <= 2 {
+            rules.stake_short
+        } else {
+            rules.stake_long
+        };
         if hand_min < stake {
             len = len.min(2);
             stake = rules.stake_short;
@@ -661,13 +766,24 @@ impl<'a> Game<'a> {
         self.players[p].stats.pacts_signed += 1;
         self.players[q].stats.pacts_signed += 1;
         // p is mid-turn: this turn counts as p's first pact turn.
-        self.pacts.push(Pact { a: p, b: q, len, done_a: 0, done_b: 0, pile_a, pile_b, extra_bonus });
+        self.pacts.push(Pact {
+            a: p,
+            b: q,
+            len,
+            done_a: 0,
+            done_b: 0,
+            pile_a,
+            pile_b,
+            extra_bonus,
+        });
     }
 
     /// End of p's turn: count it, and settle a kept pact.
     fn advance_pact(&mut self, p: usize) {
         let Some(rules) = self.cfg.pacts else { return };
-        let Some(i) = self.pacts.iter().position(|pc| pc.has(p)) else { return };
+        let Some(i) = self.pacts.iter().position(|pc| pc.has(p)) else {
+            return;
+        };
         {
             let pc = &mut self.pacts[i];
             if pc.a == p {
@@ -695,13 +811,19 @@ impl<'a> Game<'a> {
     /// the best move. The victim takes both stakes.
     fn maybe_betray(&mut self, p: usize) {
         let Some(rules) = self.cfg.pacts else { return };
-        let Diplomacy::Opportunist { factor } = self.players[p].strat.diplomacy else { return };
+        let Diplomacy::Opportunist { factor } = self.players[p].strat.diplomacy else {
+            return;
+        };
         if self.ev(Ev::PeaceOfTheChurch) {
             return; // pacts can't be broken this century
         }
-        let Some(i) = self.pacts.iter().position(|pc| pc.has(p)) else { return };
+        let Some(i) = self.pacts.iter().position(|pc| pc.has(p)) else {
+            return;
+        };
         let ratio_needed = self.players[p].strat.attack_ratio;
-        let Some(bp) = self.best_attack_on(p, true) else { return };
+        let Some(bp) = self.best_attack_on(p, true) else {
+            return;
+        };
         if bp.3 < ratio_needed {
             return;
         }
@@ -714,7 +836,11 @@ impl<'a> Game<'a> {
         }
         let pc = self.pacts.remove(i);
         let victim = pc.other(p);
-        let (victim_pile, betrayer_pile) = if pc.a == victim { (pc.pile_a, pc.pile_b) } else { (pc.pile_b, pc.pile_a) };
+        let (victim_pile, betrayer_pile) = if pc.a == victim {
+            (pc.pile_a, pc.pile_b)
+        } else {
+            (pc.pile_b, pc.pile_a)
+        };
         match rules.on_betrayal {
             StakeOnBetrayal::VictimTakesAll => {
                 self.players[victim].stats.pact_cards += betrayer_pile.len() as u32;
@@ -743,12 +869,17 @@ impl<'a> Game<'a> {
     }
 
     fn owns_region(&self, p: usize, r: usize) -> bool {
-        self.sh.graph.region_members[r].iter().all(|&t| self.owner[t] == p)
+        self.sh.graph.region_members[r]
+            .iter()
+            .all(|&t| self.owner[t] == p)
     }
 
     fn enemy_neighbours(&self, t: usize) -> impl Iterator<Item = usize> + '_ {
         let o = self.owner[t];
-        self.sh.graph.adj[t].iter().map(|&(n, _)| n).filter(move |&n| self.owner[n] != o)
+        self.sh.graph.adj[t]
+            .iter()
+            .map(|&(n, _)| n)
+            .filter(move |&n| self.owner[n] != o)
     }
 
     fn is_frontier(&self, t: usize) -> bool {
@@ -756,7 +887,10 @@ impl<'a> Game<'a> {
     }
 
     fn threat(&self, t: usize) -> f64 {
-        let enemy: u32 = self.enemy_neighbours(t).map(|n| self.troops[n].saturating_sub(1)).sum();
+        let enemy: u32 = self
+            .enemy_neighbours(t)
+            .map(|n| self.troops[n].saturating_sub(1))
+            .sum();
         enemy as f64 - self.troops[t] as f64
     }
 
@@ -773,7 +907,11 @@ impl<'a> Game<'a> {
             v += 1.5; // breaks an enemy region bonus
         }
         let pl = &self.players[p];
-        if pl.missions.iter().any(|&m| self.sh.mission_ids[m].contains(&t)) {
+        if pl
+            .missions
+            .iter()
+            .any(|&m| self.sh.mission_ids[m].contains(&t))
+        {
             v += 0.5;
         }
         v
@@ -836,7 +974,11 @@ impl<'a> Game<'a> {
     }
 
     fn hand_stars(&self, p: usize) -> u32 {
-        self.players[p].hand.iter().map(|&c| TERRITORIES[c].stars as u32).sum()
+        self.players[p]
+            .hand
+            .iter()
+            .map(|&c| TERRITORIES[c].stars as u32)
+            .sum()
     }
 
     /// Trade cards according to the player's policy. Returns troops gained.
@@ -1006,7 +1148,11 @@ impl<'a> Game<'a> {
         if let Some(i) = self.pacts.iter().position(|pc| pc.has(victim)) {
             let pc = self.pacts.remove(i);
             let survivor = pc.other(victim);
-            let (own, theirs) = if pc.a == victim { (pc.pile_b, pc.pile_a) } else { (pc.pile_a, pc.pile_b) };
+            let (own, theirs) = if pc.a == victim {
+                (pc.pile_b, pc.pile_a)
+            } else {
+                (pc.pile_a, pc.pile_b)
+            };
             self.players[survivor].hand.extend(own);
             self.players[by].hand.extend(theirs);
         }
@@ -1024,7 +1170,9 @@ impl<'a> Game<'a> {
         let mut captures = 0;
         for _ in 0..200 {
             self.maybe_betray(p);
-            let Some((src, dst, _, ratio)) = self.best_attack(p) else { break };
+            let Some((src, dst, _, ratio)) = self.best_attack(p) else {
+                break;
+            };
             if ratio < strat.attack_ratio {
                 break;
             }
@@ -1037,7 +1185,11 @@ impl<'a> Game<'a> {
 
             // Commit troops: keep a guard back if src borders other enemies.
             let other_enemies = self.enemy_neighbours(src).any(|n| n != dst);
-            let guard = if other_enemies { strat.rear_guard.max(1).max(self.troops[src] / 4) } else { 1 };
+            let guard = if other_enemies {
+                strat.rear_guard.max(1).max(self.troops[src] / 4)
+            } else {
+                1
+            };
             if self.troops[src] <= guard {
                 break;
             }
@@ -1093,14 +1245,27 @@ impl<'a> Game<'a> {
                 m.def_plus += t.river_def_plus;
                 attackers = attackers.saturating_sub(t.river_cross_cost);
             }
-            let kind = if TERRITORIES[dst].mountain { 1 } else if river { 2 } else { 0 };
+            let kind = if TERRITORIES[dst].mountain {
+                1
+            } else if river {
+                2
+            } else {
+                0
+            };
             self.terrain_attacks[kind] += 1;
             let no_withdraw = false;
             while attackers > 0 && defenders > 0 {
                 if !no_withdraw && (attackers as f64) < strat.withdraw_ratio * defenders as f64 {
                     break;
                 }
-                let (al, dl) = roll_mod(&mut self.rng, attackers, defenders, self.cfg.dice, &self.sh.table, m);
+                let (al, dl) = roll_mod(
+                    &mut self.rng,
+                    attackers,
+                    defenders,
+                    self.cfg.dice,
+                    &self.sh.table,
+                    m,
+                );
                 attackers -= al.min(attackers);
                 defenders -= dl.min(defenders);
             }
@@ -1197,8 +1362,15 @@ impl<'a> Game<'a> {
     fn mission_done(&self, p: usize, m: usize) -> bool {
         match MISSIONS[m].goal {
             MissionGoal::Hold(_) => self.sh.mission_ids[m].iter().all(|&t| self.owner[t] == p),
-            MissionGoal::Regions(k) => (0..N_REGIONS).filter(|&r| self.owns_region(p, r)).count() >= k,
-            MissionGoal::AnySeaRoute => self.sh.graph.sea_routes.iter().any(|&(a, b)| self.owner[a] == p && self.owner[b] == p),
+            MissionGoal::Regions(k) => {
+                (0..N_REGIONS).filter(|&r| self.owns_region(p, r)).count() >= k
+            }
+            MissionGoal::AnySeaRoute => self
+                .sh
+                .graph
+                .sea_routes
+                .iter()
+                .any(|&(a, b)| self.owner[a] == p && self.owner[b] == p),
             MissionGoal::HoldJewelTower { turns } => self.jt_holder == p && self.jt_turns >= turns,
         }
     }
@@ -1245,11 +1417,7 @@ impl<'a> Game<'a> {
         self.diplomacy(p);
 
         // 1. Place troops
-        let base: u32 = if self.ev(Ev::SaxonMigration) {
-            5
-        } else {
-            3
-        };
+        let base: u32 = if self.ev(Ev::SaxonMigration) { 5 } else { 3 };
         let mut new = base;
         let famine = false;
         if !famine {
@@ -1261,7 +1429,10 @@ impl<'a> Game<'a> {
                 new += Region::ALL[r].bonus() * region_mult;
             }
             if self.ev(Ev::GoodHarvests) {
-                let mine = self.sh.graph.region_members[r].iter().filter(|&&t| self.owner[t] == p).count();
+                let mine = self.sh.graph.region_members[r]
+                    .iter()
+                    .filter(|&&t| self.owner[t] == p)
+                    .count();
                 if mine >= 3 {
                     new += 1;
                 }
@@ -1331,6 +1502,7 @@ impl<'a> Game<'a> {
         let mut rounds = 0;
         let ended_by;
         let mut snapshots = Vec::new();
+        let mut last_round = false;
         self.begin_century();
         'game: loop {
             rounds += 1;
@@ -1346,6 +1518,15 @@ impl<'a> Game<'a> {
                     ended_by = EndReason::Conquest;
                     break 'game;
                 }
+                if last_round {
+                    if let Some(k) = self.cfg.sudden_end {
+                        if self.rng.d6() >= k {
+                            ended_by = EndReason::Timeline;
+                            break 'game;
+                        }
+                    }
+                    continue; // finishing the final round: no more timeline rolls
+                }
                 // 5. Advance golden cavalry
                 match self.cfg.timeline {
                     Timeline::Official => {
@@ -1359,15 +1540,37 @@ impl<'a> Game<'a> {
                             self.cavalry += 1;
                         }
                     }
+                    Timeline::HouseCircle => {
+                        self.since_open += 1;
+                        let alive = self.players.iter().filter(|pl| pl.alive).count();
+                        let last_alive = (0..n).rev().find(|&q| self.players[q].alive) == Some(p);
+                        let circle_done =
+                            if self.cfg.last_century_round && self.cavalry == LAST_SPACE - 1 {
+                                last_alive
+                            } else {
+                                self.since_open >= alive
+                            };
+                        if self.rng.d6() == 6 || circle_done {
+                            self.cavalry += 1;
+                        }
+                    }
                     Timeline::Off => {}
                 }
                 if self.cavalry >= LAST_SPACE {
+                    if self.cfg.finish_round || self.cfg.sudden_end.is_some() {
+                        last_round = true;
+                        continue;
+                    }
                     ended_by = EndReason::Timeline;
                     break 'game;
                 }
                 if self.cavalry != self.centuries.last().map_or(usize::MAX, |c| c.space) {
                     self.begin_century();
                 }
+            }
+            if last_round && self.cfg.sudden_end.is_none() {
+                ended_by = EndReason::Timeline;
+                break 'game;
             }
             if self.cfg.timeline == Timeline::HousePace {
                 self.cavalry += 1;
@@ -1388,7 +1591,12 @@ impl<'a> Game<'a> {
         let scored: Vec<usize> = if self.ev(Ev::GreatFamine) && ended_by == EndReason::Timeline {
             let thin = if self.cfg.famine_half { 1 } else { 0 };
             (0..n)
-                .map(|p| (0..N_TERR).filter(|&t| self.owner[t] == p).map(|t| if self.troops[t] >= 2 { 2 } else { thin }).sum())
+                .map(|p| {
+                    (0..N_TERR)
+                        .filter(|&t| self.owner[t] == p)
+                        .map(|t| if self.troops[t] >= 2 { 2 } else { thin })
+                        .sum()
+                })
                 .collect()
         } else {
             territories.iter().map(|&x| x * 2).collect()
@@ -1417,13 +1625,31 @@ impl<'a> Game<'a> {
         let n = self.players.len();
         let leader_territories = (0..n).map(|p| self.count(p)).max().unwrap_or(0);
         let leader_troops = (0..n)
-            .map(|p| (0..N_TERR).filter(|&t| self.owner[t] == p).map(|t| self.troops[t]).sum::<u32>())
+            .map(|p| {
+                (0..N_TERR)
+                    .filter(|&t| self.owner[t] == p)
+                    .map(|t| self.troops[t])
+                    .sum::<u32>()
+            })
             .max()
             .unwrap_or(0);
         let alive: Vec<usize> = (0..n).filter(|&p| self.players[p].alive).collect();
-        let hand_stars = alive.iter().map(|&p| self.hand_stars(p) as f64).sum::<f64>() / alive.len().max(1) as f64;
+        let hand_stars = alive
+            .iter()
+            .map(|&p| self.hand_stars(p) as f64)
+            .sum::<f64>()
+            / alive.len().max(1) as f64;
         let territories: Vec<usize> = (0..n).map(|p| self.count(p)).collect();
-        Snapshot { century: self.cavalry, round, stacks, leader_territories, leader_troops, hand_stars, leader: self.leader(), territories }
+        Snapshot {
+            century: self.cavalry,
+            round,
+            stacks,
+            leader_territories,
+            leader_troops,
+            hand_stars,
+            leader: self.leader(),
+            territories,
+        }
     }
 }
 
@@ -1435,8 +1661,16 @@ mod tests {
     fn games_finish_and_conserve_board() {
         let sh = Shared::new();
         for seed in 0..200 {
-            let cfg = Config { timeline: Timeline::Off, ..Config::default() };
-            let strats = [Strategy::BALANCED, Strategy::AGGRESSIVE, Strategy::CAUTIOUS, Strategy::HOARDER];
+            let cfg = Config {
+                timeline: Timeline::Off,
+                ..Config::default()
+            };
+            let strats = [
+                Strategy::BALANCED,
+                Strategy::AGGRESSIVE,
+                Strategy::CAUTIOUS,
+                Strategy::HOARDER,
+            ];
             let r = Game::new(cfg, &sh, &strats, seed).play();
             assert_eq!(r.territories.iter().sum::<usize>(), 42);
             assert!(!r.winners.is_empty());
@@ -1453,7 +1687,12 @@ mod tests {
             pacts: Some(PactRules::default()),
             ..Config::default()
         };
-        let strats = [Strategy::LOYAL, Strategy::OPPORTUNIST, Strategy::BACKSTABBER, Strategy::NO_PACTS];
+        let strats = [
+            Strategy::LOYAL,
+            Strategy::OPPORTUNIST,
+            Strategy::BACKSTABBER,
+            Strategy::NO_PACTS,
+        ];
         for seed in 0..300 {
             let mut g = Game::new(cfg, &sh, &strats, seed);
             g.begin_century();
@@ -1468,10 +1707,16 @@ mod tests {
                 let cards = g.deck.len()
                     + g.discard.len()
                     + g.players.iter().map(|pl| pl.hand.len()).sum::<usize>()
-                    + g.pacts.iter().map(|pc| pc.pile_a.len() + pc.pile_b.len()).sum::<usize>();
+                    + g.pacts
+                        .iter()
+                        .map(|pc| pc.pile_a.len() + pc.pile_b.len())
+                        .sum::<usize>();
                 assert_eq!(cards, 42, "territory cards must be conserved (seed {seed})");
                 assert!(g.troops.iter().all(|&t| t >= 1));
-                assert!(g.pacts.iter().all(|pc| g.players[pc.a].alive && g.players[pc.b].alive));
+                assert!(g
+                    .pacts
+                    .iter()
+                    .all(|pc| g.players[pc.a].alive && g.players[pc.b].alive));
             }
         }
     }

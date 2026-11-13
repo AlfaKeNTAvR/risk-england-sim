@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Era board, 10th to 14th century</title>
+<title>Era board, back</title>
 <script src="./support.js"></script>
 </head>
 <body>
@@ -14,26 +14,37 @@ body{margin:0}
 </style>
 </helmet>
 <div style="width: 1056px; height: 816px; box-sizing: border-box; padding: 40px 48px; background: #f3e7cf; font-family: 'EB Garamond', Georgia, serif; color: #2f241a; display: flex; flex-direction: column; gap: 10px">
-  <div style="height: 44px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; border-bottom: 2px solid #5a4632; padding-bottom: 6px">
-    <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 32px; line-height: 1">The Ages of England, continued</span>
-    <span style="font-size: 14px; color: #8e2424; font-weight: 600">XV: 1400–1485. The game ends. Most territories wins.</span>
+  <div style="height: 44px; flex-shrink: 0; display: flex; align-items: flex-end; justify-content: space-between; gap: 20px; border-bottom: 2px solid #5a4632; padding-bottom: 6px">
+    <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 32px; line-height: 1; white-space: nowrap">The Ages of England, continued</span>
+    <span style="font-size: 14px; line-height: 1.25; color: #8e2424; text-align: right; font-weight: 600;">The XIV ends at the end of a round, or on a 6.<br>XV: 1400–1485. The game ends at once. Most territories wins.</span>
   </div>
   <sc-for list="{{rows}}" as="r" hint-placeholder-count="5">
     <div style="flex: 1; min-height: 0; display: flex; gap: 10px">
-      <div style="width: 112px; flex-shrink: 0; border-radius: 8px; background: {{r.band}}; color: #fff8ea; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px">
-        <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 30px; line-height: 1">{{r.rom}}</span>
-        <span style="font-size: 12px">{{r.years}}</span>
-        <span style="width: 40px; height: 40px; box-sizing: border-box; border: 1.5px dashed #fff8ea; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; line-height: 1">cavalry</span>
+      <div style="width: 132px; flex-shrink: 0; border-radius: 8px; background: {{r.band}}; color: #fff8ea; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px">
+        <div style="display: flex; align-items: baseline; gap: 6px">
+          <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 28px; line-height: 1">{{r.rom}}</span>
+          <span style="font-size: 12px">{{r.years}}</span>
+        </div>
+        <div style="display: flex; gap: 8px">
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+            <span style="width: 46px; height: 46px; box-sizing: border-box; border: 2px solid #e2b93b; border-radius: 50%"></span>
+            <span style="font-size: 11px; line-height: 1">golden</span>
+          </div>
+          <div style="display: flex; flex-direction: column; align-items: center; gap: 2px">
+            <span style="width: 46px; height: 46px; box-sizing: border-box; border: 1.5px dashed #fff8ea; border-radius: 50%"></span>
+            <span style="font-size: 11px; line-height: 1">opened by</span>
+          </div>
+        </div>
       </div>
       <sc-for list="{{r.events}}" as="e" hint-placeholder-count="3">
-        <div style="flex: 1; min-width: 0; border: 1px solid #c9b48c; border-radius: 8px; background: #fbf4e4; padding: 8px 10px; display: flex; flex-direction: column; gap: 3px">
+        <div style="flex: 1; min-width: 0; border: 1px solid #c9b48c; border-radius: 8px; background: #fbf4e4; padding: 7px 10px; display: flex; flex-direction: column; gap: 3px">
           <div style="display: flex; align-items: center; gap: 7px">
             <span style="font-size: 13px; font-weight: 600; border: 1.5px solid #2f241a; border-radius: 4px; padding: 0 5px">{{e.die}}</span>
             <span style="font-family: 'IM Fell English SC', Georgia, serif; font-size: 17px; line-height: 1.05; flex: 1; min-width: 0">{{e.title}}</span>
-            <span style="width: 22px; height: 22px; flex-shrink: 0; box-sizing: border-box; border: 1.5px dashed #8a7356; border-radius: 50%"></span>
+            <span style="width: 30px; height: 30px; flex-shrink: 0; box-sizing: border-box; border: 1.5px dashed #b08a1e; border-radius: 50%"></span>
           </div>
           <span style="font-size: 12px; color: #5a4632">{{e.timing}}</span>
-          <span style="font-size: 13px; line-height: 1.22">{{e.effect}}</span>
+          <span style="font-size: 13px; line-height: 1.2">{{e.effect}}</span>
         </div>
       </sc-for>
     </div>
@@ -43,38 +54,135 @@ body{margin:0}
 <script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1056,"height":816}}'>
 class Component extends DCLogic {
   renderVals() {
-    var dies = ['1–2', '3–4', '5–6'];
-    var ev = function (i, title, timing, effect) { return { die: dies[i], title: title, timing: timing, effect: effect }; };
-    var M = '#7d5a12', L = '#8e2424';
     return {
-      rows: [
-        { band: M, rom: 'X', years: '900–999', events: [
-          ev(0, 'One kingdom', 'Whole century', 'At the start of each turn, every player except the leader gets 3 extra troops.'),
-          ev(1, 'Battle of Brunanburh', 'Whole century', 'Grand alliance: players other than the leader may only attack the leader.'),
-          ev(2, 'Hard winter', 'At once + century', 'Every territory with 6 or more troops loses 2. No manoeuvres into mountain territories this century.')
-        ] },
-        { band: M, rom: 'XI', years: '1000–1099', events: [
-          ev(0, 'Norman castles', 'Whole century', 'Defending a territory with 5 or more troops, the defender may roll 3 dice.'),
-          ev(1, 'Harrying of the North', 'At once', 'The leader’s North territories lose half their troops, rounded down.'),
-          ev(2, 'Domesday survey', 'Whole century', 'The leader draws at most 1 territory card per turn, however many territories they conquer.')
-        ] },
-        { band: L, rom: 'XII', years: '1100–1199', events: [
-          ev(0, 'The Anarchy', 'At once', 'The leader’s 2 thinnest territories defect to the player with the fewest territories.'),
-          ev(1, 'Great floods', 'Whole century', 'No manoeuvres across rivers. Attacks across a river crossing roll at most 1 die.'),
-          ev(2, 'Supply problems', 'Whole century', 'At the start of the leader’s turn, each of their territories with 5 or more troops loses a third, rounded down.')
-        ] },
-        { band: L, rom: 'XIII', years: '1200–1299', events: [
-          ev(0, 'Magna Carta', 'Whole century', 'The leader can’t trade cards this century.'),
-          ev(1, 'Barons’ War', 'At once + century', 'All pacts end: stakes go back, no bonus cards. No new pacts this century.'),
-          ev(2, 'Camp fever', 'At once', 'The leader’s largest stack loses half its troops, rounded down.')
-        ] },
-        { band: L, rom: 'XIV', years: '1300–1399', events: [
-          ev(0, 'Black Death', 'At once', 'Every territory loses half its troops, rounded down, and every hand is halved. The player with the fewest territories is spared.'),
-          ev(1, 'Great Famine', 'Final count', 'At the final count, territories with only 1 troop count as half.'),
-          ev(2, 'Peasants’ Revolt', 'At once', 'The leader’s 3 thinnest territories defect to the player with the fewest territories.')
-        ] }
+  "rows": [
+    {
+      "rom": "X",
+      "years": "900–999",
+      "band": "#7d5a12",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "One kingdom",
+          "timing": "Whole century",
+          "effect": "At the start of each turn, every player except the leader gets 3 extra troops."
+        },
+        {
+          "die": "3–4",
+          "title": "Battle of Brunanburh",
+          "timing": "Whole century",
+          "effect": "Grand alliance: players other than the leader may only attack the leader."
+        },
+        {
+          "die": "5–6",
+          "title": "Hard winter",
+          "timing": "At once + century",
+          "effect": "Every territory with 6 or more troops loses 2. No manoeuvres into mountain territories this century."
+        }
       ]
-    };
+    },
+    {
+      "rom": "XI",
+      "years": "1000–1099",
+      "band": "#7d5a12",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Norman castles",
+          "timing": "Whole century",
+          "effect": "Defending a territory with 5 or more troops, the defender may roll 3 dice."
+        },
+        {
+          "die": "3–4",
+          "title": "Harrying of the North",
+          "timing": "At once",
+          "effect": "The leader’s North territories lose half their troops, rounded down."
+        },
+        {
+          "die": "5–6",
+          "title": "Domesday survey",
+          "timing": "Whole century",
+          "effect": "The leader draws at most 1 territory card per turn, however many territories they conquer."
+        }
+      ]
+    },
+    {
+      "rom": "XII",
+      "years": "1100–1199",
+      "band": "#8e2424",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "The Anarchy",
+          "timing": "At once",
+          "effect": "The leader’s 2 thinnest territories defect to the player with the fewest territories."
+        },
+        {
+          "die": "3–4",
+          "title": "Great floods",
+          "timing": "Whole century",
+          "effect": "No manoeuvres across rivers. Attacks across a river crossing roll at most 1 die."
+        },
+        {
+          "die": "5–6",
+          "title": "Supply problems",
+          "timing": "Whole century",
+          "effect": "At the start of the leader’s turn, each of their territories with 5 or more troops loses a third, rounded down."
+        }
+      ]
+    },
+    {
+      "rom": "XIII",
+      "years": "1200–1299",
+      "band": "#8e2424",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Magna Carta",
+          "timing": "Whole century",
+          "effect": "The leader can’t trade cards this century."
+        },
+        {
+          "die": "3–4",
+          "title": "Barons’ War",
+          "timing": "At once + century",
+          "effect": "All pacts end: stakes go back, no bonus cards. No new pacts this century."
+        },
+        {
+          "die": "5–6",
+          "title": "Camp fever",
+          "timing": "At once",
+          "effect": "The leader’s largest stack loses half its troops, rounded down."
+        }
+      ]
+    },
+    {
+      "rom": "XIV",
+      "years": "1300–1399",
+      "band": "#8e2424",
+      "events": [
+        {
+          "die": "1–2",
+          "title": "Black Death",
+          "timing": "At once",
+          "effect": "Every territory loses half its troops, rounded down, and every hand of territory cards is halved. The player with the fewest territories is spared."
+        },
+        {
+          "die": "3–4",
+          "title": "Great Famine",
+          "timing": "Final count",
+          "effect": "At the final count, territories with only 1 troop count as half."
+        },
+        {
+          "die": "5–6",
+          "title": "Peasants’ Revolt",
+          "timing": "At once",
+          "effect": "The leader’s 3 thinnest territories defect to the player with the fewest territories."
+        }
+      ]
+    }
+  ]
+};
   }
 }
 </script>

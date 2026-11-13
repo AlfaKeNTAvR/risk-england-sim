@@ -131,11 +131,26 @@ pub fn run(cfg: Config, strats: &[Strategy], games: u64, seed: u64, threads: usi
         total.ties += p.ties;
     }
     let g = total.games as f64;
-    total.battle_win_rate = if total.battles > 0.0 { won / total.battles } else { 0.0 };
-    for v in [&mut total.rounds, &mut total.turns, &mut total.turns_per_player, &mut total.battles, &mut total.winner_territories] {
+    total.battle_win_rate = if total.battles > 0.0 {
+        won / total.battles
+    } else {
+        0.0
+    };
+    for v in [
+        &mut total.rounds,
+        &mut total.turns,
+        &mut total.turns_per_player,
+        &mut total.battles,
+        &mut total.winner_territories,
+    ] {
         *v /= g;
     }
-    for v in [&mut total.by_timeline, &mut total.by_conquest, &mut total.by_limit, &mut total.ties] {
+    for v in [
+        &mut total.by_timeline,
+        &mut total.by_conquest,
+        &mut total.by_limit,
+        &mut total.ties,
+    ] {
         *v /= g;
     }
     // Each strategy slot sits in every seat equally often, so it plays every game.

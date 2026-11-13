@@ -10,11 +10,17 @@ use risk_england_sim::sim::run;
 const RULES: [(&str, DiceRule); 3] = [
     ("classic (both roll together)", DiceRule::Classic),
     ("defender sees, picks 1 or 2", DiceRule::DefenderSees),
-    ("defender sees, rolls one by one", DiceRule::DefenderOneByOne),
+    (
+        "defender sees, rolls one by one",
+        DiceRule::DefenderOneByOne,
+    ),
 ];
 
 fn main() {
-    let games: u64 = std::env::args().nth(1).map(|x| x.parse().unwrap()).unwrap_or(20_000);
+    let games: u64 = std::env::args()
+        .nth(1)
+        .map(|x| x.parse().unwrap())
+        .unwrap_or(20_000);
     let table = DefenderTable::build();
 
     println!("== One roll, 3 attack dice vs 2 defenders (exact, all 6^5 rolls weighted)");
@@ -28,7 +34,11 @@ fn main() {
             al += x as u64;
             dl += y as u64;
         }
-        println!("{name:<34} attacker loses {:.3}, defender loses {:.3} per roll", al as f64 / n as f64, dl as f64 / n as f64);
+        println!(
+            "{name:<34} attacker loses {:.3}, defender loses {:.3} per roll",
+            al as f64 / n as f64,
+            dl as f64 / n as f64
+        );
     }
 
     println!("\n== Whole battles: attacker win chance, fought to the end (20,000 each)");
@@ -60,10 +70,16 @@ fn main() {
     }
 
     println!("\n== Whole games, house rules + events + pacts ({games} games each)");
-    let strats = [Strategy::BALANCED, Strategy::BALANCED, Strategy::AGGRESSIVE, Strategy::CAUTIOUS];
+    let strats = [
+        Strategy::BALANCED,
+        Strategy::BALANCED,
+        Strategy::AGGRESSIVE,
+        Strategy::CAUTIOUS,
+    ];
     for (name, rule) in RULES {
         let cfg = Config {
-            timeline: Timeline::HousePace,
+            timeline: Timeline::HouseCircle,
+            last_century_round: true,
             dice: rule,
             events: EventMode::Deck,
             pacts: Some(PactRules::default()),
@@ -71,7 +87,12 @@ fn main() {
         };
         let s = run(cfg, &strats, games, 1, 2);
         let names = ["balanced", "balanced", "aggressive", "cautious"];
-        let w: Vec<String> = names.iter().zip(&s.strategy_wins).skip(1).map(|(n, w)| format!("{n} {:.1}%", 100.0 * w)).collect();
+        let w: Vec<String> = names
+            .iter()
+            .zip(&s.strategy_wins)
+            .skip(1)
+            .map(|(n, w)| format!("{n} {:.1}%", 100.0 * w))
+            .collect();
         println!(
             "{name:<34} battles won {:.1}% | battles/game {:.0} | winner holds {:.1} terr | {}",
             100.0 * s.battle_win_rate,

@@ -37,8 +37,11 @@ body{margin:0}
 
   <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 26px">
     <div style="display: flex; flex-direction: column; gap: 6px">
-      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Timeline pace</h2>
-      <div style="font-size: 16px; line-height: 1.4">The cavalry starts on the 5th century. After each player's turn, that player rolls a die: on a 6 the cavalry moves 1 space. After every full round it moves 1 space. Ignore the printed dice gates. Reaching the 15th ends the game.</div>
+      <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Centuries</h2>
+      <div style="font-size: 15px; line-height: 1.36"><b>Who starts:</b> everyone rolls; highest goes first, re-roll ties. The first player opens the 5th century.</div>
+      <div style="font-size: 15px; line-height: 1.36"><b>Opening:</b> whoever's turn moves the golden cavalry opens the next century. They roll its event, mark it with the yellow cavalry, and stand one of their own cavalry on the century.</div>
+      <div style="font-size: 15px; line-height: 1.36"><b>Moving on:</b> after each turn, that player rolls: a 6 moves the cavalry. Otherwise it moves when play comes back round to the opener. Ignore the printed dice gates.</div>
+      <div style="font-size: 15px; line-height: 1.36"><b>The end:</b> the 14th ends at the end of a round, or on a 6. Reaching the 15th ends the game at once.</div>
     </div>
     <div style="display: flex; flex-direction: column; gap: 6px">
       <h2 style="margin: 0; font-family: 'IM Fell English SC', Georgia, serif; font-weight: 400; font-size: 24px; color: #5b3a86">Defending one die at a time</h2>
@@ -69,7 +72,7 @@ class Component extends DCLogic {
         { n: '2', t: 'Attack', d: 'Commit troops first. The defender rolls one die at a time.' },
         { n: '3', t: 'Manoeuvre', d: 'One move. Rivers and mountains stop it.' },
         { n: '4', t: 'Draw cards', d: '1 territory card per territory conquered.' },
-        { n: '5', t: 'End of turn', d: 'Roll: a 6 moves the cavalry. Cross off a pact turn.' }
+        { n: '5', t: 'End of turn', d: 'Roll: a 6 moves the cavalry. Move your pact cavalry on.' }
       ]
     };
   }

@@ -10,13 +10,58 @@ fn variants() -> Vec<(&'static str, TerrainCombat)> {
     let none = TerrainCombat::default();
     vec![
         ("no terrain combat (rulebook)", none),
-        ("mountain: defender +1 on top die", TerrainCombat { mountain_def_plus: 1, ..none }),
-        ("mountain: attacker loses 1 climbing", TerrainCombat { mountain_climb_cost: 1, ..none }),
-        ("river: attacker max 2 dice", TerrainCombat { river_att_max: 2, ..none }),
-        ("river: defender +1 on top die", TerrainCombat { river_def_plus: 1, ..none }),
-        ("mountain +1 def, river max 2 dice", TerrainCombat { mountain_def_plus: 1, river_att_max: 2, ..none }),
-        ("climb 1, river max 2 dice", TerrainCombat { mountain_climb_cost: 1, river_att_max: 2, ..none }),
-        ("climb 1, ford 1 (lose 1 at either)", TerrainCombat { mountain_climb_cost: 1, river_cross_cost: 1, ..none }),
+        (
+            "mountain: defender +1 on top die",
+            TerrainCombat {
+                mountain_def_plus: 1,
+                ..none
+            },
+        ),
+        (
+            "mountain: attacker loses 1 climbing",
+            TerrainCombat {
+                mountain_climb_cost: 1,
+                ..none
+            },
+        ),
+        (
+            "river: attacker max 2 dice",
+            TerrainCombat {
+                river_att_max: 2,
+                ..none
+            },
+        ),
+        (
+            "river: defender +1 on top die",
+            TerrainCombat {
+                river_def_plus: 1,
+                ..none
+            },
+        ),
+        (
+            "mountain +1 def, river max 2 dice",
+            TerrainCombat {
+                mountain_def_plus: 1,
+                river_att_max: 2,
+                ..none
+            },
+        ),
+        (
+            "climb 1, river max 2 dice",
+            TerrainCombat {
+                mountain_climb_cost: 1,
+                river_att_max: 2,
+                ..none
+            },
+        ),
+        (
+            "climb 1, ford 1 (lose 1 at either)",
+            TerrainCombat {
+                mountain_climb_cost: 1,
+                river_cross_cost: 1,
+                ..none
+            },
+        ),
     ]
 }
 
@@ -32,9 +77,20 @@ fn battle(rng: &mut Rng, table: &DefenderTable, a0: u32, d0: u32, m: Mods, cost:
 }
 
 fn main() {
-    let games: u64 = std::env::args().nth(1).map(|x| x.parse().unwrap()).unwrap_or(20_000);
+    let games: u64 = std::env::args()
+        .nth(1)
+        .map(|x| x.parse().unwrap())
+        .unwrap_or(20_000);
     let table = DefenderTable::build();
-    let fights = [(3u32, 1u32), (5, 2), (6, 3), (10, 5), (10, 10), (15, 10), (20, 10)];
+    let fights = [
+        (3u32, 1u32),
+        (5, 2),
+        (6, 3),
+        (10, 5),
+        (10, 10),
+        (15, 10),
+        (20, 10),
+    ];
 
     println!("== Attacker wins, committed attackers v defenders, fought to the end (one-by-one dice, 40,000 each)");
     println!("   (mountain rules shown for a mountain target, river rules for a river crossing)");
@@ -46,7 +102,11 @@ fn main() {
     for (name, t) in variants() {
         let m = Mods {
             def_plus: t.mountain_def_plus + t.river_def_plus,
-            att_max: if t.river_att_max > 0 { t.river_att_max } else { 3 },
+            att_max: if t.river_att_max > 0 {
+                t.river_att_max
+            } else {
+                3
+            },
             ..Mods::default()
         };
         print!("{name:<38}");
@@ -54,7 +114,9 @@ fn main() {
             let mut rng = Rng::new(9);
             let n = 40_000;
             let cost = t.mountain_climb_cost.max(t.river_cross_cost);
-            let w = (0..n).filter(|_| battle(&mut rng, &table, a, d, m, cost)).count();
+            let w = (0..n)
+                .filter(|_| battle(&mut rng, &table, a, d, m, cost))
+                .count();
             print!("{:>8.1}%", 100.0 * w as f64 / n as f64);
         }
         println!();
@@ -62,10 +124,16 @@ fn main() {
 
     println!("\n== Whole games: house rules + events + pacts, 4 players ({games} games each)");
     println!("{:<38} attacks into  plain/mtn/river | conquest rate plain/mtn/river | rounds | winner terr | comebacks", "");
-    let strats = [Strategy::LOYAL, Strategy::OPPORTUNIST, Strategy::AGGRESSIVE, Strategy::HOARDER];
+    let strats = [
+        Strategy::LOYAL,
+        Strategy::OPPORTUNIST,
+        Strategy::AGGRESSIVE,
+        Strategy::HOARDER,
+    ];
     for (name, t) in variants() {
         let cfg = Config {
-            timeline: Timeline::HousePace,
+            timeline: Timeline::HouseCircle,
+            last_century_round: true,
             dice: DiceRule::DefenderOneByOne,
             events: EventMode::Deck,
             pacts: Some(PactRules::default()),
@@ -82,8 +150,10 @@ fn main() {
                         let mut acc = [0f64; 10];
                         for g in th * per..((th + 1) * per).min(games) {
                             let rot = (g % 4) as usize;
-                            let seat: Vec<Strategy> = (0..4).map(|s| strats[(s + rot) % 4]).collect();
-                            let r = Game::new(cfg, &sh, &seat, g.wrapping_mul(0x9E37_79B9) + 3).play();
+                            let seat: Vec<Strategy> =
+                                (0..4).map(|s| strats[(s + rot) % 4]).collect();
+                            let r =
+                                Game::new(cfg, &sh, &seat, g.wrapping_mul(0x9E37_79B9) + 3).play();
                             for k in 0..3 {
                                 acc[k] += r.terrain_attacks[k] as f64;
                                 acc[3 + k] += r.terrain_wins[k] as f64;
