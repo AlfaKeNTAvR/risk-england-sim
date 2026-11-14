@@ -458,11 +458,23 @@ function say(text, delay) {
   if (!speechOk || !delay) { speakNow(text); return; }
   setTimeout(() => speakNow(text), delay);
 }
-const OPEN = {
-  early: 'Rome has gone. The land lies open.',
-  middle: 'The kingdoms harden. Borders are drawn in blood.',
-  late: 'The great lords have grown fat. The age will test them.',
-};
+const rand = a => a[Math.floor(Math.random() * a.length)];
+const WELCOME = [o => `Welcome to the ${o} century.`, o => `We enter the ${o} century.`, o => `The ${o} century begins.`, o => `Behold, the ${o} century.`];
+const CENT = [
+  ['Rome’s legions have sailed away, and Britain stands alone.', 'The last Roman ships are gone. Saxon keels already scrape the shore.', 'An empire has fallen. Whoever is bold enough may take the land.'],
+  ['Small kingdoms rise from the ruins of Rome.', 'Warlords call themselves kings, and a plague sails in from the south.', 'Monks and kings alike build on Roman stone.'],
+  ['Saints walk the land, and shield walls clash in the fields.', 'The Church brings bishops and order. The kings bring spears.', 'It is the age of Northumbria, Mercia and Wessex.'],
+  ['King Offa raises his great dyke, and strange sails appear on the horizon.', 'Mercia is mighty. But at Lindisfarne, the Northmen have landed.', 'The harvests are good, and the monasteries are rich. Too rich.'],
+  ['The Great Heathen Army has come, and only Alfred stands in its way.', 'Danish longships fill the rivers. England pays in silver, or in blood.', 'Kingdoms fall one by one. Wessex alone holds firm.'],
+  ['Æthelstan forges one England, but his enemies gather at Brunanburh.', 'For the first time, there is a King of the English. Not everyone agrees.', 'Scots, Norse and Britons march south. The new kingdom must hold.'],
+  ['Duke William has crossed the sea. Castles rise, and the North will burn.', 'Sixteen sixty six is coming. Nothing in England will stay the same.', 'Every hide of land is counted, and every lord must answer to the king.'],
+  ['Stephen and Matilda tear the realm apart. Men call it the Anarchy.', 'Christ and his saints slept, the chroniclers say, while England bled.', 'Rivers flood, armies starve, and loyalty is for sale.'],
+  ['The barons have had enough of their king.', 'At Runnymede, a king is made to bow to a charter.', 'Simon de Montfort rides against the crown.'],
+  ['Famine, plague and revolt. The darkest age has come.', 'The Black Death is coming. A third of England will not see its end.', 'The peasants have had enough. London will burn.'],
+];
+const ROLL = ['Now roll the die, and choose your destiny.', 'Opener, take up the die. Let fate decide.', 'Cast the die. History is waiting.', 'Roll, and let the age reveal itself.', 'Let the opener roll, and may fortune favour the bold.'];
+const FATE = ['Fate has spoken.', 'So it is written.', 'The die has decided.', 'Hear the will of the age.', 'Let it be recorded.'];
+const FINALE = ['The fifteenth century. The age of chivalry is over. Count your lands: whoever holds the most is master of England.', 'The Middle Ages draw to a close. Lay down your swords and count your territories. History will remember the greatest.'];
 
 // ---------------------------------------------------------------- UI
 const $ = id => document.getElementById(id);
@@ -503,16 +515,16 @@ function pickCentury(i) {
   if (i === st.c && st.e < 0) return;
   st.c = i; st.e = -1; st.battle = false; save(); render();
   setMood(baseMood(), 6);
-  if (i === 10) { fanfare('good'); say('The fifteenth century. The age of chivalry is over. Count your lands: the one who holds the most is master of England.', 2600); return; }
+  if (i === 10) { fanfare('good'); say(rand(FINALE), 2600); return; }
   fanfare('neutral');
-  say(`The ${ORD[i]} century. ${i === 0 || i === 3 || i === 7 ? OPEN[ERA(i)] + ' ' : ''}Let the opener roll.`, 2000);
+  say(`${rand(WELCOME)(ORD[i])} ${rand(CENT[i])} ${rand(ROLL)}`, 2200);
 }
 function pickEvent(k) {
   st.e = k; st.battle = false; save(); render();
   const e = AGES[st.c].events[k], mood = EVMOOD[e.t] || ERA(st.c);
   fanfare(TONE[mood] || 'neutral');
   setMood(mood, 7);
-  say(`${e.t}. ${e.h} ${e.e}`, 2400);
+  say(`${rand(FATE)} ${e.t}. ${e.h} ${e.e}`, 2400);
 }
 
 $('battle').onclick = () => {
