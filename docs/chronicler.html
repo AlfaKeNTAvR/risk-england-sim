@@ -459,22 +459,21 @@ function say(text, delay) {
   setTimeout(() => speakNow(text), delay);
 }
 const rand = a => a[Math.floor(Math.random() * a.length)];
-const WELCOME = [o => `Welcome to the ${o} century.`, o => `We enter the ${o} century.`, o => `The ${o} century begins.`, o => `Behold, the ${o} century.`];
+const WELCOME = [o => `Welcome to the ${o} century.`, o => `The ${o} century begins.`, o => `Behold, the ${o} century.`];
 const CENT = [
-  ['Rome’s legions have sailed away, and Britain stands alone.', 'The last Roman ships are gone. Saxon keels already scrape the shore.', 'An empire has fallen. Whoever is bold enough may take the land.'],
-  ['Small kingdoms rise from the ruins of Rome.', 'Warlords call themselves kings, and a plague sails in from the south.', 'Monks and kings alike build on Roman stone.'],
-  ['Saints walk the land, and shield walls clash in the fields.', 'The Church brings bishops and order. The kings bring spears.', 'It is the age of Northumbria, Mercia and Wessex.'],
-  ['King Offa raises his great dyke, and strange sails appear on the horizon.', 'Mercia is mighty. But at Lindisfarne, the Northmen have landed.', 'The harvests are good, and the monasteries are rich. Too rich.'],
-  ['The Great Heathen Army has come, and only Alfred stands in its way.', 'Danish longships fill the rivers. England pays in silver, or in blood.', 'Kingdoms fall one by one. Wessex alone holds firm.'],
-  ['Æthelstan forges one England, but his enemies gather at Brunanburh.', 'For the first time, there is a King of the English. Not everyone agrees.', 'Scots, Norse and Britons march south. The new kingdom must hold.'],
-  ['Duke William has crossed the sea. Castles rise, and the North will burn.', 'Ten sixty six is coming. Nothing in England will stay the same.', 'Every hide of land is counted, and every lord must answer to the king.'],
-  ['Stephen and Matilda tear the realm apart. Men call it the Anarchy.', 'Christ and his saints slept, the chroniclers say, while England bled.', 'Rivers flood, armies starve, and loyalty is for sale.'],
-  ['The barons have had enough of their king.', 'At Runnymede, a king is made to bow to a charter.', 'Simon de Montfort rides against the crown.'],
-  ['Famine, plague and revolt. The darkest age has come.', 'The Black Death is coming. A third of England will not see its end.', 'The peasants have had enough. London will burn.'],
+  ['Rome is gone. Britain stands alone.', 'Saxon ships are on the shore.', 'An empire falls. Take what you can.'],
+  ['Small kingdoms rise from Roman ruins.', 'Warlords crown themselves kings.', 'Plague sails in from the south.'],
+  ['Saints walk the land.', 'Shield walls clash in the fields.', 'Mercia, Wessex and Northumbria rise.'],
+  ['Offa raises his great dyke.', 'Strange sails on the horizon.', 'The monasteries are rich. Too rich.'],
+  ['The Great Heathen Army has come.', 'Only Alfred stands against the Danes.', 'Pay in silver, or pay in blood.'],
+  ['One England, if it can hold.', 'Enemies gather at Brunanburh.', 'There is a King of the English.'],
+  ['William has crossed the sea.', 'Castles rise. The North will burn.', 'Every acre will be counted.'],
+  ['England tears itself apart.', 'Loyalty is for sale.', 'Christ and his saints sleep.'],
+  ['The barons have had enough.', 'A king bows to a charter.', 'De Montfort rides against the crown.'],
+  ['The darkest age has come.', 'Famine. Plague. Revolt.', 'The Black Death is coming.'],
 ];
-const ROLL = ['Now roll the die, and choose your destiny.', 'Opener, take up the die. Let fate decide.', 'Cast the die. History is waiting.', 'Roll, and let the age reveal itself.', 'Let the opener roll, and may fortune favour the bold.'];
-const FATE = ['Fate has spoken.', 'So it is written.', 'The die has decided.', 'Hear the will of the age.', 'Let it be recorded.'];
-const FINALE = ['The fifteenth century. The age of chivalry is over. Count your lands: whoever holds the most is master of England.', 'The Middle Ages draw to a close. Lay down your swords and count your territories. History will remember the greatest.'];
+const ROLL = ['Roll for your fate.', 'Let the die decide.', 'Roll, opener.', 'Choose your destiny.'];
+const FINALE = ['The fifteenth century. Count your lands. The greatest rules England.', 'The Middle Ages end. Lay down your swords, and count.'];
 
 // ---------------------------------------------------------------- UI
 const $ = id => document.getElementById(id);
@@ -524,7 +523,7 @@ function pickEvent(k) {
   const e = AGES[st.c].events[k], mood = EVMOOD[e.t] || ERA(st.c);
   fanfare(TONE[mood] || 'neutral');
   setMood(mood, 7);
-  say(`${rand(FATE)} ${e.t}. ${e.h} ${e.e}`, 2400);
+  say(`${e.t}. ${e.h}`, 2400);
 }
 
 $('battle').onclick = () => {
@@ -532,7 +531,7 @@ $('battle').onclick = () => {
   if (ctx && st.battle) { for (let i = 0; i < 8; i++) drum(ctx.currentTime + 0.05 + i * 0.07, 0.4 + i * 0.07); }
   setMood(baseMood(), st.battle ? 2 : 6);
 };
-$('betray').onclick = () => { betrayal(); say('An oath is broken. Let no one forget it.', 1800); };
+$('betray').onclick = () => { betrayal(); say('An oath is broken.', 1800); };
 $('trade').onclick = () => coins();
 $('replay').onclick = () => { if (lastLine) say(lastLine, 0); };
 $('vol').value = st.vol;
@@ -589,7 +588,7 @@ $('start').onclick = () => {
   $('gate').hidden = true; keepAwake();
   testSoundQuiet();
   const e = st.e >= 0 && st.c < 10 ? AGES[st.c].events[st.e] : null;
-  say(e ? `We return to the ${ORD[st.c]} century. ${e.t}. ${e.e}` : `Hear now the chronicle of England. The ${ORD[st.c]} century begins.`, 1500);
+  say(e ? `The ${ORD[st.c]} century. ${e.t}.` : `Hear the chronicle of England. The ${ORD[st.c]} century begins.`, 1500);
 };
 
 // scope
