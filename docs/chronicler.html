@@ -398,18 +398,26 @@ function pickVoice() {
   if (!voice) voice = vs.find(v => /en-GB/i.test(v.lang)) || vs[0] || null;
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+let speechOk = false, speechNote = '';
+function speakNow(text) {
+  const u = new SpeechSynthesisUtterance(text);
+  if (voice) u.voice = voice;
+  u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.86; u.pitch = 0.78; u.volume = 1;
+  u.onstart = () => { speechOk = true; speechNote = 'speaking'; diag(); };
+  u.onend = () => { speechNote = ''; diag(); };
+  u.onerror = e => { speechNote = 'speech error: ' + (e.error || 'unknown'); diag(); };
+  if (ctx) { const words = text.split(' ').length; duck(0.35, Math.min(14, 1 + words * 0.42)); }
+  if (speechSynthesis.paused) speechSynthesis.resume();
+  speechSynthesis.speak(u);
+}
 function say(text, delay) {
   lastLine = text;
   document.getElementById('said').textContent = text;
   if (!st.voice || !('speechSynthesis' in window)) return;
-  speechSynthesis.cancel();
-  setTimeout(() => {
-    const u = new SpeechSynthesisUtterance(text);
-    if (voice) u.voice = voice;
-    u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.86; u.pitch = 0.78; u.volume = 1;
-    if (ctx) { const words = text.split(' ').length; duck(0.35, Math.min(14, 1 + words * 0.42)); }
-    speechSynthesis.speak(u);
-  }, delay || 0);
+  if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
+  // iPad Safari only lets speech start inside a tap until it has spoken once; after that a delay is fine.
+  if (!speechOk || !delay) { speakNow(text); return; }
+  setTimeout(() => speakNow(text), delay);
 }
 const OPEN = {
   early: 'Rome has gone. The land lies open.',
@@ -506,7 +514,7 @@ function unlockIOS() {
 function diag(extra) {
   const parts = [];
   parts.push('Audio: ' + (ctx ? ctx.state : 'not started'));
-  parts.push('Voice: ' + (!('speechSynthesis' in window) ? 'not available' : voice ? voice.name : 'default'));
+  parts.push('Voice: ' + (!('speechSynthesis' in window) ? 'not available here' : (voice ? voice.name : 'default') + (speechNote ? ' (' + speechNote + ')' : speechOk ? ' (working)' : ' (not heard yet)')));
   if (extra) parts.push(extra);
   $('diag').textContent = parts.join(' · ');
 }
@@ -516,7 +524,7 @@ function testSound() {
   const t = ctx.currentTime + 0.05, fx = fxBus();
   bell(t, 64, 0.6, fx); horn(t + 0.4, 57, 0.8, 0.25, fx);
   diag();
-  say('Sound check. Can you hear me?', 600);
+  say('Sound check. Can you hear me?', 0);
 }
 $('test').onclick = testSound;
 function testSoundQuiet() { const t = ctx.currentTime + 0.05; bell(t, 64, 0.5, fxBus()); }
@@ -525,7 +533,7 @@ $('start').onclick = () => {
   try { initAudio(); } catch (e) { diag('Error: ' + e.message); return; }
   ctx.resume().then(() => diag()).catch(e => diag('Error: ' + e.message));
   setTimeout(diag, 800);
-  if ('speechSynthesis' in window) { pickVoice(); const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
+  if ('speechSynthesis' in window) pickVoice();
   $('gate').hidden = true; keepAwake();
   testSoundQuiet();
   const e = st.e >= 0 && st.c < 10 ? AGES[st.c].events[st.e] : null;
