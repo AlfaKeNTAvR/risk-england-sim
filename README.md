@@ -147,7 +147,7 @@ Rerun with the opener circle (Nov 13): loyal 37.6% ±0.7, opportunist 24.5%, bac
 
 Mixed table (one of each), win share, ±0.6. Player-facing pages show no win rates on purpose: the owner wants players to judge for themselves.
 
-**Current default (Nov 11, owner's choice):** 1-3 turns each, stake face up exactly as many stars as turns, bonus = turns − 1 (max 2), victim takes both stakes, betrayer draws normally, oathbreaker until the cavalry moves. Mixed table: loyal 33.4%, opportunist 24.8%, backstabber 18.4%, no pacts 23.5%. Leans toward loyalty; switch `on_betrayal` to `VictimTakesOwn` for 27.0 / 24.6 / 20.2 / 28.1. Lengths with these rules: 2 turns 27.6%, 1 turn 24.4%, 3 turns 23.9%. Lower entry (1 star) raises pacts kept per game from 0.71 to 0.99 for loyal players.
+**Current default (Nov 11, owner's choice):** 1-3 turns each, stake face up exactly as many stars as turns, bonus = turns − 1 (max 2), victim takes both stakes, betrayer draws normally, oathbreaker until the next century. Mixed table: loyal 33.4%, opportunist 24.8%, backstabber 18.4%, no pacts 23.5%. Leans toward loyalty; switch `on_betrayal` to `VictimTakesOwn` for 27.0 / 24.6 / 20.2 / 28.1. Lengths with these rules: 2 turns 27.6%, 1 turn 24.4%, 3 turns 23.9%. Lower entry (1 star) raises pacts kept per game from 0.71 to 0.99 for loyal players.
 
 Earlier variants:
 
