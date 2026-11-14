@@ -118,6 +118,8 @@ canvas { width: 100%; height: 70px; display: block; border-radius: 8px; backgrou
         <div class="d" id="moodDesc"></div>
         <canvas id="scope" width="600" height="140" aria-hidden="true"></canvas>
         <div class="said" id="said" aria-live="polite"></div>
+        <div class="note" id="diag"></div>
+        <button class="btn" id="test" type="button">Sound check</button>
       </section>
       <section>
         <div class="label">Moments</div>
@@ -481,15 +483,51 @@ $('voiceOn').onchange = e => { st.voice = e.target.checked; store.set('voice', s
 $('pause').onclick = async () => {
   if (!ctx) return;
   if (ctx.state === 'running') { await ctx.suspend(); $('pause').textContent = 'Play'; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
-  else { await ctx.resume(); $('pause').textContent = 'Pause'; }
+  else { unlockIOS(); await ctx.resume(); $('pause').textContent = 'Pause'; }
+  diag();
 };
 let lock = null;
 async function keepAwake() { try { lock = await navigator.wakeLock.request('screen'); } catch (e) {} }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ctx && ctx.state === 'running') keepAwake(); });
+function silentWav() {
+  const sr = 8000, n = sr / 2, b = new ArrayBuffer(44 + n * 2), v = new DataView(b);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  let s = ''; const u = new Uint8Array(b); for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
+  return 'data:audio/wav;base64,' + btoa(s);
+}
+let unlockEl = null;
+function unlockIOS() {
+  // Ask Safari to treat this page as music, so the mute setting does not silence it.
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+  try { unlockEl = new Audio(silentWav()); unlockEl.loop = true; unlockEl.setAttribute('playsinline', ''); const p = unlockEl.play(); if (p) p.catch(() => {}); } catch (e) {}
+}
+function diag(extra) {
+  const parts = [];
+  parts.push('Audio: ' + (ctx ? ctx.state : 'not started'));
+  parts.push('Voice: ' + (!('speechSynthesis' in window) ? 'not available' : voice ? voice.name : 'default'));
+  if (extra) parts.push(extra);
+  $('diag').textContent = parts.join(' · ');
+}
+function testSound() {
+  if (!ctx) return;
+  ctx.resume().then(() => diag());
+  const t = ctx.currentTime + 0.05, fx = fxBus();
+  bell(t, 64, 0.6, fx); horn(t + 0.4, 57, 0.8, 0.25, fx);
+  diag();
+  say('Sound check. Can you hear me?', 600);
+}
+$('test').onclick = testSound;
+function testSoundQuiet() { const t = ctx.currentTime + 0.05; bell(t, 64, 0.5, fxBus()); }
 $('start').onclick = () => {
-  initAudio(); ctx.resume();
+  unlockIOS();
+  try { initAudio(); } catch (e) { diag('Error: ' + e.message); return; }
+  ctx.resume().then(() => diag()).catch(e => diag('Error: ' + e.message));
+  setTimeout(diag, 800);
   if ('speechSynthesis' in window) { pickVoice(); const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
   $('gate').hidden = true; keepAwake();
+  testSoundQuiet();
   const e = st.e >= 0 && st.c < 10 ? AGES[st.c].events[st.e] : null;
   say(e ? `We return to the ${ORD[st.c]} century. ${e.t}. ${e.e}` : `Hear now the chronicle of England. The ${ORD[st.c]} century begins.`, 1500);
 };
@@ -509,5 +547,5 @@ function draw() {
   g2.stroke();
   if (!reduce) requestAnimationFrame(draw);
 }
-render(); draw();
+render(); draw(); diag();
 </script>
