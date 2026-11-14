@@ -101,6 +101,7 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
       <div class="sub">Music and narration for Risk: The Battle for Medieval England</div>
     </div>
     <div class="controls">
+      <label class="toggle" for="recOn"><input type="checkbox" id="recOn" checked> Recorded music</label>
       <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Narrator</label>
       <select id="voicePick" class="btn" aria-label="Narrator voice" style="min-height: 48px; max-width: 220px"></select>
       <label class="vol" for="vol">Volume <input type="range" id="vol" min="0" max="100" value="70"></label>
@@ -146,6 +147,7 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
           <div class="tests" id="moodTests"></div>
         </details>
         <div class="note">Tap the century when the cavalry moves, then the event the opener rolled. The music changes over a few seconds. During a battle, swords clash at random.</div>
+        <div class="note">Music from Pixabay: kulakovka, Medieval Horizons, Kiravale, kaazoom, RoyaltyFreeMusicStudio.</div>
       </section>
     </div>
   </main>
@@ -247,9 +249,11 @@ function initAudio() {
     for (const det of [-8, 8]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.detune.value = det; const g = ctx.createGain(); g.gain.value = .045; o.connect(g); g.connect(padF); o.start(); voice.push(o); }
     pad.push(voice);
   }
+  musicBus = ctx.createGain(); musicBus.gain.value = 1; musicBus.connect(master);
   cur = Object.assign({}, MOODS[baseMood()]); tempo = cur.tempo;
   retune(ctx.currentTime, 0.01); chord(ctx.currentTime, 0.01);
   levels(MOODS[baseMood()], 2.5);
+  playTrack(baseMood(), 3);
   nextTime = ctx.currentTime + 0.1;
   timer = setInterval(tick, 25);
 }
@@ -260,8 +264,37 @@ function impulse(sec) {
 }
 function levels(m, secs) {
   const t = ctx.currentTime;
-  for (const l of LAYERS) { const g = buses[l].gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(m.lv[l], t, secs / 3); }
+  for (const l of LAYERS) { const g = buses[l].gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(useRecorded ? 0 : m.lv[l], t, secs / 3); }
 }
+// ---------------------------------------------------------------- recorded music (Pixabay tracks published with the page)
+const TRACKS = { lute: -3.7, squire: 0, feast: -6, repose: 4, epic: -3.6, fantasy: -5 };
+const MOOD_TRACKS = { early: ['lute', 'squire'], middle: ['fantasy', 'squire'], late: ['repose', 'fantasy'], festive: ['feast', 'lute'], sacred: ['repose'], intrigue: ['fantasy'], war: ['epic', 'feast'], sombre: ['repose'], battle: ['epic'], finale: ['epic', 'feast'] };
+let musicBus = null, curTrack = null, useRecorded = store.get('recorded', true), currentMood = null;
+const players = {};
+function player(k) {
+  if (players[k]) return players[k];
+  const el = new Audio(); el.loop = true; el.preload = 'auto'; el.setAttribute('playsinline', ''); el.src = 'music/' + k + '.mp3';
+  const g = ctx.createGain(); g.gain.value = 0;
+  try { ctx.createMediaElementSource(el).connect(g); } catch (e) { diag('Music routing failed: ' + e.message); }
+  g.connect(musicBus);
+  const p = { k, el, g, norm: Math.pow(10, TRACKS[k] / 20) };
+  el.addEventListener('error', () => { diag('Music file could not load: ' + k); if (curTrack === k) { curTrack = null; useRecorded = false; levels(target || cur, 3); } });
+  players[k] = p; return p;
+}
+function fadeTo(p, v, secs) { const t = ctx.currentTime; p.g.gain.cancelScheduledValues(t); p.g.gain.setValueAtTime(p.g.gain.value, t); p.g.gain.setTargetAtTime(v, t, secs / 3); }
+function playTrack(mood, secs) {
+  currentMood = mood;
+  if (!ctx || !useRecorded) return;
+  const list = MOOD_TRACKS[mood] || [];
+  if (!list.length || (curTrack && list.includes(curTrack))) return;
+  const k = list[Math.floor(Math.random() * list.length)], p = player(k), fade = secs || 5;
+  try { p.el.currentTime = 0; } catch (e) {}
+  const pr = p.el.play(); if (pr) pr.catch(err => diag('Music blocked: ' + err.name + '. Tap Pause, then Play.'));
+  fadeTo(p, p.norm, fade);
+  if (curTrack && players[curTrack]) { const o = players[curTrack]; fadeTo(o, 0, fade); setTimeout(() => { if (curTrack !== o.k) o.el.pause(); }, fade * 1000 + 1500); }
+  curTrack = k;
+}
+function stopTracks(secs) { for (const k in players) { const p = players[k]; fadeTo(p, 0, secs); setTimeout(() => { if (!useRecorded || curTrack !== k) p.el.pause(); }, secs * 1000 + 500); } curTrack = null; }
 function retune(t, tau) { for (const d of drone) d.o.frequency.setTargetAtTime(mtof(cur.root - 12 + d.iv), t, tau); }
 function chord(t, tau) {
   const deg = cur.prog[bar % cur.prog.length];
@@ -271,6 +304,7 @@ function setMood(name, secs) {
   target = MOODS[name];
   if (!ctx) return;
   levels(target, secs || 6);
+  playTrack(name, secs || 6);
   harmonyDue = true;
 }
 function tick() {
@@ -424,7 +458,8 @@ function swords() { if (!ctx) return; const t = ctx.currentTime + 0.03; [0, 0.32
 function fxBus() { const g = ctx.createGain(); g.connect(master); g.connect(revSend); return g; }
 function duck(depth, hold) {
   const t = ctx.currentTime;
-  for (const l of LAYERS) { const g = buses[l].gain; const v = g.value; g.cancelScheduledValues(t); g.setValueAtTime(v, t); g.setTargetAtTime(v * depth, t, 0.3); g.setTargetAtTime((target || cur).lv[l], t + hold, 1.2); }
+  for (const l of LAYERS) { const g = buses[l].gain; const v = g.value; g.cancelScheduledValues(t); g.setValueAtTime(v, t); g.setTargetAtTime(v * depth, t, 0.3); g.setTargetAtTime(useRecorded ? 0 : (target || cur).lv[l], t + hold, 1.2); }
+  if (musicBus) { const g = musicBus.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(depth, t, 0.3); g.setTargetAtTime(1, t + hold, 1.2); }
 }
 // century fanfare and event stings: timpani roll, gong, choir swell, chimes
 function gong(t, f, v, dest) {
@@ -604,12 +639,18 @@ $('replay').onclick = () => { if (lastLine) say(lastLine, 0); };
 $('vol').value = st.vol;
 $('vol').oninput = e => { st.vol = +e.target.value; store.set('vol', st.vol); if (master) master.gain.setTargetAtTime(st.vol / 100, ctx.currentTime, 0.1); };
 $('voicePick').onchange = e => { store.set('voiceName', e.target.value); voice = speechSynthesis.getVoices().find(v => v.name === e.target.value) || voice; diag(); say('I am the chronicler of England.', 0); };
+$('recOn').checked = useRecorded;
+$('recOn').onchange = e => {
+  useRecorded = e.target.checked; store.set('recorded', useRecorded);
+  if (!ctx) return;
+  if (useRecorded) { levels(target || cur, 2); playTrack(baseMood(), 3); } else { stopTracks(2); levels(target || cur, 3); }
+};
 $('voiceOn').checked = st.voice;
 $('voiceOn').onchange = e => { st.voice = e.target.checked; store.set('voice', st.voice); if (!st.voice && 'speechSynthesis' in window) speechSynthesis.cancel(); };
 $('pause').onclick = async () => {
   if (!ctx) return;
-  if (ctx.state === 'running') { await ctx.suspend(); $('pause').textContent = 'Play'; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
-  else { unlockIOS(); await ctx.resume(); $('pause').textContent = 'Pause'; }
+  if (ctx.state === 'running') { for (const k in players) players[k].el.pause(); await ctx.suspend(); $('pause').textContent = 'Play'; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+  else { unlockIOS(); if (curTrack && players[curTrack]) { const pr = players[curTrack].el.play(); if (pr) pr.catch(() => {}); } await ctx.resume(); $('pause').textContent = 'Pause'; }
   diag();
 };
 let lock = null;
