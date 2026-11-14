@@ -28,7 +28,7 @@ PDF page order inside each double-sided job is front, back, front, back.
 
 ## Why the backs line up
 
-- Plaques: full-width, centered pieces in the same three row positions on front and back. A long-edge flip mirrors left-right only, so the rows stay put. The printer still drifts a few mm (first test print: the long edge moved), so only the FRONT has the rounded cut shape; the BACK is one square parchment block that runs 5 mm past every piece. Cut from the front side. The three plaques on a sheet touch with no gap: one straight cut at the small margin ticks separates two plaques, then punch the corners.
+- Plaques: full-width, centered pieces in the same three row positions on front and back. A long-edge flip mirrors left-right only, so the rows stay put. The printer still drifts a few mm (first test print: the long edge moved), so only the FRONT has the rounded cut shape; the BACK is one square parchment block that runs 5 mm past every piece. Cut from the front side. The three plaques on a sheet touch with no gap and have square corners: one straight cut at the small margin ticks separates two plaques, then round every corner with the punch.
 - Era board: symmetric margins on a landscape sheet; a short-edge flip keeps it upright.
 - A5 rules: each A5 page is centered on letter, with 5 mm of extra parchment all round on both sides. Trim marks are on the fronts only (pages 1 and 3): cut from the front, 148 x 210 mm, the rulebook's page size.
 
