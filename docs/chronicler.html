@@ -94,6 +94,7 @@ canvas { width: 100%; height: 70px; display: block; border-radius: 8px; backgrou
     </div>
     <div class="controls">
       <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Narrator</label>
+      <select id="voicePick" class="btn" aria-label="Narrator voice" style="min-height: 48px; max-width: 220px"></select>
       <label class="vol" for="vol">Volume <input type="range" id="vol" min="0" max="100" value="70"></label>
       <button class="btn" id="pause" type="button">Pause</button>
     </div>
@@ -422,17 +423,25 @@ let voice = null;
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
   const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
-  const prefer = ['Daniel', 'Arthur', 'Oliver', 'Rishi', 'Google UK English Male', 'Microsoft Ryan', 'Microsoft George', 'Fred', 'Aaron', 'Alex'];
-  voice = null;
-  for (const p of prefer) { voice = vs.find(v => v.name.includes(p)); if (voice) break; }
+  const quality = v => /premium/i.test(v.name) ? 2 : /enhanced/i.test(v.name) ? 1 : 0;
+  vs.sort((a, b) => quality(b) - quality(a) || a.name.localeCompare(b.name));
+  const saved = store.get('voiceName', '');
+  const prefer = ['Daniel', 'Arthur', 'Oliver', 'Jamie', 'Malcolm', 'Rishi', 'Google UK English Male', 'Microsoft Ryan', 'Microsoft George', 'Aaron', 'Alex'];
+  voice = vs.find(v => v.name === saved) || null;
+  if (!voice) for (const q of [2, 1, 0]) { for (const p of prefer) { voice = vs.find(v => v.name.includes(p) && quality(v) === q); if (voice) break; } if (voice) break; }
   if (!voice) voice = vs.find(v => /en-GB/i.test(v.lang)) || vs[0] || null;
+  const sel = document.getElementById('voicePick');
+  if (sel) {
+    sel.innerHTML = vs.map(v => `<option value="${v.name.replace(/"/g, '&quot;')}">${v.name} (${v.lang})</option>`).join('') || '<option>No voices</option>';
+    if (voice) sel.value = voice.name;
+  }
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 let speechOk = false, speechNote = '';
 function speakNow(text) {
   const u = new SpeechSynthesisUtterance(text);
   if (voice) u.voice = voice;
-  u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.86; u.pitch = 0.78; u.volume = 1;
+  u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.9; u.pitch = 0.95; u.volume = 1;
   u.onstart = () => { speechOk = true; speechNote = 'speaking'; diag(); };
   u.onend = () => { speechNote = ''; diag(); };
   u.onerror = e => { speechNote = 'speech error: ' + (e.error || 'unknown'); diag(); };
@@ -516,6 +525,7 @@ $('trade').onclick = () => coins();
 $('replay').onclick = () => { if (lastLine) say(lastLine, 0); };
 $('vol').value = st.vol;
 $('vol').oninput = e => { st.vol = +e.target.value; store.set('vol', st.vol); if (master) master.gain.setTargetAtTime(st.vol / 100, ctx.currentTime, 0.1); };
+$('voicePick').onchange = e => { store.set('voiceName', e.target.value); voice = speechSynthesis.getVoices().find(v => v.name === e.target.value) || voice; diag(); say('I am the chronicler of England.', 0); };
 $('voiceOn').checked = st.voice;
 $('voiceOn').onchange = e => { st.voice = e.target.checked; store.set('voice', st.voice); if (!st.voice && 'speechSynthesis' in window) speechSynthesis.cancel(); };
 $('pause').onclick = async () => {
