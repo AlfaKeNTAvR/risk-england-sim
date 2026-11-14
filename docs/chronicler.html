@@ -360,29 +360,59 @@ function coins() {
     const at = t + i * 0.06 + Math.random() * 0.05, f = 2800 + Math.random() * 2200;
     [[1, 1], [2.7, .4]].forEach(([r, a]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * r; o.connect(g); g.connect(fx); env(g, at, 0.001, 0.09 * a, 0.25); o.start(at); o.stop(at + 0.3); });
   }
-  horn(t + 0.25, 62, 0.25, 0.12, fx); horn(t + 0.5, 69, 0.6, 0.12, fx);
+  bell(t + 0.55, 76, 0.3, fx);
 }
 function fxBus() { const g = ctx.createGain(); g.connect(master); g.connect(revSend); return g; }
 function duck(depth, hold) {
   const t = ctx.currentTime;
   for (const l of LAYERS) { const g = buses[l].gain; const v = g.value; g.cancelScheduledValues(t); g.setValueAtTime(v, t); g.setTargetAtTime(v * depth, t, 0.3); g.setTargetAtTime((target || cur).lv[l], t + hold, 1.2); }
 }
-// century fanfare and event stings
+// century fanfare and event stings: timpani roll, gong, choir swell, chimes
+function gong(t, f, v, dest) {
+  [[1, 1], [1.48, .55], [2.21, .4], [2.94, .28], [3.83, .18], [5.1, .1]].forEach(([r, a]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(f * r * 1.01, t); o.frequency.exponentialRampToValueAtTime(f * r, t + 1.5);
+    o.connect(g); g.connect(dest); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v * a, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 6 / Math.sqrt(r));
+    o.start(t); o.stop(t + 6.5);
+  });
+}
+function timpRoll(t, len, v, dest) {
+  const n = Math.floor(len / 0.055);
+  for (let i = 0; i < n; i++) {
+    const at = t + i * 0.055, x = i / n, o = ctx.createOscillator(), g = ctx.createGain();
+    o.frequency.setValueAtTime(92, at); o.frequency.exponentialRampToValueAtTime(70, at + 0.2);
+    o.connect(g); g.connect(dest); env(g, at, 0.004, v * (0.15 + 0.85 * x * x), 0.35); o.start(at); o.stop(at + 0.4);
+  }
+}
+function choir(t, midis, dur, v, dest) {
+  const bp1 = ctx.createBiquadFilter(), bp2 = ctx.createBiquadFilter(), g = ctx.createGain();
+  bp1.type = 'bandpass'; bp1.frequency.value = 650; bp1.Q.value = 3; bp2.type = 'bandpass'; bp2.frequency.value = 1100; bp2.Q.value = 4;
+  bp1.connect(g); bp2.connect(g); g.connect(dest);
+  for (const m of midis) for (const det of [-10, 0, 10]) {
+    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
+    const vib = ctx.createOscillator(), vg = ctx.createGain(); vib.frequency.value = 4.5 + Math.random(); vg.gain.value = 6; vib.connect(vg); vg.connect(o.detune);
+    o.connect(bp1); o.connect(bp2); o.start(t); vib.start(t); o.stop(t + dur + 2); vib.stop(t + dur + 2);
+  }
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + dur * 0.45); g.gain.setValueAtTime(v, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 1.8);
+}
+function chimes(t, midis, gap, v, dest) { midis.forEach((m, i) => bell(t + i * gap, m, v, dest)); }
 function fanfare(kind) {
   if (!ctx) return;
   const t = ctx.currentTime + 0.05, fx = fxBus(), r = 50;
-  duck(0.25, 3.2);
-  for (let i = 0; i < 6; i++) drum(t + i * 0.09, 0.35 + i * 0.1);
-  if (kind === 'good') [[0, .3], [4, .3], [7, .3], [12, 1.2]].reduce((at, [iv, d]) => { horn(at, r + iv, d, 0.22, fx); return at + d; }, t + 0.55);
-  else if (kind === 'bad') { horn(t + 0.55, r - 2, 1.6, 0.25, fx); horn(t + 0.55, r - 1, 1.6, 0.12, fx); bell(t + 0.6, r + 10, 0.5, fx); bell(t + 2.1, r + 10, 0.4, fx); }
-  else if (kind === 'war') { [[0, .25], [0, .25], [7, .5], [5, .25], [3, 1.1]].reduce((at, [iv, d]) => { horn(at, r + iv, d, 0.24, fx); drum(at, 0.8); return at + d; }, t + 0.55); }
-  else { horn(t + 0.55, r, 0.5, 0.22, fx); horn(t + 1.05, r + 7, 1.3, 0.22, fx); }
+  duck(0.2, 3.6);
+  timpRoll(t, 1.1, 0.7, fx);
+  const hit = t + 1.15;
+  drum(hit, 1);
+  if (kind === 'good') { choir(hit, [r, r + 4, r + 7, r + 12], 2.2, 0.05, fx); chimes(hit + 0.2, [r + 24, r + 28, r + 31, r + 36], 0.22, 0.28, fx); }
+  else if (kind === 'bad') { gong(hit, 55, 0.5, fx); choir(hit + 0.1, [r - 5, r - 2, r + 2], 2.6, 0.05, fx); }
+  else if (kind === 'war') { gong(hit, 62, 0.35, fx); for (let i = 1; i < 6; i++) drum(hit + i * 0.26, i % 2 ? 0.7 : 1); choir(hit + 0.2, [r - 12, r - 5, r], 1.8, 0.05, fx); }
+  else { gong(hit, 65, 0.3, fx); choir(hit + 0.1, [r, r + 7, r + 12], 2.0, 0.04, fx); }
 }
 function betrayal() {
   if (!ctx) return;
   const t = ctx.currentTime + 0.03, fx = fxBus();
   duck(0.2, 2.6);
-  [0, 1, 6].forEach(iv => horn(t, 38 + iv, 1.8, 0.16, fx));
+  gong(t, 52, 0.45, fx); choir(t + 0.05, [38, 39, 44], 2.2, 0.05, fx);
   drum(t, 1); drum(t + 0.35, 0.9); drum(t + 0.7, 1);
   bell(t + 0.1, 61, 0.45, fx);
 }
@@ -522,7 +552,7 @@ function testSound() {
   if (!ctx) return;
   ctx.resume().then(() => diag());
   const t = ctx.currentTime + 0.05, fx = fxBus();
-  bell(t, 64, 0.6, fx); horn(t + 0.4, 57, 0.8, 0.25, fx);
+  chimes(t, [64, 67, 71, 76], 0.25, 0.5, fx);
   diag();
   say('Sound check. Can you hear me?', 0);
 }
