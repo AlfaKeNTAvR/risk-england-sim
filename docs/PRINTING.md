@@ -1,6 +1,8 @@
 # Printing the table pieces
 
-Source: the "Medieval England Table Pieces" design canvas (`docs/print/`). Export each canvas page as a PDF and print from the PDF.
+Source: the "Medieval England Table Pieces" design canvas (`docs/print/`). The canvas's own PDF export rasterises the pages and looks soft, so print from `docs/print-pack/` instead: one HTML file per job, vector text. Open it in Chrome (online, so the Google fonts load) and press Ctrl+P. Rebuild after canvas changes: `python3 tools/printpack.py docs/print docs/print-pack` (needs node).
+
+In Chrome's dialog: Scale Custom 100, Margins None or Default (the files set zero margins), Background graphics on.
 
 Printer assumed: **HP ENVY 6455e** (owner said "HP NV 450"; confirm the model). It duplexes automatically up to 180 g/m² (HP Brochure / 48 lb cardstock setting). Heavier paper (up to 300 g/m² photo) only prints one side per pass: print the front, put the sheet back in turned over, print the back.
 
