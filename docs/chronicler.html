@@ -3,151 +3,137 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=EB+Garamond:wght@400;500;600&display=swap">
 <style>
-/* Layout: a candlelit console for the table. Left: the ages and the rolled event. Right: what plays now and the moment buttons. */
+/* Layout: one screen, no scrolling. Left: the ages and the rolled event. Right: what plays, the turn phase, moments. */
 :root {
   color-scheme: dark;
-  --hall: #15100c;      /* page */
-  --oak: #211912;       /* panels */
-  --seam: #3b2d21;      /* lines */
-  --parch: #efe2c4;     /* text */
-  --faded: #b5a17e;     /* secondary text */
-  --gold: #d9a93b;      /* cavalry gold, focus, active */
-  --early: #6f9157;
-  --middle: #c48d2c;
-  --late: #bf4a3f;
-  --ink: #1b140e;       /* text on gold */
+  --hall: #15100c; --oak: #211912; --seam: #3b2d21;
+  --parch: #efe2c4; --faded: #b5a17e; --gold: #d9a93b;
+  --early: #6f9157; --middle: #c48d2c; --late: #bf4a3f; --calm: #6f9157; --suspense: #c48d2c; --battle: #bf4a3f;
+  --ink: #1b140e;
   --display: 'IM Fell English SC', 'Iowan Old Style', Georgia, serif;
   --story: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
   --body: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
 }
 html, body { height: 100%; }
 body {
-  background: var(--hall); color: var(--parch); font-family: var(--body); font-size: 17px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
-  padding-block: 16px 24px; -webkit-tap-highlight-color: transparent;
+  background: var(--hall); color: var(--parch); font-family: var(--body); font-size: 16px; overflow: hidden;
+  padding-left: max(14px, env(safe-area-inset-left, 0px)); padding-right: max(14px, env(safe-area-inset-right, 0px));
+  padding-block: 10px; box-sizing: border-box; -webkit-tap-highlight-color: transparent;
 }
-button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
-button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--seam); padding-bottom: 12px; }
-h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1; letter-spacing: 0.01em; }
-.sub { color: var(--faded); font-size: 15px; }
-.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.btn { border: 1px solid var(--seam); background: var(--oak); border-radius: 10px; padding: 10px 16px; min-height: 48px; }
-.btn.primary { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; }
-.vol { display: flex; align-items: center; gap: 8px; color: var(--faded); font-size: 15px; }
-.vol input { width: 120px; accent-color: var(--gold); }
-.toggle { display: flex; align-items: center; gap: 8px; color: var(--faded); font-size: 15px; }
-.toggle input { width: 22px; height: 22px; accent-color: var(--gold); }
+button, select { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.app { height: 100%; max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+header { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--seam); padding-bottom: 8px; }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1; }
+.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--seam); background: var(--oak); border-radius: 10px; padding: 6px 12px; min-height: 42px; }
+.toggle, .vol { display: flex; align-items: center; gap: 6px; color: var(--faded); font-size: 15px; }
+.toggle input { width: 20px; height: 20px; accent-color: var(--gold); }
+.vol input { width: 110px; accent-color: var(--gold); }
+#voicePick { max-width: 170px; min-height: 42px; }
 
-main { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
-@media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
-section { background: var(--oak); border: 1px solid var(--seam); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
-.label { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); }
+main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 10px; }
+.col { display: flex; flex-direction: column; gap: 10px; min-height: 0; min-width: 0; }
+section { background: var(--oak); border: 1px solid var(--seam); border-radius: 12px; padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; min-width: 0; min-height: 0; }
+.label { font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); }
 
-.ages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
-@media (max-width: 520px) { .ages { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
-.age { border: 1px solid var(--seam); border-radius: 10px; background: var(--hall); min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; position: relative; overflow: hidden; }
+.ages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px; }
+.age { border: 1px solid var(--seam); border-radius: 9px; background: var(--hall); min-height: 50px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 4px; position: relative; overflow: hidden; }
 .age::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: var(--era); }
-.age .r { font-family: var(--display); font-size: 24px; line-height: 1; }
-.age .y { font-size: 12px; color: var(--faded); font-variant-numeric: tabular-nums; }
+.age .r { font-family: var(--display); font-size: 21px; line-height: 1; }
+.age .y { font-size: 11px; color: var(--faded); font-variant-numeric: tabular-nums; }
 .age[aria-pressed="true"] { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 16%, var(--hall)); box-shadow: inset 0 0 0 1px var(--gold); }
 
-.events { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-@media (max-width: 640px) { .events { grid-template-columns: minmax(0, 1fr); } }
-.ev { text-align: left; border: 1px solid var(--seam); border-radius: 12px; background: var(--hall); padding: 12px; display: flex; flex-direction: column; gap: 6px; min-height: 150px; min-width: 0; }
-.ev .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.die { font-weight: 600; font-size: 15px; border: 1.5px solid var(--parch); border-radius: 5px; padding: 0 7px; font-variant-numeric: tabular-nums; }
-.mood { font-size: 12px; color: var(--faded); letter-spacing: 0.06em; text-transform: uppercase; }
-.ev .t { font-family: var(--display); font-size: 21px; line-height: 1.05; }
-.ev .e { font-size: 15px; line-height: 1.3; color: var(--parch); }
+.evsec { flex: 1; }
+.events { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.ev { text-align: left; border: 1px solid var(--seam); border-radius: 10px; background: var(--hall); padding: 10px; display: flex; flex-direction: column; gap: 5px; min-width: 0; overflow: hidden; }
+.ev .top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.die { font-weight: 600; font-size: 14px; border: 1.5px solid var(--parch); border-radius: 5px; padding: 0 6px; font-variant-numeric: tabular-nums; }
+.mood { font-size: 11px; color: var(--faded); letter-spacing: 0.06em; text-transform: uppercase; }
+.ev .t { font-family: var(--display); font-size: 20px; line-height: 1.05; }
 .ev .tm { font-size: 12px; color: var(--faded); }
+.ev .e { font-size: 15px; line-height: 1.28; }
 .ev[aria-pressed="true"] { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--hall)); }
-.end { font-family: var(--story); font-style: italic; font-size: 19px; color: var(--faded); padding: 12px 4px; }
+.end { font-family: var(--story); font-style: italic; font-size: 19px; color: var(--faded); padding: 8px 2px; }
 
-.now { gap: 10px; }
-.now .m { font-family: var(--display); font-size: 30px; line-height: 1.05; }
-.now .d { font-size: 16px; color: var(--faded); line-height: 1.35; }
-canvas { width: 100%; height: 70px; display: block; border-radius: 8px; background: var(--hall); }
-.said { font-family: var(--story); font-style: italic; font-size: 17px; line-height: 1.4; border-left: 3px solid var(--gold); padding-left: 12px; min-height: 48px; }
-.moments { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-.moment { border: 1px solid var(--seam); border-radius: 12px; background: var(--hall); padding: 14px 10px; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; }
-.moment .k { font-family: var(--display); font-size: 22px; line-height: 1; }
-.moment .h { font-size: 13px; color: var(--faded); }
-.moment.battle[aria-pressed="true"] { border-color: var(--late); background: color-mix(in srgb, var(--late) 25%, var(--hall)); }
-.moment.wide { grid-column: span 2; }
-.tests { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.tests button { border: 1px solid var(--seam); background: var(--hall); border-radius: 10px; min-height: 52px; padding: 6px; font-size: 15px; }
-.tests button:active { border-color: var(--gold); }
-details > summary { cursor: pointer; font-family: var(--display); font-size: 22px; list-style: none; }
-details > summary::-webkit-details-marker { display: none; }
-details > summary::after { content: ' +'; color: var(--faded); }
-details[open] > summary::after { content: ' −'; }
-details[open] { display: flex; flex-direction: column; gap: 10px; }
-.note { font-size: 14px; color: var(--faded); line-height: 1.4; }
+.now .m { font-family: var(--display); font-size: 25px; line-height: 1.05; }
+.now .track { font-size: 14px; color: var(--faded); }
+.said { font-family: var(--story); font-style: italic; font-size: 16px; line-height: 1.35; border-left: 3px solid var(--gold); padding-left: 10px; min-height: 22px; }
+.status { font-size: 13px; color: var(--late); }
 
-.gate { position: fixed; inset: 0; background: color-mix(in srgb, var(--hall) 92%, transparent); display: flex; align-items: center; justify-content: center; z-index: 5; padding: 24px; }
+.phsec { flex: 1; }
+.phases { flex: 1; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.phase { border: 1px solid var(--seam); border-radius: 12px; background: var(--hall); min-height: 84px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; text-align: center; }
+.phase .k { font-family: var(--display); font-size: 28px; line-height: 1; }
+.phase .h { font-size: 12px; color: var(--faded); line-height: 1.2; }
+.phase[aria-pressed="true"] { border-color: var(--c); background: color-mix(in srgb, var(--c) 28%, var(--hall)); box-shadow: inset 0 0 0 1px var(--c); }
+.moments { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.moment { border: 1px solid var(--seam); border-radius: 10px; background: var(--hall); min-height: 54px; padding: 6px; font-family: var(--display); font-size: 18px; line-height: 1.05; }
+.credits { font-size: 11px; color: var(--faded); line-height: 1.3; margin-top: auto; }
+
+/* Portrait iPad and narrower: one column. */
+@media (max-width: 900px) {
+  body { overflow: auto; }
+  main { grid-template-columns: minmax(0, 1fr); }
+  .ev .e { font-size: 14px; }
+}
+@media (max-width: 560px) { .ages { grid-template-columns: repeat(4, minmax(0, 1fr)); } .events { grid-template-columns: minmax(0, 1fr); } }
+
+.gate { position: fixed; inset: 0; background: color-mix(in srgb, var(--hall) 94%, transparent); display: flex; align-items: center; justify-content: center; z-index: 5; padding: 24px; }
 .gate[hidden] { display: none; }
 .gate .card { max-width: 460px; text-align: center; display: flex; flex-direction: column; gap: 14px; align-items: center; }
 .gate .card p { margin: 0; color: var(--faded); line-height: 1.45; }
-.gate .card .big { font-family: var(--display); font-size: 40px; line-height: 1; color: var(--parch); }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+.gate .card .big { font-family: var(--display); font-size: 40px; line-height: 1; }
+.gate .btn { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; min-height: 52px; padding: 10px 22px; }
 </style>
 
-<div class="wrap">
+<div class="app">
   <header>
-    <div>
-      <h1>The Chronicler</h1>
-      <div class="sub">Music and narration for Risk: The Battle for Medieval England</div>
-    </div>
+    <h1>The Chronicler</h1>
     <div class="controls">
-      <label class="toggle" for="recOn"><input type="checkbox" id="recOn" checked> Recorded music</label>
       <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Narrator</label>
-      <select id="voicePick" class="btn" aria-label="Narrator voice" style="min-height: 48px; max-width: 220px"></select>
-      <label class="vol" for="vol">Volume <input type="range" id="vol" min="0" max="100" value="70"></label>
+      <select id="voicePick" class="btn" aria-label="Narrator voice"></select>
+      <label class="vol" for="vol">Volume <input type="range" id="vol" min="0" max="100" value="80"></label>
       <button class="btn" id="pause" type="button">Pause</button>
     </div>
   </header>
 
   <main>
-    <div style="display: flex; flex-direction: column; gap: 18px; min-width: 0">
+    <div class="col">
       <section>
         <div class="label">The golden cavalry stands on</div>
         <div class="ages" id="ages"></div>
       </section>
-      <section>
+      <section class="evsec">
         <div class="label" id="evLabel">The opener rolled</div>
-        <div id="evArea"></div>
+        <div id="evArea" style="flex: 1; min-height: 0; display: flex"></div>
       </section>
     </div>
 
-    <div style="display: flex; flex-direction: column; gap: 18px; min-width: 0">
+    <div class="col">
       <section class="now">
         <div class="label">Now playing</div>
         <div class="m" id="moodName">The early ages</div>
-        <div class="d" id="moodDesc"></div>
-        <canvas id="scope" width="600" height="140" aria-hidden="true"></canvas>
+        <div class="track" id="trackName"></div>
         <div class="said" id="said" aria-live="polite"></div>
-        <div class="note" id="diag"></div>
-        <button class="btn" id="test" type="button">Sound check</button>
+        <div class="status" id="status" hidden></div>
+      </section>
+      <section class="phsec">
+        <div class="label">This turn</div>
+        <div class="phases">
+          <button class="phase" id="ph-calm" type="button" style="--c: var(--calm)"><span class="k">Calm</span><span class="h">between turns</span></button>
+          <button class="phase" id="ph-suspense" type="button" style="--c: var(--suspense)"><span class="k">Suspense</span><span class="h">placing troops, between battles</span></button>
+          <button class="phase" id="ph-battle" type="button" style="--c: var(--battle)"><span class="k">Battle</span><span class="h">dice are rolling</span></button>
+        </div>
       </section>
       <section>
         <div class="label">Moments</div>
         <div class="moments">
-          <button class="moment battle" id="battle" type="button" aria-pressed="false"><span class="k">Battle</span><span class="h">war drums until tapped again</span></button>
-          <button class="moment" id="betray" type="button"><span class="k">Pact broken</span><span class="h">a betrayal sting</span></button>
-          <button class="moment" id="trade" type="button"><span class="k">Card trade</span><span class="h">coins on the table</span></button>
-          <button class="moment" id="replay" type="button"><span class="k">Read it again</span><span class="h">repeat the narrator</span></button>
+          <button class="moment" id="betray" type="button">Pact broken</button>
+          <button class="moment" id="trade" type="button">Card trade</button>
+          <button class="moment" id="replay" type="button">Read again</button>
         </div>
-        <details id="testBox">
-          <summary>Sound test</summary>
-          <div class="label">Effects</div>
-          <div class="tests" id="fxTests"></div>
-          <div class="label">Music moods (the next century tap returns to the game)</div>
-          <div class="tests" id="moodTests"></div>
-        </details>
-        <div class="note">Tap the century when the cavalry moves, then the event the opener rolled. The music changes over a few seconds. During a battle, swords clash at random.</div>
-        <div class="note">Music from Pixabay: kulakovka, Medieval Horizons, Kiravale, kaazoom, RoyaltyFreeMusicStudio, RubyZephyr, OneCinematicStudio, OpenMindAudio, Billy Ziogas, HitsLab.</div>
+        <div class="credits">Music from Pixabay: kulakovka, Medieval Horizons, Kiravale, kaazoom, RoyaltyFreeMusicStudio, RubyZephyr, OneCinematicStudio, OpenMindAudio, Billy Ziogas, HitsLab.</div>
       </section>
     </div>
   </main>
@@ -156,42 +142,42 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
 <div class="gate" id="gate">
   <div class="card">
     <div class="big">Light the hall</div>
-    <p>Turn the iPad's volume up and silent mode off (the bell in Control Centre): the narrator stays quiet in silent mode. Sound starts when you tap, and the screen stays awake while it plays.</p>
-    <button class="btn primary" id="start" type="button">Start the music</button>
+    <p>Turn the volume up and silent mode off (the bell in Control Centre), or the narrator stays quiet. The screen stays awake while it plays.</p>
+    <button class="btn" id="start" type="button">Start</button>
   </div>
 </div>
 
 <script>
 const AGES = [{"rom": "V", "years": "410–499", "events": [{"t": "Saxon migration", "tm": "Whole century", "e": "Every player gets 2 extra troops at the start of each turn.", "h": "Settlers pour across the North Sea as Rome leaves."}, {"t": "Roman roads", "tm": "Whole century", "e": "You may make 2 manoeuvres per turn. Rivers and mountains don’t stop them.", "h": "The old roads still connect the land."}, {"t": "Land grab", "tm": "At once", "e": "Every player except the leader draws 1 territory card.", "h": "With no one in charge, land goes to whoever takes it."}]}, {"rom": "VI", "years": "500–599", "events": [{"t": "Petty kingdoms", "tm": "At once", "e": "Every player except the leader gets 2 extra troops on their next turn.", "h": "Small kingdoms rise to check the strongest."}, {"t": "Plague of Justinian", "tm": "At once", "e": "Every territory with 3 or more troops loses 1.", "h": "A pandemic reaches Britain from the Mediterranean."}, {"t": "Age of saints", "tm": "Whole century", "e": "Mission bonuses are doubled.", "h": "Missionaries and monks spread across the land."}]}, {"rom": "VII", "years": "600–699", "events": [{"t": "Shield walls", "tm": "Whole century", "e": "Attackers roll at most 2 dice.", "h": "Battles are fought shield to shield."}, {"t": "Peace of the Church", "tm": "Whole century", "e": "Pacts can’t be broken. Pacts signed this century pay 1 extra bonus card.", "h": "The Synod of Whitby brings the kingdoms together in 664."}, {"t": "Underdog kings", "tm": "Whole century", "e": "At the start of each turn, the player with the fewest territories gets 3 extra troops.", "h": "Small kingdoms rise while great ones squabble."}]}, {"rom": "VIII", "years": "700–799", "events": [{"t": "Viking raids", "tm": "At once + century", "e": "The leader’s port territories each lose 2 troops. No attacks along sea routes this century.", "h": "The first raid hits Lindisfarne in 793."}, {"t": "Offa’s Dyke", "tm": "Whole century", "e": "Every border between two regions counts as a river crossing for manoeuvres.", "h": "Kings mark their borders with earthworks."}, {"t": "Good harvests", "tm": "Whole century", "e": "At the start of each turn, get 1 extra troop for every region where you hold 3 or more territories.", "h": "Full barns across England."}]}, {"rom": "IX", "years": "800–899", "events": [{"t": "Great Heathen Army", "tm": "Whole century", "e": "When attacking the leader, add 1 to your highest die.", "h": "A Viking army lands in 865 and finds the great kingdoms weakest."}, {"t": "Danegeld", "tm": "Whole century", "e": "Before trading on their turn, the leader gives their lowest-star card to the player with the fewest territories. With no cards, they place 2 fewer troops and that player gets 2.", "h": "The strong pay the Danes to go away."}, {"t": "Alfred’s burhs", "tm": "Whole century", "e": "Defenders add 1 to their highest die, except the leader.", "h": "Fortified towns hold out against the raiders."}]}, {"rom": "X", "years": "900–999", "events": [{"t": "One kingdom", "tm": "Whole century", "e": "At the start of each turn, every player except the leader gets 3 extra troops.", "h": "Æthelstan’s new kingdom rewards loyal lords."}, {"t": "Battle of Brunanburh", "tm": "Whole century", "e": "Grand alliance: players other than the leader may only attack the leader.", "h": "Scots, Norse and Britons unite against Æthelstan in 937."}, {"t": "Hard winter", "tm": "At once + century", "e": "Every territory with 6 or more troops loses 2. No manoeuvres into mountain territories this century.", "h": "Snow closes the passes."}]}, {"rom": "XI", "years": "1000–1099", "events": [{"t": "Norman castles", "tm": "Whole century", "e": "Defending a territory with 5 or more troops, the defender may roll 3 dice.", "h": "Castles rise across the conquered land after 1066."}, {"t": "Harrying of the North", "tm": "At once", "e": "The leader’s North territories lose half their troops, rounded down.", "h": "William lays waste to the north in 1069–70."}, {"t": "Domesday survey", "tm": "Whole century", "e": "The leader draws at most 1 territory card per turn, however many territories they conquer.", "h": "Every holding is counted in 1086, and the greatest pay most."}]}, {"rom": "XII", "years": "1100–1199", "events": [{"t": "The Anarchy", "tm": "At once", "e": "The leader’s 2 thinnest territories defect to the player with the fewest territories.", "h": "Civil war between Stephen and Matilda; lords switch sides."}, {"t": "Great floods", "tm": "Whole century", "e": "No manoeuvres across rivers. Attacks across a river crossing roll at most 1 die.", "h": "Rivers burst their banks."}, {"t": "Supply problems", "tm": "Whole century", "e": "At the start of the leader’s turn, each of their territories with 5 or more troops loses a third, rounded down.", "h": "The greatest armies can’t be fed."}]}, {"rom": "XIII", "years": "1200–1299", "events": [{"t": "Magna Carta", "tm": "Whole century", "e": "The leader can’t trade cards this century.", "h": "The barons force the king to seal the charter in 1215."}, {"t": "Barons’ War", "tm": "At once + century", "e": "All pacts end: stakes go back, no bonus cards. No new pacts this century.", "h": "Simon de Montfort leads the barons against the king."}, {"t": "Camp fever", "tm": "At once", "e": "The leader’s largest stack loses half its troops, rounded down.", "h": "Disease spreads through the biggest siege camp."}]}, {"rom": "XIV", "years": "1300–1399", "events": [{"t": "Black Death", "tm": "At once", "e": "Every territory loses half its troops, rounded down, and every hand of territory cards is halved. The player with the fewest territories is spared.", "h": "The plague kills a third of England from 1348."}, {"t": "Great Famine", "tm": "Final count", "e": "At the final count, territories with only 1 troop count as half.", "h": "Years of failed harvests from 1315 empty the thinly held lands."}, {"t": "Peasants’ Revolt", "tm": "At once", "e": "The leader’s 3 thinnest territories defect to the player with the fewest territories.", "h": "Rebels march on London in 1381."}]}];
 const ROMS = ['V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
-const ERA = i => i <= 2 ? 'early' : i <= 6 ? 'middle' : i <= 9 ? 'late' : 'end';
+const ERA = i => i <= 2 ? 'early' : i <= 6 ? 'middle' : i <= 9 ? 'late' : 'finale';
 const ORD = ['fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth','thirteenth','fourteenth','fifteenth'];
+const $ = id => document.getElementById(id);
+const rand = a => a[Math.floor(Math.random() * a.length)];
 
-// ---------------------------------------------------------------- moods
-const DORIAN=[0,2,3,5,7,9,10], MIXO=[0,2,4,5,7,9,10], AEOL=[0,2,3,5,7,8,10], PHRYG=[0,1,3,5,7,8,10], IONIAN=[0,2,4,5,7,9,11], HARM=[0,1,4,5,7,8,10];
-const D16 = {
-  none:  Array(16).fill(0),
-  soft:  [2,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0],
-  march: [2,0,0,0, 1,0,0,0, 2,0,1,0, 1,0,0,0],
-  war:   [2,0,1,0, 2,0,1,1, 2,0,1,0, 2,1,2,1],
-  slow:  [2,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0],
-  tense: [2,0,0,1, 0,0,1,0, 2,0,0,1, 0,1,0,0],
+// ---------------------------------------------------------------- music library (files published with the page)
+// Loudness trim in dB, so every track plays at about the same level.
+const TRACKS = {
+  lute: ['Just Lute', -3.7], squire: ['Squire', 0], feast: ['Medieval Music', -6], repose: ['Quiet Repose', 4], epic: ['Epic Medieval', -3.6], fantasy: ['Medieval Fantasy', -5],
+  ironbound: ['Ironbound March', -4], toll: ['The Executioner’s Toll', -5.1], knight: ['Steel & Banners', -4.3], camelot: ['Camelot', -4.1], crusade: ['Crusade of Light', -1.6],
+  drums1: ['Warrior Drums I', -2.7], drums2: ['Warrior Drums II', -2.5],
 };
-const D12 = { dance: [2,0,0,1,0,1, 2,0,0,1,0,0], none: Array(12).fill(0) };
-const P16 = { calm:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], busy:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], ost:[1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1], sparse:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], none:Array(16).fill(0) };
-const P12 = { dance:[1,0,1,1,0,1, 1,0,1,1,0,1] };
 const MOODS = {
-  early:   {name:'The early ages', desc:'Harp and recorder over a drone. Quiet, open, hopeful.', root:50, mode:DORIAN, tempo:80, beats:4, prog:[0,3,6,0], drum:D16.soft, pluck:P16.calm, lead:.45, bell:0, lv:{drone:.5,pad:.25,pluck:.7,lead:.5,drum:.25,bell:0}},
-  middle:  {name:'The middle ages', desc:'A steady march. Kingdoms grow and borders harden.', root:45, mode:AEOL, tempo:92, beats:4, prog:[0,5,3,4], drum:D16.march, pluck:P16.busy, lead:.4, bell:0, lv:{drone:.45,pad:.35,pluck:.6,lead:.45,drum:.5,bell:0}},
-  late:    {name:'The late ages', desc:'Low, dark and slow. The great lords will pay.', root:52, mode:PHRYG, tempo:70, beats:4, prog:[0,1,0,6], drum:D16.slow, pluck:P16.calm, lead:.35, bell:8, lv:{drone:.55,pad:.5,pluck:.45,lead:.4,drum:.35,bell:.25}},
-  festive: {name:'A good age', desc:'A dance in three. Full barns and open roads.', root:55, mode:MIXO, tempo:108, beats:3, prog:[0,6,3,0], drum:D12.dance, pluck:P12.dance, lead:.6, bell:0, lv:{drone:.4,pad:.2,pluck:.75,lead:.55,drum:.5,bell:0}},
-  sacred:  {name:'An age of order', desc:'Choir and bells. Charters, saints and peace.', root:50, mode:IONIAN, tempo:58, beats:4, prog:[0,3,4,0], drum:D16.none, pluck:P16.sparse, lead:.25, bell:2, lv:{drone:.4,pad:.75,pluck:.25,lead:.3,drum:0,bell:.45}},
-  intrigue:{name:'An age of intrigue', desc:'Plucked strings in a crooked scale. Someone is scheming.', root:47, mode:HARM, tempo:84, beats:4, prog:[0,1,0,4], drum:D16.tense, pluck:P16.ost, lead:.45, bell:0, lv:{drone:.45,pad:.3,pluck:.65,lead:.45,drum:.35,bell:0}},
-  war:     {name:'An age of war', desc:'War drums and a driving ostinato.', root:50, mode:AEOL, tempo:118, beats:4, prog:[0,5,6,0], drum:D16.war, pluck:P16.ost, lead:.35, bell:0, lv:{drone:.5,pad:.25,pluck:.65,lead:.35,drum:.9,bell:0}},
-  sombre:  {name:'A dark age', desc:'Tolling bells and a slow lament. No drums.', root:48, mode:PHRYG, tempo:52, beats:4, prog:[0,6,5,0], drum:D16.none, pluck:P16.sparse, lead:.3, bell:1, lv:{drone:.55,pad:.6,pluck:.15,lead:.35,drum:0,bell:.5}},
-  battle:  {name:'Battle', desc:'Dice are rolling. Drums until you tap Battle again.', root:50, mode:PHRYG, tempo:132, beats:4, prog:[0,1,0,1], drum:D16.war, pluck:P16.ost, lead:.2, bell:0, lv:{drone:.6,pad:.2,pluck:.7,lead:.25,drum:1,bell:0}},
-  finale:  {name:'The fifteenth century', desc:'The game is over. Count the territories.', root:50, mode:MIXO, tempo:96, beats:4, prog:[0,3,6,0], drum:D16.march, pluck:P16.busy, lead:.55, bell:4, lv:{drone:.5,pad:.6,pluck:.6,lead:.6,drum:.6,bell:.35}},
+  early:    { name: 'The early ages', tracks: ['lute', 'squire'] },
+  middle:   { name: 'The middle ages', tracks: ['ironbound', 'fantasy', 'squire'] },
+  late:     { name: 'The late ages', tracks: ['toll', 'repose', 'fantasy'] },
+  festive:  { name: 'A good age', tracks: ['feast', 'lute'] },
+  sacred:   { name: 'An age of order', tracks: ['camelot', 'repose'] },
+  intrigue: { name: 'An age of intrigue', tracks: ['fantasy', 'toll'] },
+  war:      { name: 'An age of war', tracks: ['epic', 'knight', 'ironbound', 'crusade'] },
+  sombre:   { name: 'A dark age', tracks: ['repose'] },
+  finale:   { name: 'The fifteenth century', tracks: ['camelot', 'crusade', 'knight'] },
+  suspense: { name: 'Suspense', tracks: ['toll', 'fantasy'] },
+  battle:   { name: 'Battle', tracks: ['drums1', 'drums2', 'epic', 'knight', 'crusade'] },
 };
+// Sound effects: none yet. Add files here as they arrive, e.g. betray: ['sfx/betray1.mp3'].
+const SFX = { century: [], good: [], bad: [], war: [], betray: [], trade: [] };
+
 const EVMOOD = {
   'Saxon migration':'festive','Roman roads':'early','Land grab':'festive',
   'Petty kingdoms':'intrigue','Plague of Justinian':'sombre','Age of saints':'sacred',
@@ -204,359 +190,131 @@ const EVMOOD = {
   'Magna Carta':'sacred','Barons’ War':'war','Camp fever':'sombre',
   'Black Death':'sombre','Great Famine':'sombre','Peasants’ Revolt':'war',
 };
-const TONE = {festive:'good', sacred:'good', early:'neutral', middle:'neutral', intrigue:'neutral', late:'bad', sombre:'bad', war:'war'};
+const TONE = { festive: 'good', sacred: 'good', early: 'good', middle: 'century', intrigue: 'century', late: 'bad', sombre: 'bad', war: 'war' };
 
 // ---------------------------------------------------------------- state
 const store = { get(k, d) { try { const v = localStorage.getItem('chron.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
                 set(k, v) { try { localStorage.setItem('chron.' + k, JSON.stringify(v)); } catch (e) {} } };
-const st = { c: store.get('c', 0), e: store.get('e', -1), battle: false, vol: store.get('vol', 70), voice: store.get('voice', true) };
+const st = { c: store.get('c', 0), e: store.get('e', -1), phase: 'calm', vol: store.get('vol', 80), voice: store.get('voice', true) };
 let lastLine = '';
-
-function baseMood() {
-  if (st.battle) return 'battle';
+function calmMood() {
   if (st.c === 10) return 'finale';
   if (st.e >= 0) return EVMOOD[AGES[st.c].events[st.e].t] || ERA(st.c);
   return ERA(st.c);
 }
+const moodNow = () => st.phase === 'calm' ? calmMood() : st.phase;
 
-// ---------------------------------------------------------------- audio
-let ctx, master, comp, revSend, analyser, buses = {}, drone = [], droneFilter, pad = [], noiseBuf;
-let cur = null, target = null, harmonyDue = false, tempo = 80, nextTime = 0, step = 0, bar = 0, arp = 0, leadIdx = 7, leadUntil = 0, timer = null;
-const LAYERS = ['drone','pad','pluck','lead','drum','bell'];
-const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
-function scaleNote(mode, deg) { const o = Math.floor(deg / 7); const i = ((deg % 7) + 7) % 7; return mode[i] + 12 * o; }
-
+// ---------------------------------------------------------------- audio: two decks that crossfade
+let ctx, master, decks = [], live = 0, curTrack = null, curMood = null, fadeTimer = null;
+const bags = {};
+// Shuffle bag: every track in a playlist plays once before any repeats, and a new round never starts with the track just played.
+function nextFrom(mood) {
+  const list = MOODS[mood].tracks;
+  let bag = bags[mood];
+  if (!bag || !bag.length) {
+    bag = list.slice();
+    for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    if (bag.length > 1 && bag[0] === curTrack) bag.push(bag.shift());
+    bags[mood] = bag;
+  }
+  return bag.shift();
+}
+function status(msg) { const s = $('status'); s.textContent = msg || ''; s.hidden = !msg; }
+function silentWav() {
+  const sr = 8000, n = sr / 4, b = new ArrayBuffer(44 + n * 2), v = new DataView(b);
+  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
+  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
+  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
+  let s = ''; const u = new Uint8Array(b); for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
+  return 'data:audio/wav;base64,' + btoa(s);
+}
 function initAudio() {
+  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
   const AC = window.AudioContext || window.webkitAudioContext;
   ctx = new AC();
-  master = ctx.createGain(); master.gain.value = st.vol / 100;
-  comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3;
-  analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
-  master.connect(comp); comp.connect(analyser); analyser.connect(ctx.destination);
-  const rev = ctx.createConvolver(); rev.buffer = impulse(3.2);
-  revSend = ctx.createGain(); revSend.gain.value = 0.4; revSend.connect(rev); rev.connect(master);
-  noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
-  const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
-  for (const l of LAYERS) { const g = ctx.createGain(); g.gain.value = 0; g.connect(master); g.connect(revSend); buses[l] = g; }
-  droneFilter = ctx.createBiquadFilter(); droneFilter.type = 'lowpass'; droneFilter.frequency.value = 650; droneFilter.Q.value = 0.8; droneFilter.connect(buses.drone);
-  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.07; const lfoG = ctx.createGain(); lfoG.gain.value = 180; lfo.connect(lfoG); lfoG.connect(droneFilter.frequency); lfo.start();
-  [[0, .16, 'sawtooth'], [7, .12, 'sawtooth'], [-12, .14, 'triangle']].forEach(([iv, g, type]) => {
-    const o = ctx.createOscillator(); o.type = type; const gn = ctx.createGain(); gn.gain.value = g; o.connect(gn); gn.connect(droneFilter); o.start(); drone.push({ o, iv });
-  });
-  const padF = ctx.createBiquadFilter(); padF.type = 'lowpass'; padF.frequency.value = 1300; padF.Q.value = 0.6; padF.connect(buses.pad);
-  for (let v = 0; v < 3; v++) {
-    const voice = [];
-    for (const det of [-8, 8]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.detune.value = det; const g = ctx.createGain(); g.gain.value = .045; o.connect(g); g.connect(padF); o.start(); voice.push(o); }
-    pad.push(voice);
+  master = ctx.createGain(); master.gain.value = st.vol / 100; master.connect(ctx.destination);
+  const quiet = silentWav();
+  for (let i = 0; i < 2; i++) {
+    const el = new Audio(); el.preload = 'auto'; el.setAttribute('playsinline', '');
+    const g = ctx.createGain(); g.gain.value = 0;
+    try { ctx.createMediaElementSource(el).connect(g); } catch (e) { status('Music routing failed: ' + e.message); }
+    g.connect(master);
+    const d = { el, g, key: null };
+    el.addEventListener('ended', () => { if (decks[live] === d) advance(); });
+    el.addEventListener('error', () => { if (d.key) status('Could not load ' + TRACKS[d.key][0] + '.'); });
+    // Unlock both decks inside the Start tap, so later track changes may start without a tap.
+    el.src = quiet; const p = el.play(); if (p) p.catch(() => {});
+    decks.push(d);
   }
-  musicBus = ctx.createGain(); musicBus.gain.value = 1; musicBus.connect(master);
-  cur = Object.assign({}, MOODS[baseMood()]); tempo = cur.tempo;
-  retune(ctx.currentTime, 0.01); chord(ctx.currentTime, 0.01);
-  levels(MOODS[baseMood()], 2.5);
-  playTrack(baseMood(), 3);
-  nextTime = ctx.currentTime + 0.1;
-  timer = setInterval(tick, 25);
+  ctx.resume();
 }
-function impulse(sec) {
-  const len = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(2, len, ctx.sampleRate);
-  for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
-  return b;
+function fade(d, v, secs) { const t = ctx.currentTime; d.g.gain.cancelScheduledValues(t); d.g.gain.setValueAtTime(d.g.gain.value, t); d.g.gain.setTargetAtTime(v, t, Math.max(0.05, secs / 3)); }
+function play(key, secs) {
+  const from = decks[live], to = decks[1 - live];
+  to.key = key; to.el.src = 'music/' + key + '.mp3';
+  const p = to.el.play(); if (p) p.catch(err => status('Music blocked (' + err.name + '). Tap Pause, then Play.'));
+  fade(to, Math.pow(10, TRACKS[key][1] / 20), secs);
+  fade(from, 0, secs);
+  clearTimeout(fadeTimer); fadeTimer = setTimeout(() => { if (decks[live] !== from) from.el.pause(); }, secs * 1000 + 800);
+  live = 1 - live; curTrack = key;
+  $('trackName').textContent = '♪ ' + TRACKS[key][0];
+  status('');
 }
-function levels(m, secs) {
-  const t = ctx.currentTime;
-  for (const l of LAYERS) { const g = buses[l].gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(useRecorded ? 0 : m.lv[l], t, secs / 3); }
-}
-// ---------------------------------------------------------------- recorded music (Pixabay tracks published with the page)
-const TRACKS = { lute: -3.7, squire: 0, feast: -6, repose: 4, epic: -3.6, fantasy: -5, ironbound: -4, toll: -5.1, knight: -4.3, camelot: -4.1, crusade: -1.6, drums1: -2.7, drums2: -2.5 };
-const MOOD_TRACKS = {
-  early: ['lute', 'squire'], middle: ['ironbound', 'fantasy', 'squire'], late: ['toll', 'repose', 'fantasy'],
-  festive: ['feast', 'lute'], sacred: ['camelot', 'repose'], intrigue: ['fantasy', 'toll'],
-  war: ['epic', 'knight', 'ironbound', 'crusade'], sombre: ['repose'], battle: ['drums1', 'drums2', 'epic'],
-  finale: ['camelot', 'crusade', 'knight'],
-};
-let musicBus = null, curTrack = null, useRecorded = store.get('recorded', true), currentMood = null;
-const players = {};
-function player(k) {
-  if (players[k]) return players[k];
-  const el = new Audio(); el.loop = true; el.preload = 'auto'; el.setAttribute('playsinline', ''); el.src = 'music/' + k + '.mp3';
-  const g = ctx.createGain(); g.gain.value = 0;
-  try { ctx.createMediaElementSource(el).connect(g); } catch (e) { diag('Music routing failed: ' + e.message); }
-  g.connect(musicBus);
-  const p = { k, el, g, norm: Math.pow(10, TRACKS[k] / 20) };
-  el.addEventListener('error', () => { diag('Music file could not load: ' + k); if (curTrack === k) { curTrack = null; useRecorded = false; levels(target || cur, 3); } });
-  players[k] = p; return p;
-}
-function fadeTo(p, v, secs) { const t = ctx.currentTime; p.g.gain.cancelScheduledValues(t); p.g.gain.setValueAtTime(p.g.gain.value, t); p.g.gain.setTargetAtTime(v, t, secs / 3); }
-function playTrack(mood, secs) {
-  currentMood = mood;
-  if (!ctx || !useRecorded) return;
-  const list = MOOD_TRACKS[mood] || [];
-  if (!list.length || (curTrack && list.includes(curTrack))) return;
-  const k = list[Math.floor(Math.random() * list.length)], p = player(k), fade = secs || 5;
-  try { p.el.currentTime = 0; } catch (e) {}
-  const pr = p.el.play(); if (pr) pr.catch(err => diag('Music blocked: ' + err.name + '. Tap Pause, then Play.'));
-  fadeTo(p, p.norm, fade);
-  if (curTrack && players[curTrack]) { const o = players[curTrack]; fadeTo(o, 0, fade); setTimeout(() => { if (curTrack !== o.k) o.el.pause(); }, fade * 1000 + 1500); }
-  curTrack = k;
-}
-function stopTracks(secs) { for (const k in players) { const p = players[k]; fadeTo(p, 0, secs); setTimeout(() => { if (!useRecorded || curTrack !== k) p.el.pause(); }, secs * 1000 + 500); } curTrack = null; }
-function retune(t, tau) { for (const d of drone) d.o.frequency.setTargetAtTime(mtof(cur.root - 12 + d.iv), t, tau); }
-function chord(t, tau) {
-  const deg = cur.prog[bar % cur.prog.length];
-  [0, 2, 4].forEach((k, v) => { const f = mtof(cur.root + scaleNote(cur.mode, deg + k)); for (const o of pad[v]) o.frequency.setTargetAtTime(f, t, tau); });
-}
-function setMood(name, secs) {
-  target = MOODS[name];
+function setMood(mood, secs) {
+  curMood = mood;
+  $('moodName').textContent = MOODS[mood].name;
   if (!ctx) return;
-  levels(target, secs || 6);
-  playTrack(name, secs || 6);
-  harmonyDue = true;
+  if (curTrack && MOODS[mood].tracks.includes(curTrack) && mood !== 'battle') return; // already fitting: keep playing
+  play(nextFrom(mood), secs);
 }
-function tick() {
-  while (nextTime < ctx.currentTime + 0.15) {
-    const n = cur.beats * 4;
-    if (step === 0) onBar(nextTime);
-    playStep(step, nextTime, n);
-    if (target) tempo += (target.tempo - tempo) * 0.04;
-    nextTime += 60 / tempo / 4;
-    step++;
-    if (step >= n) { step = 0; bar++; }
-  }
-}
-function onBar(t) {
-  if (harmonyDue && target) {
-    harmonyDue = false;
-    cur = Object.assign({}, target, { tempo: cur.tempo });
-    retune(t, 0.9);
-  }
-  chord(t, 0.5);
-}
-function playStep(s, t, n) {
-  const m = cur;
-  const dv = m.drum[s % m.drum.length]; if (dv) drum(t, dv === 2 ? 0.9 : 0.5);
-  if (m.pluck[s % m.pluck.length]) {
-    const deg = m.prog[bar % m.prog.length] + [0, 2, 4, 7][arp++ % 4];
-    pluck(t, m.root + 12 + scaleNote(m.mode, deg), 0.35 + Math.random() * 0.15);
-  }
-  if (t >= leadUntil && s % 2 === 0) {
-    const phraseEnd = (bar % 2 === 1) && s >= n - 4;
-    if (!phraseEnd && Math.random() < m.lead) {
-      const moves = [-2, -1, -1, 1, 1, 2, 0, 3, -3];
-      leadIdx = Math.max(2, Math.min(12, leadIdx + moves[Math.floor(Math.random() * moves.length)]));
-      if (s === 0) leadIdx = m.prog[bar % m.prog.length] + 7;
-      const len = [2, 2, 4, 4, 6, 8][Math.floor(Math.random() * 6)];
-      const dur = len * 60 / tempo / 4;
-      lead(t, m.root + 12 + scaleNote(m.mode, leadIdx), dur, 0.3);
-      leadUntil = t + dur * 0.98;
-    }
-  }
-  if (m.bell && s === 0 && bar % m.bell === 0) bell(t, m.root + 24, 0.35);
-  if (st.battle && Math.random() < 0.06) clang(t + Math.random() * 0.05, 0.6 + Math.random() * 0.4);
-}
-
-// instruments
-function env(g, t, a, peak, d) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
-function pluck(t, midi, v) {
-  const f = mtof(midi), o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
-  o1.type = 'triangle'; o1.frequency.value = f; o2.type = 'sawtooth'; o2.frequency.value = f * 1.002;
-  const g2 = ctx.createGain(); g2.gain.value = 0.25;
-  lp.type = 'lowpass'; lp.frequency.setValueAtTime(3200, t); lp.frequency.exponentialRampToValueAtTime(700, t + 0.5);
-  o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp); lp.connect(buses.pluck);
-  env(g, t, 0.004, v, 1.3); o1.start(t); o2.start(t); o1.stop(t + 1.5); o2.stop(t + 1.5);
-}
-function lead(t, midi, dur, v) {
-  const f = mtof(midi), o = ctx.createOscillator(), s = ctx.createOscillator(), g = ctx.createGain(), vib = ctx.createOscillator(), vg = ctx.createGain(), bp = ctx.createBiquadFilter();
-  o.type = 'triangle'; o.frequency.value = f; s.type = 'sine'; s.frequency.value = f * 2;
-  const sg = ctx.createGain(); sg.gain.value = 0.18;
-  vib.frequency.value = 5.2; vg.gain.value = f * 0.006; vib.connect(vg); vg.connect(o.frequency); vg.connect(s.frequency);
-  bp.type = 'lowpass'; bp.frequency.value = 2600;
-  o.connect(g); s.connect(sg); sg.connect(g); g.connect(bp); bp.connect(buses.lead);
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.06);
-  g.gain.setValueAtTime(v, t + Math.max(0.07, dur - 0.12)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.1);
-  for (const x of [o, s, vib]) { x.start(t); x.stop(t + dur + 0.15); }
-}
-function drum(t, v) {
-  const o = ctx.createOscillator(), g = ctx.createGain();
-  o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.22);
-  o.connect(g); g.connect(buses.drum); env(g, t, 0.003, v, 0.4); o.start(t); o.stop(t + 0.5);
-  const n = ctx.createBufferSource(), ng = ctx.createGain(), bp = ctx.createBiquadFilter();
-  n.buffer = noiseBuf; bp.type = 'bandpass'; bp.frequency.value = 1100; bp.Q.value = 0.9;
-  n.connect(bp); bp.connect(ng); ng.connect(buses.drum); env(ng, t, 0.002, v * 0.35, 0.09); n.start(t); n.stop(t + 0.15);
-}
-function bell(t, midi, v, dest) {
-  const f = mtof(midi);
-  [[1, 1], [2.0, .5], [2.76, .35], [4.07, .2], [5.4, .12]].forEach(([r, a]) => {
-    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * r;
-    o.connect(g); g.connect(dest || buses.bell); env(g, t, 0.005, v * a, 4.5 / r); o.start(t); o.stop(t + 5);
-  });
-}
-function horn(t, midi, dur, v, dest) {
-  const f = mtof(midi), g = ctx.createGain(), lp = ctx.createBiquadFilter();
-  lp.type = 'lowpass'; lp.frequency.setValueAtTime(500, t); lp.frequency.linearRampToValueAtTime(1800, t + 0.15); lp.Q.value = 2;
-  g.connect(dest || master);
-  for (const det of [-6, 6]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = det; o.connect(lp); o.start(t); o.stop(t + dur + 0.3); }
-  lp.connect(g);
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.08); g.gain.setValueAtTime(v, t + dur - 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.25);
-}
-function clang(t, v) {
-  const fx = fxBus(), base = 900 + Math.random() * 700;
-  [[1, 1], [1.48, .6], [2.31, .45], [3.17, .3], [4.6, .2]].forEach(([r, a]) => {
-    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = base * r;
-    o.connect(g); g.connect(fx); env(g, t, 0.002, v * a * 0.25, 0.9 / r); o.start(t); o.stop(t + 1);
-  });
-  const n = ctx.createBufferSource(), ng = ctx.createGain(), hp = ctx.createBiquadFilter();
-  n.buffer = noiseBuf; hp.type = 'highpass'; hp.frequency.value = 2500;
-  n.connect(hp); hp.connect(ng); ng.connect(fx); env(ng, t, 0.001, v * 0.5, 0.12); n.start(t); n.stop(t + 0.2);
-}
-function coins() {
-  if (!ctx) return;
-  const t = ctx.currentTime + 0.03, fx = fxBus();
-  for (let i = 0; i < 9; i++) {
-    const at = t + i * 0.06 + Math.random() * 0.05, f = 2800 + Math.random() * 2200;
-    [[1, 1], [2.7, .4]].forEach(([r, a]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * r; o.connect(g); g.connect(fx); env(g, at, 0.001, 0.09 * a, 0.25); o.start(at); o.stop(at + 0.3); });
-  }
-  bell(t + 0.55, 76, 0.3, fx);
-}
-function roar() {
-  if (!ctx) return;
-  const t = ctx.currentTime + 0.03, fx = fxBus();
-  duck(0.4, 2.2);
-  for (let v = 0; v < 9; v++) {
-    const at = t + Math.random() * 0.25, f0 = 110 + Math.random() * 90;
-    const src = ctx.createOscillator(); src.type = 'sawtooth'; src.frequency.setValueAtTime(f0, at); src.frequency.linearRampToValueAtTime(f0 * 1.35, at + 0.5); src.frequency.linearRampToValueAtTime(f0 * 0.9, at + 1.6);
-    const nz = ctx.createBufferSource(); nz.buffer = noiseBuf; nz.loop = true;
-    const nzg = ctx.createGain(); nzg.gain.value = 0.35;
-    const g = ctx.createGain();
-    [[600 + Math.random() * 250, 6], [1100 + Math.random() * 350, 8], [2500, 10]].forEach(([f, q]) => { const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q; src.connect(bp); nz.connect(nzg); nzg.connect(bp); bp.connect(g); });
-    g.connect(fx);
-    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.09, at + 0.25); g.gain.setValueAtTime(0.09, at + 0.9); g.gain.exponentialRampToValueAtTime(0.0001, at + 1.8);
-    src.start(at); nz.start(at); src.stop(at + 1.9); nz.stop(at + 1.9);
-  }
-}
-function gallop() {
-  if (!ctx) return;
-  const t = ctx.currentTime + 0.03, fx = fxBus();
-  for (let k = 0; k < 9; k++) {
-    const loud = Math.sin(Math.PI * (k + 0.5) / 9);
-    [0, 0.08, 0.17].forEach(off => {
-      const at = t + k * 0.36 + off + Math.random() * 0.01;
-      const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(95, at); o.frequency.exponentialRampToValueAtTime(40, at + 0.08);
-      o.connect(g); g.connect(fx); env(g, at, 0.002, 0.6 * loud, 0.1); o.start(at); o.stop(at + 0.15);
-      const n = ctx.createBufferSource(), ng = ctx.createGain(), bp = ctx.createBiquadFilter(); n.buffer = noiseBuf; bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = 1.2;
-      n.connect(bp); bp.connect(ng); ng.connect(fx); env(ng, at, 0.001, 0.25 * loud, 0.04); n.start(at); n.stop(at + 0.06);
-    });
-  }
-}
-function arrows() {
-  if (!ctx) return;
-  const t = ctx.currentTime + 0.03, fx = fxBus();
-  for (let i = 0; i < 7; i++) {
-    const at = t + i * 0.07 + Math.random() * 0.06, n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
-    n.buffer = noiseBuf; bp.type = 'bandpass'; bp.Q.value = 6; bp.frequency.setValueAtTime(3500 + Math.random() * 1000, at); bp.frequency.exponentialRampToValueAtTime(700, at + 0.45);
-    n.connect(bp); bp.connect(g); g.connect(fx);
-    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.35, at + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
-    n.start(at); n.stop(at + 0.55);
-    const hit = at + 0.55 + Math.random() * 0.15, o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.value = 240 + Math.random() * 120; o.connect(og); og.connect(fx); env(og, hit, 0.001, 0.25, 0.06); o.start(hit); o.stop(hit + 0.1);
-  }
-}
-function swords() { if (!ctx) return; const t = ctx.currentTime + 0.03; [0, 0.32, 0.5, 1.0].forEach(d => clang(t + d, 0.9)); }
-function fxBus() { const g = ctx.createGain(); g.connect(master); g.connect(revSend); return g; }
+function advance() { if (curMood) play(nextFrom(curMood), 4); }
 function duck(depth, hold) {
-  const t = ctx.currentTime;
-  for (const l of LAYERS) { const g = buses[l].gain; const v = g.value; g.cancelScheduledValues(t); g.setValueAtTime(v, t); g.setTargetAtTime(v * depth, t, 0.3); g.setTargetAtTime(useRecorded ? 0 : (target || cur).lv[l], t + hold, 1.2); }
-  if (musicBus) { const g = musicBus.gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(depth, t, 0.3); g.setTargetAtTime(1, t + hold, 1.2); }
-}
-// century fanfare and event stings: timpani roll, gong, choir swell, chimes
-function gong(t, f, v, dest) {
-  [[1, 1], [1.48, .55], [2.21, .4], [2.94, .28], [3.83, .18], [5.1, .1]].forEach(([r, a]) => {
-    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine';
-    o.frequency.setValueAtTime(f * r * 1.01, t); o.frequency.exponentialRampToValueAtTime(f * r, t + 1.5);
-    o.connect(g); g.connect(dest); g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v * a, t + 0.03); g.gain.exponentialRampToValueAtTime(0.0001, t + 6 / Math.sqrt(r));
-    o.start(t); o.stop(t + 6.5);
-  });
-}
-function timpRoll(t, len, v, dest) {
-  const n = Math.floor(len / 0.055);
-  for (let i = 0; i < n; i++) {
-    const at = t + i * 0.055, x = i / n, o = ctx.createOscillator(), g = ctx.createGain();
-    o.frequency.setValueAtTime(92, at); o.frequency.exponentialRampToValueAtTime(70, at + 0.2);
-    o.connect(g); g.connect(dest); env(g, at, 0.004, v * (0.15 + 0.85 * x * x), 0.35); o.start(at); o.stop(at + 0.4);
-  }
-}
-function choir(t, midis, dur, v, dest) {
-  const bp1 = ctx.createBiquadFilter(), bp2 = ctx.createBiquadFilter(), g = ctx.createGain();
-  bp1.type = 'bandpass'; bp1.frequency.value = 650; bp1.Q.value = 3; bp2.type = 'bandpass'; bp2.frequency.value = 1100; bp2.Q.value = 4;
-  bp1.connect(g); bp2.connect(g); g.connect(dest);
-  for (const m of midis) for (const det of [-10, 0, 10]) {
-    const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = det;
-    const vib = ctx.createOscillator(), vg = ctx.createGain(); vib.frequency.value = 4.5 + Math.random(); vg.gain.value = 6; vib.connect(vg); vg.connect(o.detune);
-    o.connect(bp1); o.connect(bp2); o.start(t); vib.start(t); o.stop(t + dur + 2); vib.stop(t + dur + 2);
-  }
-  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + dur * 0.45); g.gain.setValueAtTime(v, t + dur * 0.7); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 1.8);
-}
-function chimes(t, midis, gap, v, dest) { midis.forEach((m, i) => bell(t + i * gap, m, v, dest)); }
-function fanfare(kind) {
   if (!ctx) return;
-  const t = ctx.currentTime + 0.05, fx = fxBus(), r = 50;
-  duck(0.2, 3.6);
-  timpRoll(t, 1.1, 0.7, fx);
-  const hit = t + 1.15;
-  drum(hit, 1);
-  if (kind === 'good') { choir(hit, [r, r + 4, r + 7, r + 12], 2.2, 0.05, fx); chimes(hit + 0.2, [r + 24, r + 28, r + 31, r + 36], 0.22, 0.28, fx); }
-  else if (kind === 'bad') { gong(hit, 55, 0.5, fx); choir(hit + 0.1, [r - 5, r - 2, r + 2], 2.6, 0.05, fx); }
-  else if (kind === 'war') { gong(hit, 62, 0.35, fx); for (let i = 1; i < 6; i++) drum(hit + i * 0.26, i % 2 ? 0.7 : 1); choir(hit + 0.2, [r - 12, r - 5, r], 1.8, 0.05, fx); }
-  else { gong(hit, 65, 0.3, fx); choir(hit + 0.1, [r, r + 7, r + 12], 2.0, 0.04, fx); }
+  const t = ctx.currentTime, g = master.gain, full = st.vol / 100;
+  g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(full * depth, t, 0.25); g.setTargetAtTime(full, t + hold, 1);
 }
-function betrayal() {
-  if (!ctx) return;
-  const t = ctx.currentTime + 0.03, fx = fxBus();
-  duck(0.2, 2.6);
-  gong(t, 52, 0.45, fx); choir(t + 0.05, [38, 39, 44], 2.2, 0.05, fx);
-  drum(t, 1); drum(t + 0.35, 0.9); drum(t + 0.7, 1);
-  bell(t + 0.1, 61, 0.45, fx);
+function sfx(kind) {
+  const list = SFX[kind]; if (!ctx || !list || !list.length) return 0;
+  const el = new Audio(rand(list)); el.setAttribute('playsinline', '');
+  try { ctx.createMediaElementSource(el).connect(master); } catch (e) {}
+  const p = el.play(); if (p) p.catch(() => {});
+  return 1600;
 }
 
 // ---------------------------------------------------------------- narrator
-let voice = null;
+let voice = null, speechOk = false;
 function pickVoice() {
   if (!('speechSynthesis' in window)) return;
   const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
   const quality = v => /premium/i.test(v.name) ? 2 : /enhanced/i.test(v.name) ? 1 : 0;
   vs.sort((a, b) => quality(b) - quality(a) || a.name.localeCompare(b.name));
   const saved = store.get('voiceName', '');
-  const prefer = ['Daniel', 'Arthur', 'Oliver', 'Jamie', 'Malcolm', 'Rishi', 'Google UK English Male', 'Microsoft Ryan', 'Microsoft George', 'Aaron', 'Alex'];
+  const prefer = ['Daniel', 'Arthur', 'Oliver', 'Jamie', 'Malcolm', 'Rishi', 'Google UK English Male', 'Microsoft Ryan', 'Aaron', 'Alex'];
   voice = vs.find(v => v.name === saved) || null;
-  if (!voice) for (const q of [2, 1, 0]) { for (const p of prefer) { voice = vs.find(v => v.name.includes(p) && quality(v) === q); if (voice) break; } if (voice) break; }
+  if (!voice) for (const p of prefer) { voice = vs.find(v => v.name.includes(p)); if (voice) break; }
   if (!voice) voice = vs.find(v => /en-GB/i.test(v.lang)) || vs[0] || null;
-  const sel = document.getElementById('voicePick');
-  if (sel) {
-    sel.innerHTML = vs.map(v => `<option value="${v.name.replace(/"/g, '&quot;')}">${v.name} (${v.lang})</option>`).join('') || '<option>No voices</option>';
-    if (voice) sel.value = voice.name;
-  }
+  const sel = $('voicePick');
+  sel.innerHTML = vs.map(v => `<option value="${v.name.replace(/"/g, '&quot;')}">${v.name}</option>`).join('') || '<option>No voices</option>';
+  if (voice) sel.value = voice.name;
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
-let speechOk = false, speechNote = '';
 function speakNow(text) {
   const u = new SpeechSynthesisUtterance(text);
   if (voice) u.voice = voice;
-  u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.9; u.pitch = 0.95; u.volume = 1;
-  u.onstart = () => { speechOk = true; speechNote = 'speaking'; diag(); };
-  u.onend = () => { speechNote = ''; diag(); };
-  u.onerror = e => { speechNote = 'speech error: ' + (e.error || 'unknown'); diag(); };
-  if (ctx) { const words = text.split(' ').length; duck(0.35, Math.min(14, 1 + words * 0.42)); }
+  u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.9; u.pitch = 0.95;
+  u.onstart = () => { speechOk = true; };
+  duck(0.35, Math.min(9, 1 + text.split(' ').length * 0.42));
   if (speechSynthesis.paused) speechSynthesis.resume();
   speechSynthesis.speak(u);
 }
 function say(text, delay) {
-  lastLine = text;
-  document.getElementById('said').textContent = text;
+  lastLine = text; $('said').textContent = text;
   if (!st.voice || !('speechSynthesis' in window)) return;
   if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
-  // iPad Safari only lets speech start inside a tap until it has spoken once; after that a delay is fine.
+  // iPad Safari only lets speech start inside a tap until it has spoken once.
   if (!speechOk || !delay) { speakNow(text); return; }
   setTimeout(() => speakNow(text), delay);
 }
-const rand = a => a[Math.floor(Math.random() * a.length)];
 const WELCOME = [o => `Welcome to the ${o} century.`, o => `The ${o} century begins.`, o => `Behold, the ${o} century.`];
 const CENT = [
   ['Rome is gone. Britain stands alone.', 'Saxon ships are on the shore.', 'An empire falls. Take what you can.'],
@@ -574,7 +332,6 @@ const ROLL = ['Roll for your fate.', 'Let the die decide.', 'Roll, opener.', 'Ch
 const FINALE = ['The fifteenth century. Count your lands. The greatest rules England.', 'The Middle Ages end. Lay down your swords, and count.'];
 
 // ---------------------------------------------------------------- UI
-const $ = id => document.getElementById(id);
 function renderAges() {
   const box = $('ages'); box.innerHTML = '';
   ROMS.forEach((r, i) => {
@@ -600,124 +357,53 @@ function renderEvents() {
     $('evs').appendChild(b);
   });
 }
-function renderNow() {
-  const m = MOODS[baseMood()];
-  $('moodName').textContent = m.name; $('moodDesc').textContent = m.desc;
-  $('battle').setAttribute('aria-pressed', String(st.battle));
-}
-function render() { renderAges(); renderEvents(); renderNow(); }
+function renderPhase() { for (const p of ['calm', 'suspense', 'battle']) $('ph-' + p).setAttribute('aria-pressed', String(st.phase === p)); }
+function render() { renderAges(); renderEvents(); renderPhase(); $('moodName').textContent = MOODS[moodNow()].name; }
 function save() { store.set('c', st.c); store.set('e', st.e); }
 
 function pickCentury(i) {
-  if (i === st.c && st.e < 0) return;
-  st.c = i; st.e = -1; st.battle = false; save(); render();
-  setMood(baseMood(), 6);
-  if (i === 10) { fanfare('good'); say(rand(FINALE), 2600); return; }
-  fanfare('neutral');
-  say(`${rand(WELCOME)(ORD[i])} ${rand(CENT[i])} ${rand(ROLL)}`, 2200);
+  st.c = i; st.e = -1; st.phase = 'calm'; save(); render();
+  setMood(moodNow(), 5);
+  if (i === 10) { say(rand(FINALE), sfx('good')); return; }
+  say(`${rand(WELCOME)(ORD[i])} ${rand(CENT[i])} ${rand(ROLL)}`, sfx('century'));
 }
 function pickEvent(k) {
-  st.e = k; st.battle = false; save(); render();
+  st.e = k; st.phase = 'calm'; save(); render();
   const e = AGES[st.c].events[k], mood = EVMOOD[e.t] || ERA(st.c);
-  fanfare(TONE[mood] || 'neutral');
-  setMood(mood, 7);
-  say(`${e.t}. ${e.h}`, 2400);
+  setMood(moodNow(), 6);
+  say(`${e.t}. ${e.h}`, sfx(TONE[mood] || 'century'));
 }
-
-$('battle').onclick = () => {
-  st.battle = !st.battle; renderNow();
-  if (ctx && st.battle) { for (let i = 0; i < 8; i++) drum(ctx.currentTime + 0.05 + i * 0.07, 0.4 + i * 0.07); }
-  setMood(baseMood(), st.battle ? 2 : 6);
-};
-$('betray').onclick = () => { betrayal(); say('An oath is broken.', 1800); };
-$('trade').onclick = () => coins();
-const FX_TESTS = [
-  ['Sword clash', () => swords()], ['Battle cry', () => roar()], ['Cavalry charge', () => gallop()],
-  ['Arrow volley', () => arrows()], ['Coins', () => coins()], ['War drums', () => { const t = ctx.currentTime + 0.03; for (let i = 0; i < 12; i++) drum(t + i * 0.18, i % 4 ? 0.6 : 1); }],
-  ['Gong', () => gong(ctx.currentTime + 0.03, 58, 0.5, fxBus())], ['Bells', () => chimes(ctx.currentTime + 0.03, [64, 67, 71, 76], 0.25, 0.5, fxBus())],
-  ['Choir', () => choir(ctx.currentTime + 0.03, [50, 54, 57, 62], 2.5, 0.06, fxBus())],
-  ['Good century', () => fanfare('good')], ['Bad century', () => fanfare('bad')], ['War century', () => fanfare('war')],
-];
-FX_TESTS.forEach(([name, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = name; b.onclick = () => { if (!ctx) return; ctx.resume(); fn(); }; $('fxTests').appendChild(b); });
-Object.keys(MOODS).forEach(k => { const b = document.createElement('button'); b.type = 'button'; { const s = MOODS[k].name.replace(/^(A|An|The) /, ''); b.textContent = s[0].toUpperCase() + s.slice(1); } b.onclick = () => { if (!ctx) return; ctx.resume(); setMood(k, 3); $('moodName').textContent = MOODS[k].name + ' (preview)'; $('moodDesc').textContent = MOODS[k].desc; }; $('moodTests').appendChild(b); });
+function setPhase(p) {
+  if (st.phase === p && p !== 'battle') return;
+  st.phase = p; renderPhase();
+  setMood(moodNow(), p === 'battle' ? 1.5 : p === 'suspense' ? 3 : 5);
+}
+$('ph-calm').onclick = () => setPhase('calm');
+$('ph-suspense').onclick = () => setPhase('suspense');
+$('ph-battle').onclick = () => setPhase('battle');
+$('betray').onclick = () => say('An oath is broken.', sfx('betray'));
+$('trade').onclick = () => sfx('trade');
 $('replay').onclick = () => { if (lastLine) say(lastLine, 0); };
 $('vol').value = st.vol;
 $('vol').oninput = e => { st.vol = +e.target.value; store.set('vol', st.vol); if (master) master.gain.setTargetAtTime(st.vol / 100, ctx.currentTime, 0.1); };
-$('voicePick').onchange = e => { store.set('voiceName', e.target.value); voice = speechSynthesis.getVoices().find(v => v.name === e.target.value) || voice; diag(); say('I am the chronicler of England.', 0); };
-$('recOn').checked = useRecorded;
-$('recOn').onchange = e => {
-  useRecorded = e.target.checked; store.set('recorded', useRecorded);
-  if (!ctx) return;
-  if (useRecorded) { levels(target || cur, 2); playTrack(baseMood(), 3); } else { stopTracks(2); levels(target || cur, 3); }
-};
+$('voicePick').onchange = e => { store.set('voiceName', e.target.value); voice = speechSynthesis.getVoices().find(v => v.name === e.target.value) || voice; say('I am the chronicler of England.', 0); };
 $('voiceOn').checked = st.voice;
 $('voiceOn').onchange = e => { st.voice = e.target.checked; store.set('voice', st.voice); if (!st.voice && 'speechSynthesis' in window) speechSynthesis.cancel(); };
 $('pause').onclick = async () => {
   if (!ctx) return;
-  if (ctx.state === 'running') { for (const k in players) players[k].el.pause(); await ctx.suspend(); $('pause').textContent = 'Play'; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
-  else { unlockIOS(); if (curTrack && players[curTrack]) { const pr = players[curTrack].el.play(); if (pr) pr.catch(() => {}); } await ctx.resume(); $('pause').textContent = 'Pause'; }
-  diag();
+  const d = decks[live];
+  if (ctx.state === 'running') { d.el.pause(); await ctx.suspend(); $('pause').textContent = 'Play'; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+  else { await ctx.resume(); const p = d.el.play(); if (p) p.catch(() => {}); $('pause').textContent = 'Pause'; }
 };
-let lock = null;
-async function keepAwake() { try { lock = await navigator.wakeLock.request('screen'); } catch (e) {} }
+async function keepAwake() { try { await navigator.wakeLock.request('screen'); } catch (e) {} }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ctx && ctx.state === 'running') keepAwake(); });
-function silentWav() {
-  const sr = 8000, n = sr / 2, b = new ArrayBuffer(44 + n * 2), v = new DataView(b);
-  const w = (o, s) => { for (let i = 0; i < s.length; i++) v.setUint8(o + i, s.charCodeAt(i)); };
-  w(0, 'RIFF'); v.setUint32(4, 36 + n * 2, true); w(8, 'WAVE'); w(12, 'fmt '); v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true);
-  v.setUint32(24, sr, true); v.setUint32(28, sr * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); w(36, 'data'); v.setUint32(40, n * 2, true);
-  let s = ''; const u = new Uint8Array(b); for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
-  return 'data:audio/wav;base64,' + btoa(s);
-}
-let unlockEl = null;
-function unlockIOS() {
-  // Ask Safari to treat this page as music, so the mute setting does not silence it.
-  try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
-  try { unlockEl = new Audio(silentWav()); unlockEl.loop = true; unlockEl.setAttribute('playsinline', ''); const p = unlockEl.play(); if (p) p.catch(() => {}); } catch (e) {}
-}
-function diag(extra) {
-  const parts = [];
-  parts.push('Audio: ' + (ctx ? ctx.state : 'not started'));
-  parts.push('Voice: ' + (!('speechSynthesis' in window) ? 'not available here' : (voice ? voice.name : 'default') + (speechNote ? ' (' + speechNote + ')' : speechOk ? ' (working)' : ' (not heard yet)')));
-  if (extra) parts.push(extra);
-  $('diag').textContent = parts.join(' · ');
-}
-function testSound() {
-  if (!ctx) return;
-  ctx.resume().then(() => diag());
-  const t = ctx.currentTime + 0.05, fx = fxBus();
-  chimes(t, [64, 67, 71, 76], 0.25, 0.5, fx);
-  diag();
-  say('Sound check. Can you hear me?', 0);
-}
-$('test').onclick = testSound;
-function testSoundQuiet() { const t = ctx.currentTime + 0.05; bell(t, 64, 0.5, fxBus()); }
 $('start').onclick = () => {
-  unlockIOS();
-  try { initAudio(); } catch (e) { diag('Error: ' + e.message); return; }
-  ctx.resume().then(() => diag()).catch(e => diag('Error: ' + e.message));
-  setTimeout(diag, 800);
+  try { initAudio(); } catch (e) { status('Sound could not start: ' + e.message); return; }
   if ('speechSynthesis' in window) pickVoice();
   $('gate').hidden = true; keepAwake();
-  testSoundQuiet();
+  setMood(moodNow(), 3);
   const e = st.e >= 0 && st.c < 10 ? AGES[st.c].events[st.e] : null;
-  say(e ? `The ${ORD[st.c]} century. ${e.t}.` : `Hear the chronicle of England. The ${ORD[st.c]} century begins.`, 1500);
+  say(e ? `The ${ORD[st.c]} century. ${e.t}.` : `Hear the chronicle of England. The ${ORD[st.c]} century begins.`, 0);
 };
-
-// scope
-const cv = $('scope'), g2 = cv.getContext('2d');
-const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-function draw() {
-  const w = cv.width, h = cv.height;
-  g2.clearRect(0, 0, w, h);
-  g2.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#d9a93b';
-  g2.lineWidth = 2; g2.beginPath();
-  if (analyser) {
-    const d = new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(d);
-    for (let i = 0; i < d.length; i++) { const x = i / (d.length - 1) * w, y = h / 2 + (d[i] - 128) / 128 * h * 0.9; i ? g2.lineTo(x, y) : g2.moveTo(x, y); }
-  } else { g2.moveTo(0, h / 2); g2.lineTo(w, h / 2); }
-  g2.stroke();
-  if (!reduce) requestAnimationFrame(draw);
-}
-render(); draw(); diag();
+render();
 </script>
