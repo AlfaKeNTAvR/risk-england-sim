@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>The Chronicler</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -8,7 +9,7 @@
   color-scheme: dark;
   --hall: #15100c; --oak: #211912; --seam: #3b2d21;
   --parch: #efe2c4; --faded: #b5a17e; --gold: #d9a93b;
-  --early: #6f9157; --middle: #c48d2c; --late: #bf4a3f; --calm: #6f9157; --suspense: #c48d2c; --battle: #bf4a3f;
+  --early: #6f9157; --middle: #c48d2c; --late: #bf4a3f; --calm: #6f9157; --suspense: #c48d2c; --battle: #bf4a3f; --finale: #4a7fc4;
   --ink: #1b140e;
   --display: 'IM Fell English SC', 'Iowan Old Style', Georgia, serif;
   --story: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
@@ -23,14 +24,19 @@ body {
 button, select { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
 button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .app { height: 100%; max-width: 1240px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
-header { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--seam); padding-bottom: 8px; }
+header { flex: none; display: flex; flex-direction: column; align-items: stretch; gap: 8px; border-bottom: 1px solid var(--seam); padding-bottom: 8px; }
 h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 28px; line-height: 1; }
-.controls { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.btn { border: 1px solid var(--seam); background: var(--oak); border-radius: 10px; padding: 6px 12px; min-height: 42px; }
-.toggle, .vol { display: flex; align-items: center; gap: 6px; color: var(--faded); font-size: 15px; }
-.toggle input { width: 20px; height: 20px; accent-color: var(--gold); }
-.vol input { width: 110px; accent-color: var(--gold); }
-#voicePick { max-width: 170px; min-height: 42px; }
+.controls { display: flex; align-items: center; gap: 16px; }
+.btn { border: 1px solid var(--seam); background: var(--oak); border-radius: 10px; padding: 8px 16px; min-height: 52px; font-size: 17px; }
+#pause { min-width: 120px; font-weight: 600; border-color: var(--gold); }
+.toggle, .vol { display: flex; align-items: center; gap: 8px; color: var(--faded); font-size: 17px; }
+.vol { flex: 1; min-width: 0; }
+.toggle input { width: 26px; height: 26px; accent-color: var(--gold); }
+.vol input { flex: 1; min-width: 0; height: 44px; -webkit-appearance: none; appearance: none; background: transparent; }
+.vol input::-webkit-slider-runnable-track { height: 10px; border-radius: 5px; background: var(--seam); }
+.vol input::-webkit-slider-thumb { -webkit-appearance: none; width: 32px; height: 32px; margin-top: -11px; border-radius: 50%; background: var(--gold); border: 2px solid var(--ink); }
+.vol input::-moz-range-track { height: 10px; border-radius: 5px; background: var(--seam); }
+.vol input::-moz-range-thumb { width: 28px; height: 28px; border-radius: 50%; background: var(--gold); border: 2px solid var(--ink); }
 
 main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 10px; }
 .col { display: flex; flex-direction: column; gap: 10px; min-height: 0; min-width: 0; }
@@ -57,7 +63,9 @@ section { background: var(--oak); border: 1px solid var(--seam); border-radius: 
 .end { font-family: var(--story); font-style: italic; font-size: 19px; color: var(--faded); padding: 8px 2px; }
 
 .now .m { font-family: var(--display); font-size: 25px; line-height: 1.05; }
-.now .track { font-size: 14px; color: var(--faded); }
+.now .track { font-size: 15px; color: var(--faded); text-align: left; background: none; border: 1px dashed transparent; border-radius: 8px; padding: 6px 8px; margin-left: -8px; min-height: 40px; }
+.now .track:hover, .now .track.arm { border-color: var(--seam); }
+.now .track.arm { color: var(--late); border-color: var(--late); }
 .said { font-family: var(--story); font-style: italic; font-size: 16px; line-height: 1.35; border-left: 3px solid var(--gold); padding-left: 10px; min-height: 22px; }
 .status { font-size: 13px; color: var(--late); }
 
@@ -84,6 +92,8 @@ section { background: var(--oak); border: 1px solid var(--seam); border-radius: 
 .gate .card { max-width: 460px; text-align: center; display: flex; flex-direction: column; gap: 14px; align-items: center; }
 .gate .card p { margin: 0; color: var(--faded); line-height: 1.45; }
 .gate .card .big { font-family: var(--display); font-size: 40px; line-height: 1; }
+.gate .gatebtns { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+#continue { background: var(--oak); color: var(--parch); border-color: var(--gold); }
 .gate .btn { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; min-height: 52px; padding: 10px 22px; }
 </style>
 
@@ -91,9 +101,9 @@ section { background: var(--oak); border: 1px solid var(--seam); border-radius: 
   <header>
     <h1>The Chronicler</h1>
     <div class="controls">
-      <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Narrator</label>
-      <select id="voicePick" class="btn" aria-label="Narrator voice"></select>
-      <label class="vol" for="vol">Volume <input type="range" id="vol" min="0" max="100" value="80"></label>
+      <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Voice on</label>
+      <label class="vol" for="vol">Music <input type="range" id="vol" min="0" max="100" value="80"></label>
+      <label class="vol" for="vvol">Narrator <input type="range" id="vvol" min="0" max="100" value="90"></label>
       <button class="btn" id="pause" type="button">Pause</button>
     </div>
   </header>
@@ -114,7 +124,7 @@ section { background: var(--oak); border: 1px solid var(--seam); border-radius: 
       <section class="now">
         <div class="label">Now playing</div>
         <div class="m" id="moodName">The early ages</div>
-        <div class="track" id="trackName"></div>
+        <button class="track" id="trackName" type="button" title="Tap twice to stop playing this track"></button>
         <div class="said" id="said" aria-live="polite"></div>
         <div class="status" id="status" hidden></div>
       </section>
@@ -133,7 +143,7 @@ section { background: var(--oak); border: 1px solid var(--seam); border-radius: 
           <button class="moment" id="trade" type="button">Card trade</button>
           <button class="moment" id="replay" type="button">Read again</button>
         </div>
-        <div class="credits">Music from Pixabay: kulakovka, Medieval Horizons, Kiravale, kaazoom, RoyaltyFreeMusicStudio, RubyZephyr, OneCinematicStudio, OpenMindAudio, Billy Ziogas, HitsLab.</div>
+        <div class="credits">Music from Pixabay: kulakovka, Medieval Horizons, Kiravale, kaazoom, RoyaltyFreeMusicStudio, RubyZephyr, OneCinematicStudio, OpenMindAudio, Billy Ziogas, HitsLab, deuslower, emmraan, krayolabro, montogoronto, ob-lix, audioatlant, Forgotten Hero Records, yevhenastafiev, composiia, katzen_tupas, Pixabay user 44363205, ebunny, bykenneth, desifreemusic, mfcc, nickpanek, vjgalaxy, its_tigri, matthewmikemusic, dstechnician, fidelfortune. Sound effects from Pixabay: Freesound community, kave_msri, soundmarker33, universfield, grumpynora, soundreality, time-traveling-city, rlxmusic24, trading_nation, daviddumaisaudio, floraphonic, poorartistt, dihumichi, u_xg7ssi08yr, yuliana-yurukova, djartmusic, dragon-studio, pwlpl.</div>
       </section>
     </div>
   </main>
@@ -143,7 +153,10 @@ section { background: var(--oak); border: 1px solid var(--seam); border-radius: 
   <div class="card">
     <div class="big">Light the hall</div>
     <p>Turn the volume up and silent mode off (the bell in Control Centre), or the narrator stays quiet. The screen stays awake while it plays.</p>
-    <button class="btn" id="start" type="button">Start</button>
+    <div class="gatebtns">
+      <button class="btn" id="newGame" type="button">New chronicle</button>
+      <button class="btn" id="continue" type="button" hidden>Continue</button>
+    </div>
   </div>
 </div>
 
@@ -161,22 +174,65 @@ const TRACKS = {
   lute: ['Just Lute', -3.7], squire: ['Squire', 0], feast: ['Medieval Music', -6], repose: ['Quiet Repose', 4], epic: ['Epic Medieval', -3.6], fantasy: ['Medieval Fantasy', -5],
   ironbound: ['Ironbound March', -4], toll: ['The Executioner’s Toll', -5.1], knight: ['Steel & Banners', -4.3], camelot: ['Camelot', -4.1], crusade: ['Crusade of Light', -1.6],
   drums1: ['Warrior Drums I', -2.7], drums2: ['Warrior Drums II', -2.5],
+  suspense1: ['Epic Battle Orchestra', 4.0],
+  suspense2: ['Medieval Opener', -8.0],
+  suspense3: ['Intense Medieval Lofi', -2.6],
+  suspense4: ['Ominous Dark', -1.0],
+  suspense5: ['Beata', -2.1],
+  suspense6: ['Blackwood Outpost', -4.4],
+  battle1: ['Total War', -4.5],
+  battle2: ['Echoes of Valhalla', -3.8],
+  battle3: ['The Storm Comes', -5.6],
+  battle4: ['Warrior Drums III', -3.2],
+  battle5: ['Epic Battle', -8.0],
+  sombre1: ['O Herbologista', 4.0],
+  sombre2: ['Stellar Guardian', 4.0],
+  sombre3: ['Cloud of Sorrow', -4.1],
+  early1: ['Return to Me, My Love', -5.1],
+  early2: ['The Ballad of My Sweet Fair Maiden', -5.5],
+  early3: ['Eternal Meadow', -3.3],
+  early4: ['Forgotten Realm', -2.6],
+  middle1: ['March of the Fae', -5.5],
+  middle2: ['Knight of Flowers', -7.9],
+  late1: ['Fantasia Medieval', -3.3],
+  late2: ['Dark Medieval', -0.4],
+  late3: ['Fantasy Kingdom', -7.9],
+  late4: ['Irish Celtic', -8.0],
+  festive1: ['Early Morning Jig', -6.6],
+  festive2: ['Embers on the Flagstone', -2.3],
+  sacred1: ['Private Prayer to Mary', -1.2],
+  sacred2: ['Epic Gregorian Choir', -1.6],
+  intrigue1: ['Sword', 4.0],
+  intrigue2: ['Medieval Sands', -1.4],
+  war1: ['Dawn of War', -0.6],
+  finale1: ['Inspiration', -0.4],
 };
 const MOODS = {
-  early:    { name: 'The early ages', tracks: ['lute', 'squire'] },
-  middle:   { name: 'The middle ages', tracks: ['ironbound', 'fantasy', 'squire'] },
-  late:     { name: 'The late ages', tracks: ['toll', 'repose', 'fantasy'] },
-  festive:  { name: 'A good age', tracks: ['feast', 'lute'] },
-  sacred:   { name: 'An age of order', tracks: ['camelot', 'repose'] },
-  intrigue: { name: 'An age of intrigue', tracks: ['fantasy', 'toll'] },
-  war:      { name: 'An age of war', tracks: ['epic', 'knight', 'ironbound', 'crusade'] },
-  sombre:   { name: 'A dark age', tracks: ['repose'] },
-  finale:   { name: 'The fifteenth century', tracks: ['camelot', 'crusade', 'knight'] },
-  suspense: { name: 'Suspense', tracks: ['toll', 'fantasy'] },
-  battle:   { name: 'Battle', tracks: ['drums1', 'drums2', 'epic', 'knight', 'crusade'] },
+  early:    { name: 'The early ages', tracks: ['lute', 'squire', 'early1', 'early2', 'early3', 'early4'] },
+  middle:   { name: 'The middle ages', tracks: ['ironbound', 'fantasy', 'squire', 'middle1', 'middle2'] },
+  late:     { name: 'The late ages', tracks: ['toll', 'repose', 'fantasy', 'late1', 'late2', 'late3', 'late4'] },
+  festive:  { name: 'A good age', tracks: ['feast', 'lute', 'festive1', 'festive2'] },
+  sacred:   { name: 'An age of order', tracks: ['camelot', 'repose', 'sacred1', 'sacred2'] },
+  intrigue: { name: 'An age of intrigue', tracks: ['fantasy', 'toll', 'intrigue1', 'intrigue2'] },
+  war:      { name: 'An age of war', tracks: ['epic', 'knight', 'ironbound', 'crusade', 'war1'] },
+  sombre:   { name: 'A dark age', tracks: ['repose', 'sombre1', 'sombre2', 'sombre3'] },
+  finale:   { name: 'The fifteenth century', tracks: ['camelot', 'crusade', 'knight', 'finale1'] },
+  suspense: { name: 'Suspense', tracks: ['toll', 'suspense1', 'suspense3', 'suspense4', 'suspense5', 'suspense6'] },
+  battle:   { name: 'Battle', tracks: ['drums1', 'drums2', 'epic', 'knight', 'crusade', 'battle1', 'battle2', 'battle3', 'battle4', 'battle5'] },
 };
-// Sound effects: none yet. Add files here as they arrive, e.g. betray: ['sfx/betray1.mp3'].
-const SFX = { century: [], good: [], bad: [], war: [], betray: [], trade: [] };
+// Sound effects, one random pick per moment. battle plays when the Battle phase starts.
+const SFX = {
+  century: ['sfx/century1.mp3', 'sfx/century2.mp3', 'sfx/century3.mp3', 'sfx/century4.mp3', 'sfx/century5.mp3', 'sfx/century6.mp3'],
+  good: ['sfx/century2.mp3', 'sfx/century5.mp3', 'sfx/century6.mp3'], // church bells; the fanfares (good1, good2) sounded cheap
+  bad: ['sfx/bad1.mp3', 'sfx/bad2.mp3', 'sfx/bad3.mp3', 'sfx/bad4.mp3', 'sfx/bad5.mp3', 'sfx/bad6.mp3'],
+  war: ['sfx/war1.mp3', 'sfx/war2.mp3', 'sfx/war3.mp3'],
+  betray: ['sfx/betray1.mp3', 'sfx/betray2.mp3', 'sfx/betray3.mp3', 'sfx/betray4.mp3', 'sfx/betray5.mp3'],
+  trade: ['sfx/trade1.mp3', 'sfx/trade2.mp3', 'sfx/trade3.mp3', 'sfx/trade4.mp3', 'sfx/trade5.mp3'],
+  battle: ['sfx/battle1.mp3', 'sfx/battle2.mp3', 'sfx/battle3.mp3', 'sfx/battle4.mp3', 'sfx/battle5.mp3', 'sfx/battle6.mp3', 'sfx/battle7.mp3', 'sfx/battle8.mp3'],
+};
+
+// Recorded narrator clips (Kokoro TTS, voice Lewis): [file, text shown]. Missing or failing clips fall back to the device voice.
+const VOICE = {"centuries": [[["voice/century0-1.mp3", "The fifth century. Rome is gone, and Britain stands alone. Roll for your fate."], ["voice/century0-2.mp3", "Welcome to the fifth century. Saxon ships are on the shore. Let the die decide."], ["voice/century0-3.mp3", "Behold, the fifth century. An empire falls... take what you can. Roll, opener!"]], [["voice/century1-1.mp3", "The sixth century begins. Small kingdoms rise from the Roman ruins. Roll for your fate."], ["voice/century1-2.mp3", "Welcome to the sixth century. Warlords crown themselves kings. Let the die decide."], ["voice/century1-3.mp3", "Behold, the sixth century. Plague sails in from the south. Choose your destiny."]], [["voice/century2-1.mp3", "The seventh century. Saints walk the land. Roll for your fate."], ["voice/century2-2.mp3", "Welcome to the seventh century. Shield walls clash in the fields. Let the die decide."], ["voice/century2-3.mp3", "The seventh century begins. Mercia, Wessex and Northumbria rise. Roll, opener!"]], [["voice/century3-1.mp3", "The eighth century. Offa raises his great dyke. Roll for your fate."], ["voice/century3-2.mp3", "Welcome to the eighth century. Strange sails on the horizon. Let the die decide."], ["voice/century3-3.mp3", "Behold, the eighth century. The monasteries are rich... too rich. Choose your destiny."]], [["voice/century4-1.mp3", "The ninth century. The Great Heathen Army has come. Roll for your fate."], ["voice/century4-2.mp3", "Welcome to the ninth century. Only Alfred stands against the Danes. Let the die decide."], ["voice/century4-3.mp3", "The ninth century begins. Pay in silver... or pay in blood. Roll, opener!"]], [["voice/century5-1.mp3", "The tenth century. One England... if it can hold. Roll for your fate."], ["voice/century5-2.mp3", "Welcome to the tenth century. Enemies gather at Brunanburh. Let the die decide."], ["voice/century5-3.mp3", "Behold, the tenth century. There is a King of the English. Choose your destiny."]], [["voice/century6-1.mp3", "The eleventh century. William has crossed the sea. Roll for your fate."], ["voice/century6-2.mp3", "Welcome to the eleventh century. Castles rise, and the North will burn. Let the die decide."], ["voice/century6-3.mp3", "The eleventh century begins. Every acre will be counted. Roll, opener!"]], [["voice/century7-1.mp3", "The twelfth century. England tears itself apart. Roll for your fate."], ["voice/century7-2.mp3", "Welcome to the twelfth century. Loyalty is for sale. Let the die decide."], ["voice/century7-3.mp3", "Behold, the twelfth century, when Christ and his saints slept. Choose your destiny."]], [["voice/century8-1.mp3", "The thirteenth century. The barons have had enough. Roll for your fate."], ["voice/century8-2.mp3", "Welcome to the thirteenth century. A king bows to a charter. Let the die decide."], ["voice/century8-3.mp3", "The thirteenth century begins. de Montfort rides against the crown. Roll, opener!"]], [["voice/century9-1.mp3", "The fourteenth century. The darkest age has come. Roll for your fate."], ["voice/century9-2.mp3", "Welcome to the fourteenth century. Famine... plague... and revolt. Let the die decide."], ["voice/century9-3.mp3", "Behold, the fourteenth century. The Black Death is coming. Choose your destiny."]]], "finale": [["voice/finale-1.mp3", "The fifteenth century. Count your lands... the greatest rules England."], ["voice/finale-2.mp3", "The Middle Ages end. Lay down your swords... and count."], ["voice/finale-3.mp3", "The age of kings draws to its close. Count your lands... and let the greatest rule."]], "betray": [["voice/betray-1.mp3", "An oath is broken."], ["voice/betray-2.mp3", "Betrayal! A pact lies shattered."], ["voice/betray-3.mp3", "So much for sworn words... an oath is broken."]], "intro": [["voice/intro-1.mp3", "Hail, lords of England! I am the Chronicler. A thousand years of war and glory lie before you... and I shall write down every deed, and every betrayal."], ["voice/intro-2.mp3", "Gather round, would-be kings. I am the Chronicler, keeper of England's story. Ten centuries await you... let us see who will rule them."], ["voice/intro-3.mp3", "Welcome, my lords, to the long history of England. I am the Chronicler. Swear your oaths, sharpen your swords... and try not to break too many promises."]], "continue": [["voice/continue-1.mp3", "The chronicle continues. Now... where were we?"], ["voice/continue-2.mp3", "Welcome back, my lords. Let us pick up the tale."], ["voice/continue-3.mp3", "Ah, you have returned. The ink is still wet... let the story go on."]], "battle": [["voice/battle-1.mp3", "To arms!"], ["voice/battle-2.mp3", "Steel meets steel."], ["voice/battle-3.mp3", "The banners advance."], ["voice/battle-4.mp3", "Let the dice decide who lives."], ["voice/battle-5.mp3", "War is as old as England itself."], ["voice/battle-6.mp3", "Another field, another slaughter."], ["voice/battle-7.mp3", "Shields up... here they come!"], ["voice/battle-8.mp3", "Blood will water these fields today."], ["voice/battle-9.mp3", "Mothers will weep tonight."], ["voice/battle-10.mp3", "The crows are already gathering."], ["voice/battle-11.mp3", "No quarter asked... and none given."], ["voice/battle-12.mp3", "Kings make wars. Peasants fill the graves."], ["voice/battle-13.mp3", "Sound the horns. Battle is joined!"], ["voice/battle-14.mp3", "Fortune favours the bold... sometimes."], ["voice/battle-15.mp3", "The chroniclers will remember this day."], ["voice/battle-16.mp3", "A good day to die... for someone."], ["voice/battle-17.mp3", "Charge!"], ["voice/battle-18.mp3", "Hold the line!"], ["voice/battle-19.mp3", "The ground shakes beneath a thousand feet."], ["voice/battle-20.mp3", "Arrows darken the sky."], ["voice/battle-21.mp3", "Another border, written in blood."], ["voice/battle-22.mp3", "Swords are drawn. Words are over."], ["voice/battle-23.mp3", "Courage, my lords. Or at least, good dice."], ["voice/battle-24.mp3", "Every acre has its price... and today, it is paid in lives."], ["voice/battle-25.mp3", "The old enemy, once again."], ["voice/battle-26.mp3", "Let God sort them out."], ["voice/battle-27.mp3", "Victory, or a quiet grave."], ["voice/battle-28.mp3", "The bards will sing of this... if anyone survives."], ["voice/battle-29.mp3", "Ravens circle overhead."], ["voice/battle-30.mp3", "Forward, for the crown!"]], "events": {"Saxon migration": [["voice/event-saxon-migration-1.mp3", "Saxon migration. As Rome departs, settlers pour across the North Sea."], ["voice/event-saxon-migration-2.mp3", "The Saxons are coming. Boat after boat, they cross the grey North Sea... and they mean to stay."]], "Roman roads": [["voice/event-roman-roads-1.mp3", "Roman roads. The old roads still bind the land together."], ["voice/event-roman-roads-2.mp3", "The Romans are gone, but their roads remain. Straight and true, they carry armies swiftly across the land."]], "Land grab": [["voice/event-land-grab-1.mp3", "Land grab. With no one in charge, the land goes to whoever takes it."], ["voice/event-land-grab-2.mp3", "No king, no law... only the bold. The land belongs to whoever takes it."]], "Petty kingdoms": [["voice/event-petty-kingdoms-1.mp3", "Petty kingdoms. Small kingdoms rise to check the strongest."], ["voice/event-petty-kingdoms-2.mp3", "A hundred little kings, each with a crown of his own. Together, they hold the mighty in check."]], "Plague of Justinian": [["voice/event-plague-of-justinian-1.mp3", "The Plague of Justinian. A pestilence reaches Britain from the Mediterranean."], ["voice/event-plague-of-justinian-2.mp3", "A sickness comes on the merchant ships. Crowded halls fall silent, one by one."]], "Age of saints": [["voice/event-age-of-saints-1.mp3", "The Age of Saints. Missionaries and monks spread across the land."], ["voice/event-age-of-saints-2.mp3", "Holy men walk the roads, and new churches rise. It is an age of saints."]], "Shield walls": [["voice/event-shield-walls-1.mp3", "Shield walls. Battles are fought shield to shield."], ["voice/event-shield-walls-2.mp3", "Shoulder to shoulder, shield against shield. No man may break the wall alone."]], "Peace of the Church": [["voice/event-peace-of-the-church-1.mp3", "The Peace of the Church. In six sixty-four, the Synod of Whitby brings the kingdoms together."], ["voice/event-peace-of-the-church-2.mp3", "At Whitby, the churchmen meet... and for a time, oaths are sacred. No pact may be broken."]], "Underdog kings": [["voice/event-underdog-kings-1.mp3", "Underdog kings. Small kingdoms rise while the great ones squabble."], ["voice/event-underdog-kings-2.mp3", "Fortune favours the small. While the great kingdoms quarrel, the weakest grow strong."]], "Viking raids": [["voice/event-viking-raids-1.mp3", "Viking raids. In seven ninety-three, the first raid falls on Lindisfarne."], ["voice/event-viking-raids-2.mp3", "Dragon ships, out of the northern mist. Lindisfarne burns, and the coasts are no longer safe."]], "Offa’s Dyke": [["voice/event-offas-dyke-1.mp3", "Offa's Dyke. Kings mark their borders with earthworks."], ["voice/event-offas-dyke-2.mp3", "King Offa digs his great earthwork, from sea to sea. Every border is now a barrier."]], "Good harvests": [["voice/event-good-harvests-1.mp3", "Good harvests. The barns are full across England."], ["voice/event-good-harvests-2.mp3", "The sun is kind, and the fields are golden. Full barns mean strong armies."]], "Great Heathen Army": [["voice/event-great-heathen-army-1.mp3", "The Great Heathen Army. In eight sixty-five, a Viking host lands and finds the great kingdoms at their weakest."], ["voice/event-great-heathen-army-2.mp3", "The sons of Ragnar have come for vengeance. Woe to the mightiest kingdom!"]], "Danegeld": [["voice/event-danegeld-1.mp3", "Danegeld. The strong pay the Danes to go away."], ["voice/event-danegeld-2.mp3", "Silver for peace... gold to go away. The strongest must pay the Danegeld."]], "Alfred’s burhs": [["voice/event-alfreds-burhs-1.mp3", "Alfred's burhs. Fortified towns hold out against the raiders."], ["voice/event-alfreds-burhs-2.mp3", "Alfred builds his walls, town by town. Behind them, the people hold firm."]], "One kingdom": [["voice/event-one-kingdom-1.mp3", "One kingdom. Athelstan's new realm rewards its loyal lords."], ["voice/event-one-kingdom-2.mp3", "For the first time, one king rules all the English. He rewards those who kneel."]], "Battle of Brunanburh": [["voice/event-battle-of-brunanburh-1.mp3", "The Battle of Brunanburh. In nine thirty-seven, Scots, Norse and Britons unite against Athelstan."], ["voice/event-battle-of-brunanburh-2.mp3", "Scots, Norsemen and Britons march together. All their spears are pointed at one king."]], "Hard winter": [["voice/event-hard-winter-1.mp3", "A hard winter. Snow closes the mountain passes."], ["voice/event-hard-winter-2.mp3", "The snow falls deep, and the mountain passes close. Great armies starve in the cold."]], "Norman castles": [["voice/event-norman-castles-1.mp3", "Norman castles. After ten sixty-six, castles rise across the conquered land."], ["voice/event-norman-castles-2.mp3", "Stone towers rise from the earth. Behind their walls, a few can hold against many."]], "Harrying of the North": [["voice/event-harrying-of-the-north-1.mp3", "The Harrying of the North. In ten sixty-nine, William lays waste to the north."], ["voice/event-harrying-of-the-north-2.mp3", "William's fury falls upon the north. Villages burn, and the fields are salted."]], "Domesday survey": [["voice/event-domesday-survey-1.mp3", "The Domesday survey. In ten eighty-six, every holding is counted, and the greatest pay the most."], ["voice/event-domesday-survey-2.mp3", "Every field, every ox, every coin is written in the king's great book. The mighty cannot hide."]], "The Anarchy": [["voice/event-the-anarchy-1.mp3", "The Anarchy. Stephen and Matilda wage civil war, and lords switch sides."], ["voice/event-the-anarchy-2.mp3", "Two claimants, one crown. Lords switch sides as the wind changes."]], "Great floods": [["voice/event-great-floods-1.mp3", "Great floods. The rivers burst their banks."], ["voice/event-great-floods-2.mp3", "The rains will not stop. Rivers rise, bridges fall, and no army may cross."]], "Supply problems": [["voice/event-supply-problems-1.mp3", "Supply problems. The greatest armies cannot be fed."], ["voice/event-supply-problems-2.mp3", "Too many mouths, too little bread. The largest armies begin to starve."]], "Magna Carta": [["voice/event-magna-carta-1.mp3", "Magna Carta. In twelve fifteen, the barons force the king to seal the charter."], ["voice/event-magna-carta-2.mp3", "At Runnymede, the king sets his seal upon the charter. Even the mighty must obey the law."]], "Barons’ War": [["voice/event-barons-war-1.mp3", "The Barons' War. Simon de Montfort leads the barons against the king."], ["voice/event-barons-war-2.mp3", "Simon de Montfort raises his banner. Every pact is broken, and every lord chooses a side."]], "Camp fever": [["voice/event-camp-fever-1.mp3", "Camp fever. Disease spreads through the largest siege camp."], ["voice/event-camp-fever-2.mp3", "Fever stalks the siege lines. The greater the camp, the faster it spreads."]], "Black Death": [["voice/event-black-death-1.mp3", "The Black Death. From thirteen forty-eight, the plague kills a third of England."], ["voice/event-black-death-2.mp3", "The great mortality has come. Half of every army falls... and no one is safe."]], "Great Famine": [["voice/event-great-famine-1.mp3", "The Great Famine. From thirteen fifteen, years of failed harvests empty the thinly held lands."], ["voice/event-great-famine-2.mp3", "Rain, rot, and ruin. Year after year, the harvest fails."]], "Peasants’ Revolt": [["voice/event-peasants-revolt-1.mp3", "The Peasants' Revolt. In thirteen eighty-one, the rebels march on London."], ["voice/event-peasants-revolt-2.mp3", "Wat Tyler leads the commons on London. When Adam delved and Eve span... who was then the gentleman?"]]}};
 
 const EVMOOD = {
   'Saxon migration':'festive','Roman roads':'early','Land grab':'festive',
@@ -195,8 +251,8 @@ const TONE = { festive: 'good', sacred: 'good', early: 'good', middle: 'century'
 // ---------------------------------------------------------------- state
 const store = { get(k, d) { try { const v = localStorage.getItem('chron.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
                 set(k, v) { try { localStorage.setItem('chron.' + k, JSON.stringify(v)); } catch (e) {} } };
-const st = { c: store.get('c', 0), e: store.get('e', -1), phase: 'calm', vol: store.get('vol', 80), voice: store.get('voice', true) };
-let lastLine = '';
+const st = { c: store.get('c', 0), e: store.get('e', -1), phase: 'calm', vol: store.get('vol', 80), vvol: store.get('vvol', 90), voice: store.get('voice', true) };
+let lastLine = '', lastClips = null;
 function calmMood() {
   if (st.c === 10) return 'finale';
   if (st.e >= 0) return EVMOOD[AGES[st.c].events[st.e].t] || ERA(st.c);
@@ -205,11 +261,49 @@ function calmMood() {
 const moodNow = () => st.phase === 'calm' ? calmMood() : st.phase;
 
 // ---------------------------------------------------------------- audio: two decks that crossfade
+let voiceEl = null, voiceGain = null, clipQueue = null, clipTimer = null, ambientGain = null, ambientTimer = null;
 let ctx, master, decks = [], live = 0, curTrack = null, curMood = null, fadeTimer = null;
 const bags = {};
+// Tracks Nikita dropped: never picked again. Kept in this browser and, when the viewer is signed in,
+// in the artifact database (collection "ignored", one doc per track key) so Claude can read them later.
+const ignored = new Set(store.get('ignored', []));
+let ignoredDb = null;
+(async () => {
+  if (!window.claude || !window.claude.use) return;
+  try {
+    const db = await window.claude.use('db'); if (!db) return;
+    ignoredDb = db.collection('ignored');
+    ignoredDb.onSnapshot(snap => {
+      snap.docs.forEach(d => ignored.add(d.id));
+      store.set('ignored', [...ignored]);
+    }, () => {});
+    for (const key of ignored) ignoredDb.doc(key).get().then(d => { if (!d.exists) recordIgnored(key); }).catch(() => {});
+  } catch (e) { /* no database here: the browser copy still works */ }
+})();
+function recordIgnored(key) {
+  if (!ignoredDb || !TRACKS[key]) return;
+  ignoredDb.doc(key).set({ title: TRACKS[key][0], playlist: curMood || '', at: new Date().toISOString() }).catch(() => {});
+}
+let armTimer = null;
+function onTrackTap() {
+  if (!curTrack) return;
+  const b = $('trackName');
+  if (!b.classList.contains('arm')) {
+    b.classList.add('arm'); b.textContent = 'Tap again to never play ' + TRACKS[curTrack][0];
+    clearTimeout(armTimer); armTimer = setTimeout(() => { b.classList.remove('arm'); b.textContent = '♪ ' + TRACKS[curTrack][0]; }, 3000);
+    return;
+  }
+  clearTimeout(armTimer); b.classList.remove('arm');
+  const key = curTrack;
+  ignored.add(key); store.set('ignored', [...ignored]); recordIgnored(key);
+  skipTrack();
+  status('Dropped ' + TRACKS[key][0] + '.'); setTimeout(() => status(''), 2500);
+}
 // Shuffle bag: every track in a playlist plays once before any repeats, and a new round never starts with the track just played.
 function nextFrom(mood) {
-  const list = MOODS[mood].tracks;
+  const all = MOODS[mood].tracks, kept = all.filter(k => !ignored.has(k));
+  const list = kept.length ? kept : all;
+  if (bags[mood]) bags[mood] = bags[mood].filter(k => list.includes(k));
   let bag = bags[mood];
   if (!bag || !bag.length) {
     bag = list.slice();
@@ -246,28 +340,76 @@ function initAudio() {
     el.src = quiet; const p = el.play(); if (p) p.catch(() => {});
     decks.push(d);
   }
+  // Narrator deck, unlocked in the same tap so clips may start later without one. Not ducked with the music.
+  voiceEl = new Audio(); voiceEl.preload = 'auto'; voiceEl.setAttribute('playsinline', '');
+  voiceGain = ctx.createGain(); voiceGain.gain.value = st.vvol / 100;
+  try { ctx.createMediaElementSource(voiceEl).connect(voiceGain); voiceGain.connect(ctx.destination); } catch (e) { voiceGain = null; }
+  voiceEl.addEventListener('ended', playNextClip);
+  voiceEl.addEventListener('error', () => { if (clipQueue) { const rest = clipQueue.map(c => c[1]).join(' '); clipQueue = null; if (rest) speakNow(rest); } });
+  voiceEl.src = quiet; const vp = voiceEl.play(); if (vp) vp.catch(() => {});
+  ambientGain = ctx.createGain(); ambientGain.gain.value = AMBIENT_LEVEL; ambientGain.connect(master);
   ctx.resume();
 }
 function fade(d, v, secs) { const t = ctx.currentTime; d.g.gain.cancelScheduledValues(t); d.g.gain.setValueAtTime(d.g.gain.value, t); d.g.gain.setTargetAtTime(v, t, Math.max(0.05, secs / 3)); }
-function play(key, secs) {
+// Rotation with memory: every track remembers where it was left, and each playlist its last track.
+// Coming back to a playlist either resumes that last track (RESUME_CHANCE) or moves on to the next
+// track in the rotation, which itself continues from wherever it was left, or starts at a random point.
+const trackPos = {}, lastOf = {};
+const RESUME_CHANCE = 0.5;
+const RANDOM_START_MAX = 0.5; // a fresh track starts somewhere in its first half
+// start: seconds to resume from, 'random' for a random point in the first half, or 0 for the beginning.
+function play(key, secs, start) {
   const from = decks[live], to = decks[1 - live];
-  to.key = key; to.el.src = 'music/' + key + '.mp3';
-  const p = to.el.play(); if (p) p.catch(err => status('Music blocked (' + err.name + '). Tap Pause, then Play.'));
+  if (from.key && from.mood !== 'battle' && !from.el.ended && from.el.currentTime > 0) trackPos[from.key] = from.el.currentTime;
+  to.key = key; to.mood = curMood; lastOf[curMood] = key; to.el.src = 'music/' + key + '.mp3';
+  if (start) {
+    to.el.addEventListener('loadedmetadata', () => {
+      if (to.key !== key) return;
+      const dur = to.el.duration;
+      const at = start === 'random' ? (isFinite(dur) ? Math.random() * RANDOM_START_MAX * dur : 0) : start;
+      try { to.el.currentTime = isFinite(dur) && at < dur - 8 ? at : 0; } catch (e) { /* seeking refused: play from the start */ }
+    }, { once: true });
+  }
+  // AbortError means a newer track change or a fade-out pause interrupted this play: not a real block.
+  // Ignore it when this track is no longer the live one; if it still is, try once more.
+  const isStillLive = () => decks[live] === to && to.key === key;
+  const report = err => { if (isStillLive() && err.name !== 'AbortError') status('Music blocked (' + err.name + '). Tap Pause, then Play.'); };
+  const p = to.el.play();
+  if (p) p.catch(err => {
+    if (!isStillLive()) return;
+    if (err.name !== 'AbortError') { report(err); return; }
+    const retry = to.el.play(); if (retry) retry.catch(report);
+  });
   fade(to, Math.pow(10, TRACKS[key][1] / 20), secs);
   fade(from, 0, secs);
   clearTimeout(fadeTimer); fadeTimer = setTimeout(() => { if (decks[live] !== from) from.el.pause(); }, secs * 1000 + 800);
   live = 1 - live; curTrack = key;
+  clearTimeout(armTimer); $('trackName').classList.remove('arm');
   $('trackName').textContent = '♪ ' + TRACKS[key][0];
   status('');
 }
-function setMood(mood, secs) {
+const startFor = key => trackPos[key] !== undefined ? trackPos[key] : 'random';
+// force: a phase switch always changes the music, even when the current track also belongs to the new playlist.
+function setMood(mood, secs, force) {
+  const prev = curMood;
   curMood = mood;
   $('moodName').textContent = MOODS[mood].name;
   if (!ctx) return;
-  if (curTrack && MOODS[mood].tracks.includes(curTrack) && mood !== 'battle') return; // already fitting: keep playing
-  play(nextFrom(mood), secs);
+  if (curTrack && mood !== 'battle' && (prev === mood || (!force && MOODS[mood].tracks.includes(curTrack)))) return; // already fitting: keep playing
+  // Battle always opens a new track from its first note.
+  if (mood === 'battle') { play(nextFrom(mood), secs, 0); return; }
+  const last = lastOf[mood];
+  if (last && last !== curTrack && !ignored.has(last) && Math.random() < RESUME_CHANCE) { play(last, secs, startFor(last)); return; }
+  let key = nextFrom(mood);
+  if ((key === last || key === curTrack) && MOODS[mood].tracks.length > 2) key = nextFrom(mood);
+  play(key, secs, startFor(key));
 }
-function advance() { if (curMood) play(nextFrom(curMood), 4); }
+function advance() {
+  if (!curMood) return;
+  delete trackPos[curTrack];
+  const key = nextFrom(curMood);
+  play(key, 4, trackPos[key] !== undefined ? trackPos[key] : 0);
+}
 function duck(depth, hold) {
   if (!ctx) return;
   const t = ctx.currentTime, g = master.gain, full = st.vol / 100;
@@ -293,15 +435,12 @@ function pickVoice() {
   voice = vs.find(v => v.name === saved) || null;
   if (!voice) for (const p of prefer) { voice = vs.find(v => v.name.includes(p)); if (voice) break; }
   if (!voice) voice = vs.find(v => /en-GB/i.test(v.lang)) || vs[0] || null;
-  const sel = $('voicePick');
-  sel.innerHTML = vs.map(v => `<option value="${v.name.replace(/"/g, '&quot;')}">${v.name}</option>`).join('') || '<option>No voices</option>';
-  if (voice) sel.value = voice.name;
 }
 if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
 function speakNow(text) {
   const u = new SpeechSynthesisUtterance(text);
   if (voice) u.voice = voice;
-  u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.9; u.pitch = 0.95;
+  u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.9; u.pitch = 0.95; u.volume = st.vvol / 100;
   u.onstart = () => { speechOk = true; };
   duck(0.35, Math.min(9, 1 + text.split(' ').length * 0.42));
   if (speechSynthesis.paused) speechSynthesis.resume();
@@ -315,6 +454,54 @@ function say(text, delay) {
   if (!speechOk || !delay) { speakNow(text); return; }
   setTimeout(() => speakNow(text), delay);
 }
+// Play recorded clips one after another; text-to-speech covers any clip that fails to load.
+function playNextClip() {
+  if (!clipQueue || !clipQueue.length) { clipQueue = null; return; }
+  const [src, text] = clipQueue[0];
+  clipQueue = clipQueue.slice(1);
+  duck(0.35, Math.min(9, 1 + text.split(' ').length * 0.42));
+  voiceEl.src = src;
+  const p = voiceEl.play(); if (p) p.catch(err => { if (err.name !== 'AbortError') { clipQueue = null; speakNow(text); } });
+}
+function sayClips(clips, delay) {
+  const text = clips.map(c => c[1]).join(' ');
+  lastLine = text; lastClips = clips; $('said').textContent = text;
+  if (!st.voice) return;
+  if (!voiceEl || !voiceGain) { say(text, delay); return; }
+  if ('speechSynthesis' in window && (speechSynthesis.speaking || speechSynthesis.pending)) speechSynthesis.cancel();
+  clearTimeout(clipTimer); voiceEl.pause(); clipQueue = null;
+  clipTimer = setTimeout(() => { clipQueue = clips.slice(); playNextClip(); }, delay || 0);
+}
+
+// Battle ambience: while the Battle phase is on, a random battle sound every few seconds, under the music.
+// Volume changes and pause/play glide over half a second instead of jumping.
+const GLIDE_S = 0.5;
+function glide(param, value) {
+  const t = ctx.currentTime;
+  param.cancelScheduledValues(t); param.setValueAtTime(param.value, t); param.linearRampToValueAtTime(value, t + GLIDE_S);
+}
+
+const AMBIENT_LEVEL = 0.45, AMBIENT_MIN_MS = 5000, AMBIENT_MAX_MS = 12000;
+const buffers = {};
+async function loadBuffer(url) {
+  if (!buffers[url]) buffers[url] = fetch(url).then(r => r.arrayBuffer()).then(b => ctx.decodeAudioData(b));
+  return buffers[url];
+}
+function scheduleAmbience() {
+  clearTimeout(ambientTimer);
+  if (st.phase !== 'battle') return;
+  ambientTimer = setTimeout(async () => {
+    if (st.phase !== 'battle') return;
+    if (ctx && ctx.state === 'running') {
+      try {
+        const src = ctx.createBufferSource(); src.buffer = await loadBuffer(rand(SFX.battle.concat(SFX.war)));
+        src.connect(ambientGain); src.start();
+      } catch (e) { /* one missing sound only skips this beat; the next one is already scheduled below */ }
+    }
+    scheduleAmbience();
+  }, AMBIENT_MIN_MS + Math.random() * (AMBIENT_MAX_MS - AMBIENT_MIN_MS));
+}
+
 const WELCOME = [o => `Welcome to the ${o} century.`, o => `The ${o} century begins.`, o => `Behold, the ${o} century.`];
 const CENT = [
   ['Rome is gone. Britain stands alone.', 'Saxon ships are on the shore.', 'An empire falls. Take what you can.'],
@@ -336,7 +523,7 @@ function renderAges() {
   const box = $('ages'); box.innerHTML = '';
   ROMS.forEach((r, i) => {
     const b = document.createElement('button'); b.type = 'button'; b.className = 'age';
-    b.style.setProperty('--era', `var(--${i === 10 ? 'gold' : ERA(i)})`);
+    b.style.setProperty('--era', `var(--${i === 10 ? 'finale' : ERA(i)})`);
     b.setAttribute('aria-pressed', String(st.c === i));
     b.innerHTML = `<span class="r">${r}</span><span class="y">${i === 10 ? '1400–1485' : AGES[i].years}</span>`;
     b.onclick = () => pickCentury(i);
@@ -364,46 +551,114 @@ function save() { store.set('c', st.c); store.set('e', st.e); }
 function pickCentury(i) {
   st.c = i; st.e = -1; st.phase = 'calm'; save(); render();
   setMood(moodNow(), 5);
-  if (i === 10) { say(rand(FINALE), sfx('good')); return; }
-  say(`${rand(WELCOME)(ORD[i])} ${rand(CENT[i])} ${rand(ROLL)}`, sfx('century'));
+  if (i === 10) { sayClips([rand(VOICE.finale)], sfx('good')); return; }
+  sayClips([rand(VOICE.centuries[i])], sfx('century'));
 }
 function pickEvent(k) {
   st.e = k; st.phase = 'calm'; save(); render();
   const e = AGES[st.c].events[k], mood = EVMOOD[e.t] || ERA(st.c);
   setMood(moodNow(), 6);
-  say(`${e.t}. ${e.h}`, sfx(TONE[mood] || 'century'));
+  const clips = VOICE.events[e.t];
+  if (clips) sayClips([rand(clips)], sfx(TONE[mood] || 'century')); else say(`${e.t}. ${e.h}`, sfx(TONE[mood] || 'century'));
+}
+// Battle cries from the Chronicler: on about half the switches into Battle, each line once before any repeats.
+const BATTLE_LINE_CHANCE = 0.5;
+let battleBag = [];
+function nextBattleLine() {
+  if (!battleBag.length) battleBag = VOICE.battle.slice().sort(() => Math.random() - 0.5);
+  return battleBag.pop();
+}
+// Tapping the phase that is already on skips to another track from the same playlist.
+function skipTrack() {
+  if (!ctx) return;
+  const mood = moodNow();
+  let key = nextFrom(mood);
+  if (key === curTrack && MOODS[mood].tracks.length > 1) key = nextFrom(mood);
+  curMood = mood; play(key, 2, mood === 'battle' ? 0 : startFor(key));
+}
+// On some switches into Battle the Chronicler speaks first, over the fading music;
+// the battle sound and the battle track start as soon as he finishes.
+let battleStartTimer = null;
+const BATTLE_LINE_MAX_WAIT_MS = 5000;
+function startBattleMusic() {
+  clearTimeout(battleStartTimer); battleStartTimer = null;
+  if (voiceEl) voiceEl.removeEventListener('ended', startBattleMusic);
+  if (st.phase !== 'battle') return;
+  sfx('battle');
+  setMood('battle', 1.5, true);
 }
 function setPhase(p) {
-  if (st.phase === p && p !== 'battle') return;
+  if (st.phase === p) { skipTrack(); return; }
   st.phase = p; renderPhase();
-  setMood(moodNow(), p === 'battle' ? 1.5 : p === 'suspense' ? 3 : 5);
+  clearTimeout(battleStartTimer); battleStartTimer = null;
+  if (voiceEl) voiceEl.removeEventListener('ended', startBattleMusic);
+  scheduleAmbience();
+  if (p !== 'battle') { setMood(moodNow(), p === 'suspense' ? 3 : 5, true); return; }
+  if (st.voice && voiceEl && voiceGain && Math.random() < BATTLE_LINE_CHANCE) {
+    $('moodName').textContent = MOODS.battle.name;
+    decks.forEach(d => fade(d, 0.15 * d.g.gain.value, 0.6));
+    sayClips([nextBattleLine()], 0);
+    voiceEl.addEventListener('ended', startBattleMusic);
+    battleStartTimer = setTimeout(startBattleMusic, BATTLE_LINE_MAX_WAIT_MS);
+    return;
+  }
+  startBattleMusic();
 }
+$('trackName').onclick = onTrackTap;
 $('ph-calm').onclick = () => setPhase('calm');
 $('ph-suspense').onclick = () => setPhase('suspense');
 $('ph-battle').onclick = () => setPhase('battle');
-$('betray').onclick = () => say('An oath is broken.', sfx('betray'));
+$('betray').onclick = () => sayClips([rand(VOICE.betray)], sfx('betray'));
 $('trade').onclick = () => sfx('trade');
-$('replay').onclick = () => { if (lastLine) say(lastLine, 0); };
+$('replay').onclick = () => { if (lastClips) sayClips(lastClips, 0); else if (lastLine) say(lastLine, 0); };
 $('vol').value = st.vol;
-$('vol').oninput = e => { st.vol = +e.target.value; store.set('vol', st.vol); if (master) master.gain.setTargetAtTime(st.vol / 100, ctx.currentTime, 0.1); };
-$('voicePick').onchange = e => { store.set('voiceName', e.target.value); voice = speechSynthesis.getVoices().find(v => v.name === e.target.value) || voice; say('I am the chronicler of England.', 0); };
+$('vol').oninput = e => { st.vol = +e.target.value; store.set('vol', st.vol); if (master) glide(master.gain, st.vol / 100); };
+$('vvol').value = st.vvol;
+$('vvol').oninput = e => { st.vvol = +e.target.value; store.set('vvol', st.vvol); if (voiceGain) glide(voiceGain.gain, st.vvol / 100); };
 $('voiceOn').checked = st.voice;
-$('voiceOn').onchange = e => { st.voice = e.target.checked; store.set('voice', st.voice); if (!st.voice && 'speechSynthesis' in window) speechSynthesis.cancel(); };
+$('voiceOn').onchange = e => { st.voice = e.target.checked; store.set('voice', st.voice); if (!st.voice) { if ('speechSynthesis' in window) speechSynthesis.cancel(); if (voiceEl) { clearTimeout(clipTimer); clipQueue = null; voiceEl.pause(); } } };
+let pausing = false;
 $('pause').onclick = async () => {
-  if (!ctx) return;
+  if (!ctx || pausing) return;
   const d = decks[live];
-  if (ctx.state === 'running') { d.el.pause(); await ctx.suspend(); $('pause').textContent = 'Play'; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
-  else { await ctx.resume(); const p = d.el.play(); if (p) p.catch(() => {}); $('pause').textContent = 'Pause'; }
+  if (ctx.state === 'running') {
+    $('pause').textContent = 'Play';
+    if ('speechSynthesis' in window) speechSynthesis.cancel();
+    pausing = true;
+    glide(master.gain, 0); if (voiceGain) glide(voiceGain.gain, 0);
+    await new Promise(r => setTimeout(r, GLIDE_S * 1000));
+    d.el.pause(); if (voiceEl) voiceEl.pause(); await ctx.suspend();
+    pausing = false;
+  } else {
+    master.gain.value = 0; if (voiceGain) voiceGain.gain.value = 0;
+    await ctx.resume(); const p = d.el.play(); if (p) p.catch(() => {});
+    glide(master.gain, st.vol / 100); if (voiceGain) glide(voiceGain.gain, st.vvol / 100);
+    $('pause').textContent = 'Pause';
+  }
 };
 async function keepAwake() { try { await navigator.wakeLock.request('screen'); } catch (e) {} }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ctx && ctx.state === 'running') keepAwake(); });
-$('start').onclick = () => {
+// Start screen: New resets to the fifth century and the Chronicler introduces himself; Continue resumes the saved century.
+function startChronicle(isNew) {
   try { initAudio(); } catch (e) { status('Sound could not start: ' + e.message); return; }
   if ('speechSynthesis' in window) pickVoice();
+  if (isNew) { st.c = 0; st.e = -1; save(); }
+  st.phase = 'calm'; render();
   $('gate').hidden = true; keepAwake();
   setMood(moodNow(), 3);
   const e = st.e >= 0 && st.c < 10 ? AGES[st.c].events[st.e] : null;
-  say(e ? `The ${ORD[st.c]} century. ${e.t}.` : `Hear the chronicle of England. The ${ORD[st.c]} century begins.`, 0);
-};
+  const opener = rand(isNew ? VOICE.intro : VOICE.continue);
+  if (st.c === 10) sayClips([opener, rand(VOICE.finale)], 0);
+  else if (e && VOICE.events[e.t]) sayClips([opener, rand(VOICE.events[e.t])], 0);
+  else sayClips([opener, rand(VOICE.centuries[st.c])], 0);
+}
+$('newGame').onclick = () => startChronicle(true);
+$('continue').onclick = () => startChronicle(false);
+if (st.c > 0 || st.e >= 0) {
+  const at = st.c === 10 ? 'the end of the game' : `the ${ORD[st.c]} century` + (st.e >= 0 ? `, ${AGES[st.c].events[st.e].t}` : '');
+  $('continue').hidden = false; $('continue').textContent = 'Continue: ' + at;
+}
 render();
 </script>
+
+</body></html>
