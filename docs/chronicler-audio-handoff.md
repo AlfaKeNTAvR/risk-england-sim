@@ -75,3 +75,17 @@ Then tell Nikita which folders are complete, and which are short and why.
 ## Hand back
 
 Nikita sends the page-building session the manifest plus the files, one or two folders per message. Files over 15 MB, or any whose licence is unclear, should be flagged, not sent.
+
+## Optional: add the files to the page yourself
+
+Only if your tools include the built-in **Artifact** tool. Otherwise stop at the manifest.
+
+1. Ask Nikita for The Chronicler's artifact link. Read it first with the Artifact tool (`action: "read"`, `url`). You get the page HTML; save it as your working file.
+2. Give each new file a short key (lowercase letters and digits, for example `suspense3`). Music is served at `music/<key>.mp3`; effects at `sfx/<key>.mp3`.
+3. In the page's script, edit only these constants:
+   - `TRACKS`: add `key: ['Title', trimDb]`, where `trimDb = -16 - LUFS`, capped between -8 and +4.
+   - `MOODS`: add the key to the matching playlist's `tracks` list. Folder to playlist: suspense→suspense, battle→battle, early-ages→early, middle-ages→middle, late-ages→late, good-age→festive, order→sacred, intrigue→intrigue, dark-age→sombre, war-age→war, finale→finale.
+   - `SFX`: add `'sfx/<key>.mp3'` to the list for its kind. Folder to kind: century-change→century, good-event→good, bad-event→bad, war-event→war, pact-broken→betray, card-trade→trade, battle-start→battle (also add `battle: []` to `SFX` and call `sfx('battle')` in `setPhase` when entering Battle).
+   - Credits line: add each new artist.
+4. Publish with the Artifact tool, passing the same `url`, the edited page as `file_path`, and the new audio as `files` (`{"music/suspense3.mp3": "<local path>", ...}`). At most 255 files and 64 MB per publish, so send big batches in several publishes. Files you leave out are kept.
+5. Tell Nikita what you added, so the page-building session can re-read the artifact before its next change.
