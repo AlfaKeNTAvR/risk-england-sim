@@ -1,0 +1,513 @@
+<title>The Chronicler</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=EB+Garamond:wght@400;500;600&display=swap">
+<style>
+/* Layout: a candlelit console for the table. Left: the ages and the rolled event. Right: what plays now and the moment buttons. */
+:root {
+  color-scheme: dark;
+  --hall: #15100c;      /* page */
+  --oak: #211912;       /* panels */
+  --seam: #3b2d21;      /* lines */
+  --parch: #efe2c4;     /* text */
+  --faded: #b5a17e;     /* secondary text */
+  --gold: #d9a93b;      /* cavalry gold, focus, active */
+  --early: #6f9157;
+  --middle: #c48d2c;
+  --late: #bf4a3f;
+  --ink: #1b140e;       /* text on gold */
+  --display: 'IM Fell English SC', 'Iowan Old Style', Georgia, serif;
+  --story: 'IM Fell English', 'Iowan Old Style', Georgia, serif;
+  --body: 'EB Garamond', 'Iowan Old Style', Georgia, serif;
+}
+html, body { height: 100%; }
+body {
+  background: var(--hall); color: var(--parch); font-family: var(--body); font-size: 17px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 16px 24px; -webkit-tap-highlight-color: transparent;
+}
+button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulation; }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.wrap { max-width: 1180px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--seam); padding-bottom: 12px; }
+h1 { margin: 0; font-family: var(--display); font-weight: 400; font-size: 34px; line-height: 1; letter-spacing: 0.01em; }
+.sub { color: var(--faded); font-size: 15px; }
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--seam); background: var(--oak); border-radius: 10px; padding: 10px 16px; min-height: 48px; }
+.btn.primary { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 600; }
+.vol { display: flex; align-items: center; gap: 8px; color: var(--faded); font-size: 15px; }
+.vol input { width: 120px; accent-color: var(--gold); }
+.toggle { display: flex; align-items: center; gap: 8px; color: var(--faded); font-size: 15px; }
+.toggle input { width: 22px; height: 22px; accent-color: var(--gold); }
+
+main { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+@media (max-width: 860px) { main { grid-template-columns: minmax(0, 1fr); } }
+section { background: var(--oak); border: 1px solid var(--seam); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+.label { font-size: 13px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--faded); }
+
+.ages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 520px) { .ages { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.age { border: 1px solid var(--seam); border-radius: 10px; background: var(--hall); min-height: 64px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px; position: relative; overflow: hidden; }
+.age::before { content: ""; position: absolute; inset: 0 0 auto; height: 4px; background: var(--era); }
+.age .r { font-family: var(--display); font-size: 24px; line-height: 1; }
+.age .y { font-size: 12px; color: var(--faded); font-variant-numeric: tabular-nums; }
+.age[aria-pressed="true"] { border-color: var(--gold); background: color-mix(in srgb, var(--gold) 16%, var(--hall)); box-shadow: inset 0 0 0 1px var(--gold); }
+
+.events { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 640px) { .events { grid-template-columns: minmax(0, 1fr); } }
+.ev { text-align: left; border: 1px solid var(--seam); border-radius: 12px; background: var(--hall); padding: 12px; display: flex; flex-direction: column; gap: 6px; min-height: 150px; min-width: 0; }
+.ev .top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.die { font-weight: 600; font-size: 15px; border: 1.5px solid var(--parch); border-radius: 5px; padding: 0 7px; font-variant-numeric: tabular-nums; }
+.mood { font-size: 12px; color: var(--faded); letter-spacing: 0.06em; text-transform: uppercase; }
+.ev .t { font-family: var(--display); font-size: 21px; line-height: 1.05; }
+.ev .e { font-size: 15px; line-height: 1.3; color: var(--parch); }
+.ev .tm { font-size: 12px; color: var(--faded); }
+.ev[aria-pressed="true"] { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); background: color-mix(in srgb, var(--gold) 12%, var(--hall)); }
+.end { font-family: var(--story); font-style: italic; font-size: 19px; color: var(--faded); padding: 12px 4px; }
+
+.now { gap: 10px; }
+.now .m { font-family: var(--display); font-size: 30px; line-height: 1.05; }
+.now .d { font-size: 16px; color: var(--faded); line-height: 1.35; }
+canvas { width: 100%; height: 70px; display: block; border-radius: 8px; background: var(--hall); }
+.said { font-family: var(--story); font-style: italic; font-size: 17px; line-height: 1.4; border-left: 3px solid var(--gold); padding-left: 12px; min-height: 48px; }
+.moments { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.moment { border: 1px solid var(--seam); border-radius: 12px; background: var(--hall); padding: 14px 10px; min-height: 76px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; text-align: center; }
+.moment .k { font-family: var(--display); font-size: 22px; line-height: 1; }
+.moment .h { font-size: 13px; color: var(--faded); }
+.moment.battle[aria-pressed="true"] { border-color: var(--late); background: color-mix(in srgb, var(--late) 25%, var(--hall)); }
+.moment.wide { grid-column: span 2; }
+.note { font-size: 14px; color: var(--faded); line-height: 1.4; }
+
+.gate { position: fixed; inset: 0; background: color-mix(in srgb, var(--hall) 92%, transparent); display: flex; align-items: center; justify-content: center; z-index: 5; padding: 24px; }
+.gate[hidden] { display: none; }
+.gate .card { max-width: 460px; text-align: center; display: flex; flex-direction: column; gap: 14px; align-items: center; }
+.gate .card p { margin: 0; color: var(--faded); line-height: 1.45; }
+.gate .card .big { font-family: var(--display); font-size: 40px; line-height: 1; color: var(--parch); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <h1>The Chronicler</h1>
+      <div class="sub">Music and narration for Risk: The Battle for Medieval England</div>
+    </div>
+    <div class="controls">
+      <label class="toggle" for="voiceOn"><input type="checkbox" id="voiceOn" checked> Narrator</label>
+      <label class="vol" for="vol">Volume <input type="range" id="vol" min="0" max="100" value="70"></label>
+      <button class="btn" id="pause" type="button">Pause</button>
+    </div>
+  </header>
+
+  <main>
+    <div style="display: flex; flex-direction: column; gap: 18px; min-width: 0">
+      <section>
+        <div class="label">The golden cavalry stands on</div>
+        <div class="ages" id="ages"></div>
+      </section>
+      <section>
+        <div class="label" id="evLabel">The opener rolled</div>
+        <div id="evArea"></div>
+      </section>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 18px; min-width: 0">
+      <section class="now">
+        <div class="label">Now playing</div>
+        <div class="m" id="moodName">The early ages</div>
+        <div class="d" id="moodDesc"></div>
+        <canvas id="scope" width="600" height="140" aria-hidden="true"></canvas>
+        <div class="said" id="said" aria-live="polite"></div>
+      </section>
+      <section>
+        <div class="label">Moments</div>
+        <div class="moments">
+          <button class="moment battle" id="battle" type="button" aria-pressed="false"><span class="k">Battle</span><span class="h">war drums until tapped again</span></button>
+          <button class="moment" id="betray" type="button"><span class="k">Pact broken</span><span class="h">a betrayal sting</span></button>
+          <button class="moment" id="trade" type="button"><span class="k">Card trade</span><span class="h">coins on the table</span></button>
+          <button class="moment" id="replay" type="button"><span class="k">Read it again</span><span class="h">repeat the narrator</span></button>
+        </div>
+        <div class="note">Tap the century when the cavalry moves, then the event the opener rolled. The music changes over a few seconds. During a battle, swords clash at random.</div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<div class="gate" id="gate">
+  <div class="card">
+    <div class="big">Light the hall</div>
+    <p>Turn the iPad's volume up. Sound starts when you tap, and the screen stays awake while it plays.</p>
+    <button class="btn primary" id="start" type="button">Start the music</button>
+  </div>
+</div>
+
+<script>
+const AGES = [{"rom": "V", "years": "410–499", "events": [{"t": "Saxon migration", "tm": "Whole century", "e": "Every player gets 2 extra troops at the start of each turn.", "h": "Settlers pour across the North Sea as Rome leaves."}, {"t": "Roman roads", "tm": "Whole century", "e": "You may make 2 manoeuvres per turn. Rivers and mountains don’t stop them.", "h": "The old roads still connect the land."}, {"t": "Land grab", "tm": "At once", "e": "Every player except the leader draws 1 territory card.", "h": "With no one in charge, land goes to whoever takes it."}]}, {"rom": "VI", "years": "500–599", "events": [{"t": "Petty kingdoms", "tm": "At once", "e": "Every player except the leader gets 2 extra troops on their next turn.", "h": "Small kingdoms rise to check the strongest."}, {"t": "Plague of Justinian", "tm": "At once", "e": "Every territory with 3 or more troops loses 1.", "h": "A pandemic reaches Britain from the Mediterranean."}, {"t": "Age of saints", "tm": "Whole century", "e": "Mission bonuses are doubled.", "h": "Missionaries and monks spread across the land."}]}, {"rom": "VII", "years": "600–699", "events": [{"t": "Shield walls", "tm": "Whole century", "e": "Attackers roll at most 2 dice.", "h": "Battles are fought shield to shield."}, {"t": "Peace of the Church", "tm": "Whole century", "e": "Pacts can’t be broken. Pacts signed this century pay 1 extra bonus card.", "h": "The Synod of Whitby brings the kingdoms together in 664."}, {"t": "Underdog kings", "tm": "Whole century", "e": "At the start of each turn, the player with the fewest territories gets 3 extra troops.", "h": "Small kingdoms rise while great ones squabble."}]}, {"rom": "VIII", "years": "700–799", "events": [{"t": "Viking raids", "tm": "At once + century", "e": "The leader’s port territories each lose 2 troops. No attacks along sea routes this century.", "h": "The first raid hits Lindisfarne in 793."}, {"t": "Offa’s Dyke", "tm": "Whole century", "e": "Every border between two regions counts as a river crossing for manoeuvres.", "h": "Kings mark their borders with earthworks."}, {"t": "Good harvests", "tm": "Whole century", "e": "At the start of each turn, get 1 extra troop for every region where you hold 3 or more territories.", "h": "Full barns across England."}]}, {"rom": "IX", "years": "800–899", "events": [{"t": "Great Heathen Army", "tm": "Whole century", "e": "When attacking the leader, add 1 to your highest die.", "h": "A Viking army lands in 865 and finds the great kingdoms weakest."}, {"t": "Danegeld", "tm": "Whole century", "e": "Before trading on their turn, the leader gives their lowest-star card to the player with the fewest territories. With no cards, they place 2 fewer troops and that player gets 2.", "h": "The strong pay the Danes to go away."}, {"t": "Alfred’s burhs", "tm": "Whole century", "e": "Defenders add 1 to their highest die, except the leader.", "h": "Fortified towns hold out against the raiders."}]}, {"rom": "X", "years": "900–999", "events": [{"t": "One kingdom", "tm": "Whole century", "e": "At the start of each turn, every player except the leader gets 3 extra troops.", "h": "Æthelstan’s new kingdom rewards loyal lords."}, {"t": "Battle of Brunanburh", "tm": "Whole century", "e": "Grand alliance: players other than the leader may only attack the leader.", "h": "Scots, Norse and Britons unite against Æthelstan in 937."}, {"t": "Hard winter", "tm": "At once + century", "e": "Every territory with 6 or more troops loses 2. No manoeuvres into mountain territories this century.", "h": "Snow closes the passes."}]}, {"rom": "XI", "years": "1000–1099", "events": [{"t": "Norman castles", "tm": "Whole century", "e": "Defending a territory with 5 or more troops, the defender may roll 3 dice.", "h": "Castles rise across the conquered land after 1066."}, {"t": "Harrying of the North", "tm": "At once", "e": "The leader’s North territories lose half their troops, rounded down.", "h": "William lays waste to the north in 1069–70."}, {"t": "Domesday survey", "tm": "Whole century", "e": "The leader draws at most 1 territory card per turn, however many territories they conquer.", "h": "Every holding is counted in 1086, and the greatest pay most."}]}, {"rom": "XII", "years": "1100–1199", "events": [{"t": "The Anarchy", "tm": "At once", "e": "The leader’s 2 thinnest territories defect to the player with the fewest territories.", "h": "Civil war between Stephen and Matilda; lords switch sides."}, {"t": "Great floods", "tm": "Whole century", "e": "No manoeuvres across rivers. Attacks across a river crossing roll at most 1 die.", "h": "Rivers burst their banks."}, {"t": "Supply problems", "tm": "Whole century", "e": "At the start of the leader’s turn, each of their territories with 5 or more troops loses a third, rounded down.", "h": "The greatest armies can’t be fed."}]}, {"rom": "XIII", "years": "1200–1299", "events": [{"t": "Magna Carta", "tm": "Whole century", "e": "The leader can’t trade cards this century.", "h": "The barons force the king to seal the charter in 1215."}, {"t": "Barons’ War", "tm": "At once + century", "e": "All pacts end: stakes go back, no bonus cards. No new pacts this century.", "h": "Simon de Montfort leads the barons against the king."}, {"t": "Camp fever", "tm": "At once", "e": "The leader’s largest stack loses half its troops, rounded down.", "h": "Disease spreads through the biggest siege camp."}]}, {"rom": "XIV", "years": "1300–1399", "events": [{"t": "Black Death", "tm": "At once", "e": "Every territory loses half its troops, rounded down, and every hand of territory cards is halved. The player with the fewest territories is spared.", "h": "The plague kills a third of England from 1348."}, {"t": "Great Famine", "tm": "Final count", "e": "At the final count, territories with only 1 troop count as half.", "h": "Years of failed harvests from 1315 empty the thinly held lands."}, {"t": "Peasants’ Revolt", "tm": "At once", "e": "The leader’s 3 thinnest territories defect to the player with the fewest territories.", "h": "Rebels march on London in 1381."}]}];
+const ROMS = ['V','VI','VII','VIII','IX','X','XI','XII','XIII','XIV','XV'];
+const ERA = i => i <= 2 ? 'early' : i <= 6 ? 'middle' : i <= 9 ? 'late' : 'end';
+const ORD = ['fifth','sixth','seventh','eighth','ninth','tenth','eleventh','twelfth','thirteenth','fourteenth','fifteenth'];
+
+// ---------------------------------------------------------------- moods
+const DORIAN=[0,2,3,5,7,9,10], MIXO=[0,2,4,5,7,9,10], AEOL=[0,2,3,5,7,8,10], PHRYG=[0,1,3,5,7,8,10], IONIAN=[0,2,4,5,7,9,11], HARM=[0,1,4,5,7,8,10];
+const D16 = {
+  none:  Array(16).fill(0),
+  soft:  [2,0,0,0, 0,0,1,0, 1,0,0,0, 0,0,1,0],
+  march: [2,0,0,0, 1,0,0,0, 2,0,1,0, 1,0,0,0],
+  war:   [2,0,1,0, 2,0,1,1, 2,0,1,0, 2,1,2,1],
+  slow:  [2,0,0,0, 0,0,0,0, 1,0,0,0, 0,0,0,0],
+  tense: [2,0,0,1, 0,0,1,0, 2,0,0,1, 0,1,0,0],
+};
+const D12 = { dance: [2,0,0,1,0,1, 2,0,0,1,0,0], none: Array(12).fill(0) };
+const P16 = { calm:[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0], busy:[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0], ost:[1,0,1,1,1,0,1,1,1,0,1,1,1,0,1,1], sparse:[1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0], none:Array(16).fill(0) };
+const P12 = { dance:[1,0,1,1,0,1, 1,0,1,1,0,1] };
+const MOODS = {
+  early:   {name:'The early ages', desc:'Harp and recorder over a drone. Quiet, open, hopeful.', root:50, mode:DORIAN, tempo:80, beats:4, prog:[0,3,6,0], drum:D16.soft, pluck:P16.calm, lead:.45, bell:0, lv:{drone:.5,pad:.25,pluck:.7,lead:.5,drum:.25,bell:0}},
+  middle:  {name:'The middle ages', desc:'A steady march. Kingdoms grow and borders harden.', root:45, mode:AEOL, tempo:92, beats:4, prog:[0,5,3,4], drum:D16.march, pluck:P16.busy, lead:.4, bell:0, lv:{drone:.45,pad:.35,pluck:.6,lead:.45,drum:.5,bell:0}},
+  late:    {name:'The late ages', desc:'Low, dark and slow. The great lords will pay.', root:52, mode:PHRYG, tempo:70, beats:4, prog:[0,1,0,6], drum:D16.slow, pluck:P16.calm, lead:.35, bell:8, lv:{drone:.55,pad:.5,pluck:.45,lead:.4,drum:.35,bell:.25}},
+  festive: {name:'A good age', desc:'A dance in three. Full barns and open roads.', root:55, mode:MIXO, tempo:108, beats:3, prog:[0,6,3,0], drum:D12.dance, pluck:P12.dance, lead:.6, bell:0, lv:{drone:.4,pad:.2,pluck:.75,lead:.55,drum:.5,bell:0}},
+  sacred:  {name:'An age of order', desc:'Choir and bells. Charters, saints and peace.', root:50, mode:IONIAN, tempo:58, beats:4, prog:[0,3,4,0], drum:D16.none, pluck:P16.sparse, lead:.25, bell:2, lv:{drone:.4,pad:.75,pluck:.25,lead:.3,drum:0,bell:.45}},
+  intrigue:{name:'An age of intrigue', desc:'Plucked strings in a crooked scale. Someone is scheming.', root:47, mode:HARM, tempo:84, beats:4, prog:[0,1,0,4], drum:D16.tense, pluck:P16.ost, lead:.45, bell:0, lv:{drone:.45,pad:.3,pluck:.65,lead:.45,drum:.35,bell:0}},
+  war:     {name:'An age of war', desc:'War drums and a driving ostinato.', root:50, mode:AEOL, tempo:118, beats:4, prog:[0,5,6,0], drum:D16.war, pluck:P16.ost, lead:.35, bell:0, lv:{drone:.5,pad:.25,pluck:.65,lead:.35,drum:.9,bell:0}},
+  sombre:  {name:'A dark age', desc:'Tolling bells and a slow lament. No drums.', root:48, mode:PHRYG, tempo:52, beats:4, prog:[0,6,5,0], drum:D16.none, pluck:P16.sparse, lead:.3, bell:1, lv:{drone:.55,pad:.6,pluck:.15,lead:.35,drum:0,bell:.5}},
+  battle:  {name:'Battle', desc:'Dice are rolling. Drums until you tap Battle again.', root:50, mode:PHRYG, tempo:132, beats:4, prog:[0,1,0,1], drum:D16.war, pluck:P16.ost, lead:.2, bell:0, lv:{drone:.6,pad:.2,pluck:.7,lead:.25,drum:1,bell:0}},
+  finale:  {name:'The fifteenth century', desc:'The game is over. Count the territories.', root:50, mode:MIXO, tempo:96, beats:4, prog:[0,3,6,0], drum:D16.march, pluck:P16.busy, lead:.55, bell:4, lv:{drone:.5,pad:.6,pluck:.6,lead:.6,drum:.6,bell:.35}},
+};
+const EVMOOD = {
+  'Saxon migration':'festive','Roman roads':'early','Land grab':'festive',
+  'Petty kingdoms':'intrigue','Plague of Justinian':'sombre','Age of saints':'sacred',
+  'Shield walls':'war','Peace of the Church':'sacred','Underdog kings':'festive',
+  'Viking raids':'war','Offa’s Dyke':'middle','Good harvests':'festive',
+  'Great Heathen Army':'war','Danegeld':'intrigue','Alfred’s burhs':'middle',
+  'One kingdom':'sacred','Battle of Brunanburh':'war','Hard winter':'sombre',
+  'Norman castles':'middle','Harrying of the North':'sombre','Domesday survey':'intrigue',
+  'The Anarchy':'intrigue','Great floods':'sombre','Supply problems':'late',
+  'Magna Carta':'sacred','Barons’ War':'war','Camp fever':'sombre',
+  'Black Death':'sombre','Great Famine':'sombre','Peasants’ Revolt':'war',
+};
+const TONE = {festive:'good', sacred:'good', early:'neutral', middle:'neutral', intrigue:'neutral', late:'bad', sombre:'bad', war:'war'};
+
+// ---------------------------------------------------------------- state
+const store = { get(k, d) { try { const v = localStorage.getItem('chron.' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+                set(k, v) { try { localStorage.setItem('chron.' + k, JSON.stringify(v)); } catch (e) {} } };
+const st = { c: store.get('c', 0), e: store.get('e', -1), battle: false, vol: store.get('vol', 70), voice: store.get('voice', true) };
+let lastLine = '';
+
+function baseMood() {
+  if (st.battle) return 'battle';
+  if (st.c === 10) return 'finale';
+  if (st.e >= 0) return EVMOOD[AGES[st.c].events[st.e].t] || ERA(st.c);
+  return ERA(st.c);
+}
+
+// ---------------------------------------------------------------- audio
+let ctx, master, comp, revSend, analyser, buses = {}, drone = [], droneFilter, pad = [], noiseBuf;
+let cur = null, target = null, harmonyDue = false, tempo = 80, nextTime = 0, step = 0, bar = 0, arp = 0, leadIdx = 7, leadUntil = 0, timer = null;
+const LAYERS = ['drone','pad','pluck','lead','drum','bell'];
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function scaleNote(mode, deg) { const o = Math.floor(deg / 7); const i = ((deg % 7) + 7) % 7; return mode[i] + 12 * o; }
+
+function initAudio() {
+  const AC = window.AudioContext || window.webkitAudioContext;
+  ctx = new AC();
+  master = ctx.createGain(); master.gain.value = st.vol / 100;
+  comp = ctx.createDynamicsCompressor(); comp.threshold.value = -18; comp.ratio.value = 3;
+  analyser = ctx.createAnalyser(); analyser.fftSize = 1024;
+  master.connect(comp); comp.connect(analyser); analyser.connect(ctx.destination);
+  const rev = ctx.createConvolver(); rev.buffer = impulse(3.2);
+  revSend = ctx.createGain(); revSend.gain.value = 0.4; revSend.connect(rev); rev.connect(master);
+  noiseBuf = ctx.createBuffer(1, ctx.sampleRate, ctx.sampleRate);
+  const nd = noiseBuf.getChannelData(0); for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
+  for (const l of LAYERS) { const g = ctx.createGain(); g.gain.value = 0; g.connect(master); g.connect(revSend); buses[l] = g; }
+  droneFilter = ctx.createBiquadFilter(); droneFilter.type = 'lowpass'; droneFilter.frequency.value = 650; droneFilter.Q.value = 0.8; droneFilter.connect(buses.drone);
+  const lfo = ctx.createOscillator(); lfo.frequency.value = 0.07; const lfoG = ctx.createGain(); lfoG.gain.value = 180; lfo.connect(lfoG); lfoG.connect(droneFilter.frequency); lfo.start();
+  [[0, .16, 'sawtooth'], [7, .12, 'sawtooth'], [-12, .14, 'triangle']].forEach(([iv, g, type]) => {
+    const o = ctx.createOscillator(); o.type = type; const gn = ctx.createGain(); gn.gain.value = g; o.connect(gn); gn.connect(droneFilter); o.start(); drone.push({ o, iv });
+  });
+  const padF = ctx.createBiquadFilter(); padF.type = 'lowpass'; padF.frequency.value = 1300; padF.Q.value = 0.6; padF.connect(buses.pad);
+  for (let v = 0; v < 3; v++) {
+    const voice = [];
+    for (const det of [-8, 8]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.detune.value = det; const g = ctx.createGain(); g.gain.value = .045; o.connect(g); g.connect(padF); o.start(); voice.push(o); }
+    pad.push(voice);
+  }
+  cur = Object.assign({}, MOODS[baseMood()]); tempo = cur.tempo;
+  retune(ctx.currentTime, 0.01); chord(ctx.currentTime, 0.01);
+  levels(MOODS[baseMood()], 2.5);
+  nextTime = ctx.currentTime + 0.1;
+  timer = setInterval(tick, 25);
+}
+function impulse(sec) {
+  const len = Math.floor(ctx.sampleRate * sec), b = ctx.createBuffer(2, len, ctx.sampleRate);
+  for (let c = 0; c < 2; c++) { const d = b.getChannelData(c); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 3); }
+  return b;
+}
+function levels(m, secs) {
+  const t = ctx.currentTime;
+  for (const l of LAYERS) { const g = buses[l].gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(m.lv[l], t, secs / 3); }
+}
+function retune(t, tau) { for (const d of drone) d.o.frequency.setTargetAtTime(mtof(cur.root - 12 + d.iv), t, tau); }
+function chord(t, tau) {
+  const deg = cur.prog[bar % cur.prog.length];
+  [0, 2, 4].forEach((k, v) => { const f = mtof(cur.root + scaleNote(cur.mode, deg + k)); for (const o of pad[v]) o.frequency.setTargetAtTime(f, t, tau); });
+}
+function setMood(name, secs) {
+  target = MOODS[name];
+  if (!ctx) return;
+  levels(target, secs || 6);
+  harmonyDue = true;
+}
+function tick() {
+  while (nextTime < ctx.currentTime + 0.15) {
+    const n = cur.beats * 4;
+    if (step === 0) onBar(nextTime);
+    playStep(step, nextTime, n);
+    if (target) tempo += (target.tempo - tempo) * 0.04;
+    nextTime += 60 / tempo / 4;
+    step++;
+    if (step >= n) { step = 0; bar++; }
+  }
+}
+function onBar(t) {
+  if (harmonyDue && target) {
+    harmonyDue = false;
+    cur = Object.assign({}, target, { tempo: cur.tempo });
+    retune(t, 0.9);
+  }
+  chord(t, 0.5);
+}
+function playStep(s, t, n) {
+  const m = cur;
+  const dv = m.drum[s % m.drum.length]; if (dv) drum(t, dv === 2 ? 0.9 : 0.5);
+  if (m.pluck[s % m.pluck.length]) {
+    const deg = m.prog[bar % m.prog.length] + [0, 2, 4, 7][arp++ % 4];
+    pluck(t, m.root + 12 + scaleNote(m.mode, deg), 0.35 + Math.random() * 0.15);
+  }
+  if (t >= leadUntil && s % 2 === 0) {
+    const phraseEnd = (bar % 2 === 1) && s >= n - 4;
+    if (!phraseEnd && Math.random() < m.lead) {
+      const moves = [-2, -1, -1, 1, 1, 2, 0, 3, -3];
+      leadIdx = Math.max(2, Math.min(12, leadIdx + moves[Math.floor(Math.random() * moves.length)]));
+      if (s === 0) leadIdx = m.prog[bar % m.prog.length] + 7;
+      const len = [2, 2, 4, 4, 6, 8][Math.floor(Math.random() * 6)];
+      const dur = len * 60 / tempo / 4;
+      lead(t, m.root + 12 + scaleNote(m.mode, leadIdx), dur, 0.3);
+      leadUntil = t + dur * 0.98;
+    }
+  }
+  if (m.bell && s === 0 && bar % m.bell === 0) bell(t, m.root + 24, 0.35);
+  if (st.battle && Math.random() < 0.06) clang(t + Math.random() * 0.05, 0.6 + Math.random() * 0.4);
+}
+
+// instruments
+function env(g, t, a, peak, d) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + a + d); }
+function pluck(t, midi, v) {
+  const f = mtof(midi), o1 = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+  o1.type = 'triangle'; o1.frequency.value = f; o2.type = 'sawtooth'; o2.frequency.value = f * 1.002;
+  const g2 = ctx.createGain(); g2.gain.value = 0.25;
+  lp.type = 'lowpass'; lp.frequency.setValueAtTime(3200, t); lp.frequency.exponentialRampToValueAtTime(700, t + 0.5);
+  o1.connect(g); o2.connect(g2); g2.connect(g); g.connect(lp); lp.connect(buses.pluck);
+  env(g, t, 0.004, v, 1.3); o1.start(t); o2.start(t); o1.stop(t + 1.5); o2.stop(t + 1.5);
+}
+function lead(t, midi, dur, v) {
+  const f = mtof(midi), o = ctx.createOscillator(), s = ctx.createOscillator(), g = ctx.createGain(), vib = ctx.createOscillator(), vg = ctx.createGain(), bp = ctx.createBiquadFilter();
+  o.type = 'triangle'; o.frequency.value = f; s.type = 'sine'; s.frequency.value = f * 2;
+  const sg = ctx.createGain(); sg.gain.value = 0.18;
+  vib.frequency.value = 5.2; vg.gain.value = f * 0.006; vib.connect(vg); vg.connect(o.frequency); vg.connect(s.frequency);
+  bp.type = 'lowpass'; bp.frequency.value = 2600;
+  o.connect(g); s.connect(sg); sg.connect(g); g.connect(bp); bp.connect(buses.lead);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.06);
+  g.gain.setValueAtTime(v, t + Math.max(0.07, dur - 0.12)); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.1);
+  for (const x of [o, s, vib]) { x.start(t); x.stop(t + dur + 0.15); }
+}
+function drum(t, v) {
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(48, t + 0.22);
+  o.connect(g); g.connect(buses.drum); env(g, t, 0.003, v, 0.4); o.start(t); o.stop(t + 0.5);
+  const n = ctx.createBufferSource(), ng = ctx.createGain(), bp = ctx.createBiquadFilter();
+  n.buffer = noiseBuf; bp.type = 'bandpass'; bp.frequency.value = 1100; bp.Q.value = 0.9;
+  n.connect(bp); bp.connect(ng); ng.connect(buses.drum); env(ng, t, 0.002, v * 0.35, 0.09); n.start(t); n.stop(t + 0.15);
+}
+function bell(t, midi, v, dest) {
+  const f = mtof(midi);
+  [[1, 1], [2.0, .5], [2.76, .35], [4.07, .2], [5.4, .12]].forEach(([r, a]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * r;
+    o.connect(g); g.connect(dest || buses.bell); env(g, t, 0.005, v * a, 4.5 / r); o.start(t); o.stop(t + 5);
+  });
+}
+function horn(t, midi, dur, v, dest) {
+  const f = mtof(midi), g = ctx.createGain(), lp = ctx.createBiquadFilter();
+  lp.type = 'lowpass'; lp.frequency.setValueAtTime(500, t); lp.frequency.linearRampToValueAtTime(1800, t + 0.15); lp.Q.value = 2;
+  g.connect(dest || master);
+  for (const det of [-6, 6]) { const o = ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = f; o.detune.value = det; o.connect(lp); o.start(t); o.stop(t + dur + 0.3); }
+  lp.connect(g);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(v, t + 0.08); g.gain.setValueAtTime(v, t + dur - 0.1); g.gain.exponentialRampToValueAtTime(0.0001, t + dur + 0.25);
+}
+function clang(t, v) {
+  const fx = fxBus(), base = 900 + Math.random() * 700;
+  [[1, 1], [1.48, .6], [2.31, .45], [3.17, .3], [4.6, .2]].forEach(([r, a]) => {
+    const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = base * r;
+    o.connect(g); g.connect(fx); env(g, t, 0.002, v * a * 0.25, 0.9 / r); o.start(t); o.stop(t + 1);
+  });
+  const n = ctx.createBufferSource(), ng = ctx.createGain(), hp = ctx.createBiquadFilter();
+  n.buffer = noiseBuf; hp.type = 'highpass'; hp.frequency.value = 2500;
+  n.connect(hp); hp.connect(ng); ng.connect(fx); env(ng, t, 0.001, v * 0.5, 0.12); n.start(t); n.stop(t + 0.2);
+}
+function coins() {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.03, fx = fxBus();
+  for (let i = 0; i < 9; i++) {
+    const at = t + i * 0.06 + Math.random() * 0.05, f = 2800 + Math.random() * 2200;
+    [[1, 1], [2.7, .4]].forEach(([r, a]) => { const o = ctx.createOscillator(), g = ctx.createGain(); o.type = 'sine'; o.frequency.value = f * r; o.connect(g); g.connect(fx); env(g, at, 0.001, 0.09 * a, 0.25); o.start(at); o.stop(at + 0.3); });
+  }
+  horn(t + 0.25, 62, 0.25, 0.12, fx); horn(t + 0.5, 69, 0.6, 0.12, fx);
+}
+function fxBus() { const g = ctx.createGain(); g.connect(master); g.connect(revSend); return g; }
+function duck(depth, hold) {
+  const t = ctx.currentTime;
+  for (const l of LAYERS) { const g = buses[l].gain; const v = g.value; g.cancelScheduledValues(t); g.setValueAtTime(v, t); g.setTargetAtTime(v * depth, t, 0.3); g.setTargetAtTime((target || cur).lv[l], t + hold, 1.2); }
+}
+// century fanfare and event stings
+function fanfare(kind) {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.05, fx = fxBus(), r = 50;
+  duck(0.25, 3.2);
+  for (let i = 0; i < 6; i++) drum(t + i * 0.09, 0.35 + i * 0.1);
+  if (kind === 'good') [[0, .3], [4, .3], [7, .3], [12, 1.2]].reduce((at, [iv, d]) => { horn(at, r + iv, d, 0.22, fx); return at + d; }, t + 0.55);
+  else if (kind === 'bad') { horn(t + 0.55, r - 2, 1.6, 0.25, fx); horn(t + 0.55, r - 1, 1.6, 0.12, fx); bell(t + 0.6, r + 10, 0.5, fx); bell(t + 2.1, r + 10, 0.4, fx); }
+  else if (kind === 'war') { [[0, .25], [0, .25], [7, .5], [5, .25], [3, 1.1]].reduce((at, [iv, d]) => { horn(at, r + iv, d, 0.24, fx); drum(at, 0.8); return at + d; }, t + 0.55); }
+  else { horn(t + 0.55, r, 0.5, 0.22, fx); horn(t + 1.05, r + 7, 1.3, 0.22, fx); }
+}
+function betrayal() {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.03, fx = fxBus();
+  duck(0.2, 2.6);
+  [0, 1, 6].forEach(iv => horn(t, 38 + iv, 1.8, 0.16, fx));
+  drum(t, 1); drum(t + 0.35, 0.9); drum(t + 0.7, 1);
+  bell(t + 0.1, 61, 0.45, fx);
+}
+
+// ---------------------------------------------------------------- narrator
+let voice = null;
+function pickVoice() {
+  if (!('speechSynthesis' in window)) return;
+  const vs = speechSynthesis.getVoices().filter(v => /^en/i.test(v.lang));
+  const prefer = ['Daniel', 'Arthur', 'Oliver', 'Rishi', 'Google UK English Male', 'Microsoft Ryan', 'Microsoft George', 'Fred', 'Aaron', 'Alex'];
+  voice = null;
+  for (const p of prefer) { voice = vs.find(v => v.name.includes(p)); if (voice) break; }
+  if (!voice) voice = vs.find(v => /en-GB/i.test(v.lang)) || vs[0] || null;
+}
+if ('speechSynthesis' in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+function say(text, delay) {
+  lastLine = text;
+  document.getElementById('said').textContent = text;
+  if (!st.voice || !('speechSynthesis' in window)) return;
+  speechSynthesis.cancel();
+  setTimeout(() => {
+    const u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = voice ? voice.lang : 'en-GB'; u.rate = 0.86; u.pitch = 0.78; u.volume = 1;
+    if (ctx) { const words = text.split(' ').length; duck(0.35, Math.min(14, 1 + words * 0.42)); }
+    speechSynthesis.speak(u);
+  }, delay || 0);
+}
+const OPEN = {
+  early: 'Rome has gone. The land lies open.',
+  middle: 'The kingdoms harden. Borders are drawn in blood.',
+  late: 'The great lords have grown fat. The age will test them.',
+};
+
+// ---------------------------------------------------------------- UI
+const $ = id => document.getElementById(id);
+function renderAges() {
+  const box = $('ages'); box.innerHTML = '';
+  ROMS.forEach((r, i) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'age';
+    b.style.setProperty('--era', `var(--${i === 10 ? 'gold' : ERA(i)})`);
+    b.setAttribute('aria-pressed', String(st.c === i));
+    b.innerHTML = `<span class="r">${r}</span><span class="y">${i === 10 ? '1400–1485' : AGES[i].years}</span>`;
+    b.onclick = () => pickCentury(i);
+    box.appendChild(b);
+  });
+}
+function renderEvents() {
+  const area = $('evArea');
+  if (st.c === 10) { $('evLabel').textContent = 'The end of the game'; area.innerHTML = '<div class="end">The cavalry has reached the fifteenth century. Most territories wins.</div>'; return; }
+  $('evLabel').textContent = `The opener rolled, ${ORD[st.c]} century`;
+  area.innerHTML = '<div class="events" id="evs"></div>';
+  AGES[st.c].events.forEach((e, k) => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'ev';
+    b.setAttribute('aria-pressed', String(st.e === k));
+    const md = MOODS[EVMOOD[e.t] || ERA(st.c)];
+    b.innerHTML = `<div class="top"><span class="die">${['1–2','3–4','5–6'][k]}</span><span class="mood">${md.name.replace(/^(A|An|The) /, '')}</span></div><div class="t">${e.t}</div><div class="tm">${e.tm}</div><div class="e">${e.e}</div>`;
+    b.onclick = () => pickEvent(k);
+    $('evs').appendChild(b);
+  });
+}
+function renderNow() {
+  const m = MOODS[baseMood()];
+  $('moodName').textContent = m.name; $('moodDesc').textContent = m.desc;
+  $('battle').setAttribute('aria-pressed', String(st.battle));
+}
+function render() { renderAges(); renderEvents(); renderNow(); }
+function save() { store.set('c', st.c); store.set('e', st.e); }
+
+function pickCentury(i) {
+  if (i === st.c && st.e < 0) return;
+  st.c = i; st.e = -1; st.battle = false; save(); render();
+  setMood(baseMood(), 6);
+  if (i === 10) { fanfare('good'); say('The fifteenth century. The age of chivalry is over. Count your lands: the one who holds the most is master of England.', 2600); return; }
+  fanfare('neutral');
+  say(`The ${ORD[i]} century. ${i === 0 || i === 3 || i === 7 ? OPEN[ERA(i)] + ' ' : ''}Let the opener roll.`, 2000);
+}
+function pickEvent(k) {
+  st.e = k; st.battle = false; save(); render();
+  const e = AGES[st.c].events[k], mood = EVMOOD[e.t] || ERA(st.c);
+  fanfare(TONE[mood] || 'neutral');
+  setMood(mood, 7);
+  say(`${e.t}. ${e.h} ${e.e}`, 2400);
+}
+
+$('battle').onclick = () => {
+  st.battle = !st.battle; renderNow();
+  if (ctx && st.battle) { for (let i = 0; i < 8; i++) drum(ctx.currentTime + 0.05 + i * 0.07, 0.4 + i * 0.07); }
+  setMood(baseMood(), st.battle ? 2 : 6);
+};
+$('betray').onclick = () => { betrayal(); say('An oath is broken. Let no one forget it.', 1800); };
+$('trade').onclick = () => coins();
+$('replay').onclick = () => { if (lastLine) say(lastLine, 0); };
+$('vol').value = st.vol;
+$('vol').oninput = e => { st.vol = +e.target.value; store.set('vol', st.vol); if (master) master.gain.setTargetAtTime(st.vol / 100, ctx.currentTime, 0.1); };
+$('voiceOn').checked = st.voice;
+$('voiceOn').onchange = e => { st.voice = e.target.checked; store.set('voice', st.voice); if (!st.voice && 'speechSynthesis' in window) speechSynthesis.cancel(); };
+$('pause').onclick = async () => {
+  if (!ctx) return;
+  if (ctx.state === 'running') { await ctx.suspend(); $('pause').textContent = 'Play'; if ('speechSynthesis' in window) speechSynthesis.cancel(); }
+  else { await ctx.resume(); $('pause').textContent = 'Pause'; }
+};
+let lock = null;
+async function keepAwake() { try { lock = await navigator.wakeLock.request('screen'); } catch (e) {} }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && ctx && ctx.state === 'running') keepAwake(); });
+$('start').onclick = () => {
+  initAudio(); ctx.resume();
+  if ('speechSynthesis' in window) { pickVoice(); const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); }
+  $('gate').hidden = true; keepAwake();
+  const e = st.e >= 0 && st.c < 10 ? AGES[st.c].events[st.e] : null;
+  say(e ? `We return to the ${ORD[st.c]} century. ${e.t}. ${e.e}` : `Hear now the chronicle of England. The ${ORD[st.c]} century begins.`, 1500);
+};
+
+// scope
+const cv = $('scope'), g2 = cv.getContext('2d');
+const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function draw() {
+  const w = cv.width, h = cv.height;
+  g2.clearRect(0, 0, w, h);
+  g2.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--gold').trim() || '#d9a93b';
+  g2.lineWidth = 2; g2.beginPath();
+  if (analyser) {
+    const d = new Uint8Array(analyser.fftSize); analyser.getByteTimeDomainData(d);
+    for (let i = 0; i < d.length; i++) { const x = i / (d.length - 1) * w, y = h / 2 + (d[i] - 128) / 128 * h * 0.9; i ? g2.lineTo(x, y) : g2.moveTo(x, y); }
+  } else { g2.moveTo(0, h / 2); g2.lineTo(w, h / 2); }
+  g2.stroke();
+  if (!reduce) requestAnimationFrame(draw);
+}
+render(); draw();
+</script>
