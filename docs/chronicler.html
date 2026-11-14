@@ -147,7 +147,7 @@ details[open] { display: flex; flex-direction: column; gap: 10px; }
           <div class="tests" id="moodTests"></div>
         </details>
         <div class="note">Tap the century when the cavalry moves, then the event the opener rolled. The music changes over a few seconds. During a battle, swords clash at random.</div>
-        <div class="note">Music from Pixabay: kulakovka, Medieval Horizons, Kiravale, kaazoom, RoyaltyFreeMusicStudio.</div>
+        <div class="note">Music from Pixabay: kulakovka, Medieval Horizons, Kiravale, kaazoom, RoyaltyFreeMusicStudio, RubyZephyr, OneCinematicStudio, OpenMindAudio, Billy Ziogas, HitsLab.</div>
       </section>
     </div>
   </main>
@@ -267,8 +267,13 @@ function levels(m, secs) {
   for (const l of LAYERS) { const g = buses[l].gain; g.cancelScheduledValues(t); g.setValueAtTime(g.value, t); g.setTargetAtTime(useRecorded ? 0 : m.lv[l], t, secs / 3); }
 }
 // ---------------------------------------------------------------- recorded music (Pixabay tracks published with the page)
-const TRACKS = { lute: -3.7, squire: 0, feast: -6, repose: 4, epic: -3.6, fantasy: -5 };
-const MOOD_TRACKS = { early: ['lute', 'squire'], middle: ['fantasy', 'squire'], late: ['repose', 'fantasy'], festive: ['feast', 'lute'], sacred: ['repose'], intrigue: ['fantasy'], war: ['epic', 'feast'], sombre: ['repose'], battle: ['epic'], finale: ['epic', 'feast'] };
+const TRACKS = { lute: -3.7, squire: 0, feast: -6, repose: 4, epic: -3.6, fantasy: -5, ironbound: -4, toll: -5.1, knight: -4.3, camelot: -4.1, crusade: -1.6, drums1: -2.7, drums2: -2.5 };
+const MOOD_TRACKS = {
+  early: ['lute', 'squire'], middle: ['ironbound', 'fantasy', 'squire'], late: ['toll', 'repose', 'fantasy'],
+  festive: ['feast', 'lute'], sacred: ['camelot', 'repose'], intrigue: ['fantasy', 'toll'],
+  war: ['epic', 'knight', 'ironbound', 'crusade'], sombre: ['repose'], battle: ['drums1', 'drums2', 'epic'],
+  finale: ['camelot', 'crusade', 'knight'],
+};
 let musicBus = null, curTrack = null, useRecorded = store.get('recorded', true), currentMood = null;
 const players = {};
 function player(k) {
