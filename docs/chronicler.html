@@ -76,6 +76,14 @@ canvas { width: 100%; height: 70px; display: block; border-radius: 8px; backgrou
 .moment .h { font-size: 13px; color: var(--faded); }
 .moment.battle[aria-pressed="true"] { border-color: var(--late); background: color-mix(in srgb, var(--late) 25%, var(--hall)); }
 .moment.wide { grid-column: span 2; }
+.tests { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.tests button { border: 1px solid var(--seam); background: var(--hall); border-radius: 10px; min-height: 52px; padding: 6px; font-size: 15px; }
+.tests button:active { border-color: var(--gold); }
+details > summary { cursor: pointer; font-family: var(--display); font-size: 22px; list-style: none; }
+details > summary::-webkit-details-marker { display: none; }
+details > summary::after { content: ' +'; color: var(--faded); }
+details[open] > summary::after { content: ' −'; }
+details[open] { display: flex; flex-direction: column; gap: 10px; }
 .note { font-size: 14px; color: var(--faded); line-height: 1.4; }
 
 .gate { position: fixed; inset: 0; background: color-mix(in srgb, var(--hall) 92%, transparent); display: flex; align-items: center; justify-content: center; z-index: 5; padding: 24px; }
@@ -130,6 +138,13 @@ canvas { width: 100%; height: 70px; display: block; border-radius: 8px; backgrou
           <button class="moment" id="trade" type="button"><span class="k">Card trade</span><span class="h">coins on the table</span></button>
           <button class="moment" id="replay" type="button"><span class="k">Read it again</span><span class="h">repeat the narrator</span></button>
         </div>
+        <details id="testBox">
+          <summary>Sound test</summary>
+          <div class="label">Effects</div>
+          <div class="tests" id="fxTests"></div>
+          <div class="label">Music moods (the next century tap returns to the game)</div>
+          <div class="tests" id="moodTests"></div>
+        </details>
         <div class="note">Tap the century when the cavalry moves, then the event the opener rolled. The music changes over a few seconds. During a battle, swords clash at random.</div>
       </section>
     </div>
@@ -363,6 +378,49 @@ function coins() {
   }
   bell(t + 0.55, 76, 0.3, fx);
 }
+function roar() {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.03, fx = fxBus();
+  duck(0.4, 2.2);
+  for (let v = 0; v < 9; v++) {
+    const at = t + Math.random() * 0.25, f0 = 110 + Math.random() * 90;
+    const src = ctx.createOscillator(); src.type = 'sawtooth'; src.frequency.setValueAtTime(f0, at); src.frequency.linearRampToValueAtTime(f0 * 1.35, at + 0.5); src.frequency.linearRampToValueAtTime(f0 * 0.9, at + 1.6);
+    const nz = ctx.createBufferSource(); nz.buffer = noiseBuf; nz.loop = true;
+    const nzg = ctx.createGain(); nzg.gain.value = 0.35;
+    const g = ctx.createGain();
+    [[600 + Math.random() * 250, 6], [1100 + Math.random() * 350, 8], [2500, 10]].forEach(([f, q]) => { const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q; src.connect(bp); nz.connect(nzg); nzg.connect(bp); bp.connect(g); });
+    g.connect(fx);
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.09, at + 0.25); g.gain.setValueAtTime(0.09, at + 0.9); g.gain.exponentialRampToValueAtTime(0.0001, at + 1.8);
+    src.start(at); nz.start(at); src.stop(at + 1.9); nz.stop(at + 1.9);
+  }
+}
+function gallop() {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.03, fx = fxBus();
+  for (let k = 0; k < 9; k++) {
+    const loud = Math.sin(Math.PI * (k + 0.5) / 9);
+    [0, 0.08, 0.17].forEach(off => {
+      const at = t + k * 0.36 + off + Math.random() * 0.01;
+      const o = ctx.createOscillator(), g = ctx.createGain(); o.frequency.setValueAtTime(95, at); o.frequency.exponentialRampToValueAtTime(40, at + 0.08);
+      o.connect(g); g.connect(fx); env(g, at, 0.002, 0.6 * loud, 0.1); o.start(at); o.stop(at + 0.15);
+      const n = ctx.createBufferSource(), ng = ctx.createGain(), bp = ctx.createBiquadFilter(); n.buffer = noiseBuf; bp.type = 'bandpass'; bp.frequency.value = 1800; bp.Q.value = 1.2;
+      n.connect(bp); bp.connect(ng); ng.connect(fx); env(ng, at, 0.001, 0.25 * loud, 0.04); n.start(at); n.stop(at + 0.06);
+    });
+  }
+}
+function arrows() {
+  if (!ctx) return;
+  const t = ctx.currentTime + 0.03, fx = fxBus();
+  for (let i = 0; i < 7; i++) {
+    const at = t + i * 0.07 + Math.random() * 0.06, n = ctx.createBufferSource(), bp = ctx.createBiquadFilter(), g = ctx.createGain();
+    n.buffer = noiseBuf; bp.type = 'bandpass'; bp.Q.value = 6; bp.frequency.setValueAtTime(3500 + Math.random() * 1000, at); bp.frequency.exponentialRampToValueAtTime(700, at + 0.45);
+    n.connect(bp); bp.connect(g); g.connect(fx);
+    g.gain.setValueAtTime(0.0001, at); g.gain.exponentialRampToValueAtTime(0.35, at + 0.3); g.gain.exponentialRampToValueAtTime(0.0001, at + 0.5);
+    n.start(at); n.stop(at + 0.55);
+    const hit = at + 0.55 + Math.random() * 0.15, o = ctx.createOscillator(), og = ctx.createGain(); o.frequency.value = 240 + Math.random() * 120; o.connect(og); og.connect(fx); env(og, hit, 0.001, 0.25, 0.06); o.start(hit); o.stop(hit + 0.1);
+  }
+}
+function swords() { if (!ctx) return; const t = ctx.currentTime + 0.03; [0, 0.32, 0.5, 1.0].forEach(d => clang(t + d, 0.9)); }
 function fxBus() { const g = ctx.createGain(); g.connect(master); g.connect(revSend); return g; }
 function duck(depth, hold) {
   const t = ctx.currentTime;
@@ -533,6 +591,15 @@ $('battle').onclick = () => {
 };
 $('betray').onclick = () => { betrayal(); say('An oath is broken.', 1800); };
 $('trade').onclick = () => coins();
+const FX_TESTS = [
+  ['Sword clash', () => swords()], ['Battle cry', () => roar()], ['Cavalry charge', () => gallop()],
+  ['Arrow volley', () => arrows()], ['Coins', () => coins()], ['War drums', () => { const t = ctx.currentTime + 0.03; for (let i = 0; i < 12; i++) drum(t + i * 0.18, i % 4 ? 0.6 : 1); }],
+  ['Gong', () => gong(ctx.currentTime + 0.03, 58, 0.5, fxBus())], ['Bells', () => chimes(ctx.currentTime + 0.03, [64, 67, 71, 76], 0.25, 0.5, fxBus())],
+  ['Choir', () => choir(ctx.currentTime + 0.03, [50, 54, 57, 62], 2.5, 0.06, fxBus())],
+  ['Good century', () => fanfare('good')], ['Bad century', () => fanfare('bad')], ['War century', () => fanfare('war')],
+];
+FX_TESTS.forEach(([name, fn]) => { const b = document.createElement('button'); b.type = 'button'; b.textContent = name; b.onclick = () => { if (!ctx) return; ctx.resume(); fn(); }; $('fxTests').appendChild(b); });
+Object.keys(MOODS).forEach(k => { const b = document.createElement('button'); b.type = 'button'; { const s = MOODS[k].name.replace(/^(A|An|The) /, ''); b.textContent = s[0].toUpperCase() + s.slice(1); } b.onclick = () => { if (!ctx) return; ctx.resume(); setMood(k, 3); $('moodName').textContent = MOODS[k].name + ' (preview)'; $('moodDesc').textContent = MOODS[k].desc; }; $('moodTests').appendChild(b); });
 $('replay').onclick = () => { if (lastLine) say(lastLine, 0); };
 $('vol').value = st.vol;
 $('vol').oninput = e => { st.vol = +e.target.value; store.set('vol', st.vol); if (master) master.gain.setTargetAtTime(st.vol / 100, ctx.currentTime, 0.1); };
