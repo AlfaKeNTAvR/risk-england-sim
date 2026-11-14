@@ -28,12 +28,12 @@ PDF page order inside each double-sided job is front, back, front, back.
 
 ## Why the backs line up
 
-- Plaques: full-width, centered pieces in the same three row positions on front and back. A long-edge flip mirrors left-right only, so the rows stay put.
+- Plaques: full-width, centered pieces in the same three row positions on front and back. A long-edge flip mirrors left-right only, so the rows stay put. The printer still drifts a few mm (first test print: the long edge moved), so only the FRONT has the rounded cut shape; the BACK is one square parchment block that runs 5 mm past every piece. Cut from the front side.
 - Era board: symmetric margins on a landscape sheet; a short-edge flip keeps it upright.
-- A5 rules: each A5 page is centered on letter with corner trim marks, so front and back trim marks coincide. Trim on the marks: 148 x 210 mm, the rulebook's page size.
+- A5 rules: each A5 page is centered on letter, with 5 mm of extra parchment all round on both sides. Trim marks are on the fronts only (pages 1 and 3): cut from the front, 148 x 210 mm, the rulebook's page size.
 
 ## Finishing
 
-- Cut along each outline (4 mm gap between pieces), round corners with the 5 mm punch. Every piece keeps 5 mm clear inside its edge.
+- No outline strokes: cut along the edge of the parchment colour (4 mm gap between pieces), round corners with the 5 mm punch. Every piece keeps 5 mm clear inside its edge.
 - No laminating or dry-erase marker needed: pact turns, the opener and the current event are all tracked with cavalry pieces.
 - Plaques: V/VI, VII/VIII, IX/X, XI/XII, XIII/XIV, how-to/blank.
